@@ -368,6 +368,9 @@ img,svg{display:block;max-width:100%}
 .b-s{font:italic 300 calc(var(--cw)*5.2/100)/1.32 var(--serif);text-wrap:pretty;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
 .b-m{font:600 calc(var(--cw)*3.5/100)/1.5 var(--sans);letter-spacing:.1em;text-transform:uppercase;opacity:.75}
 .b-bar{margin-top:auto;height:calc(var(--cw)*12/100);width:46%;background:repeating-linear-gradient(90deg,currentColor 0 .calc(var(--cw)*6/100),transparent .calc(var(--cw)*6/100) calc(var(--cw)*1.5/100),currentColor calc(var(--cw)*1.5/100) calc(var(--cw)*2.8/100),transparent calc(var(--cw)*2.8/100) calc(var(--cw)*3.4/100));opacity:.75}
+.case-stage.locked{cursor:default}
+.wrapfx{position:absolute;inset:0;pointer-events:none;background:linear-gradient(112deg,rgba(255,255,255,.5) 0,rgba(255,255,255,.06) 26%,rgba(255,255,255,.28) 52%,rgba(255,255,255,0) 74%);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.45)}
+.sealed{font:italic 300 15px/1 var(--serif);color:var(--soft)}
 .case-ctl{display:flex;gap:26px;justify-content:center;margin-top:6px}
 .case-ctl .tlink{font-size:13px}
 .hl{display:inline;font:inherit;color:inherit;text-align:inherit;letter-spacing:inherit;text-decoration:underline dotted 1px;text-decoration-color:var(--rule);text-underline-offset:.16em;transition:text-decoration-color .2s}
@@ -476,8 +479,13 @@ img,svg{display:block;max-width:100%}
 <div id="toast" role="status" aria-live="polite"></div>
 <noscript><p style="padding:24px">The Usual needs JavaScript to build your shelf.</p></noscript>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 'use strict';
+const SUPABASE_URL='https://cmgiwujrrioppkuobirv.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_JvXHK8qQYQqp7-hpjRUhDQ_7XPmqxKe';
+let SB=null, cloudUser=null, cloudLibrary=null, cloudReady=false, cloudTimer=null, cloudChannel=null;
+let cloudMessage='', cloudInvite='';
 /* ============================================================
    UTIL
    ============================================================ */
@@ -683,6 +691,7 @@ const S={
 };
 function save(){
   tryLS.set(KEY,JSON.stringify({items:S.items,people:S.people,lib:S.lib,partner:S.partner,filter:S.filter,sort:S.sort,isort:S.isort}));
+  queueCloudSave();
 }
 function load(){
   const raw=tryLS.get(KEY);
@@ -750,7 +759,7 @@ function coverHTML(it){
   const sz=n<=13?'':n<=24?'m':'l';
   return `<div class="cover cv${t}" style="--cb:var(${p.bg});--ci:var(${p.ink});--ca:var(${p.band})"><div class="cv-art"></div>
     <div class="cv-top"><span>${it.type==='series'?'Series · S'+it.s:'Film'}</span><span>${it.y||''}</span></div>
-    <div class="cv-title ${sz}">${esc(it.t)}</div><div class="cv-by">${esc(it.dir||'')}</div><div class="cv-sheen"></div></div>`;
+    <div class="cv-title ${sz}">${esc(it.t)}</div><div class="cv-by">${esc(it.status==='waiting'?'':(it.dir||''))}</div><div class="cv-sheen"></div></div>`;
 }
 function baseWidth(it){ // film cases are slim, season sets are thicker. Height never changes.
   const j=hash(it.id)%3*2;
@@ -763,7 +772,7 @@ function spineHTML(it,o={}){
   const y=String(it.y||'');
   const first=it.watches.length?wsorted(it)[0].who[0]:null;
   const r=latestR(it);
-  const aria=`${heading(it)}, ${it.y||''}. ${it.status==='waiting'?'Waiting to be watched.':'On the shelf.'}${r?' Rated '+r+'.':''}`;
+  const aria=`${heading(it)}, ${it.y||''}. ${it.status==='waiting'?'Still wrapped. Its details unlock once you have watched it.':'On the shelf.'}${r?' Rated '+r+'.':''}`;
   const tag=o.static?'span':'button';
   const drag=o.drag&&!o.static?'draggable="true"':'';
   const tip=`<span class="sp-tip"><b>${esc(heading(it))}</b><i>${it.y||''} · ${it.status==='waiting'?'Waiting':(r?'★ '+rtxt(r):'On the shelf')}</i></span>`;
@@ -973,7 +982,18 @@ function fillIndex(){
 /* ============================================================
    THE CASE — open it, turn it over
    ============================================================ */
+function sealedCaseHTML(it){
+  const p=SP[it.col%SP.length];
+  return `<div class="case-wrap"><div class="case-stage locked" role="img" aria-label="The case for ${esc(heading(it))}, still in its shrink-wrap">
+    <div class="case3d" style="--sb:var(${p.bg});--si:var(${p.ink});--sa:var(${p.band});--ry:-24deg;--rx:5deg">
+      <div class="c-base"><div class="in"></div><div class="out"></div></div>
+      <div class="c-spine"><span>${esc(it.short||it.t)}</span></div><div class="c-edge-r"></div><div class="c-top"></div><div class="c-bot"></div>
+      <div class="c-front"><div class="f-out">${coverHTML(it)}<i class="gloss"></i><i class="wrapfx"></i></div><div class="f-in"></div></div>
+    </div></div>
+    <div class="case-ctl"><span class="sealed">Sealed until you’ve watched it</span></div></div>`;
+}
 function caseHTML(it){
+  if(it.status==='waiting')return sealedCaseHTML(it);
   const c=S.cs, p=SP[it.col%SP.length], ws=wsorted(it), noted=ws.filter(w=>w.note), lw=noted[noted.length-1]||null;
   const waiting=it.status==='waiting', label=it.short||it.t;
   const sty=`--sb:var(${p.bg});--si:var(${p.ink});--sa:var(${p.band});--ry:${c.ry}deg;--rx:${c.rx}deg`;
@@ -1002,6 +1022,7 @@ function applyCase(){
   const b=$('[data-act="case-open"]');if(b)b.textContent=S.cs.open?'Close the case':'Open the case';
 }
 function toggleCase(){
+  const cur=byId(S.open); if(cur&&cur.status==='waiting')return;
   S.cs.open=!S.cs.open;
   if(S.cs.open){S.cs.ry=Math.round(S.cs.ry/360)*360-10;S.cs.rx=4}
   applyCase();
@@ -1012,7 +1033,7 @@ function flipCase(){
 }
 let cdrag=null;
 document.addEventListener('pointerdown',e=>{
-  const st=e.target.closest&&e.target.closest('.case-stage'); if(!st||e.target.closest('.disc'))return;
+  const st=e.target.closest&&e.target.closest('.case-stage'); if(!st||st.classList.contains('locked')||e.target.closest('.disc'))return;
   cdrag={c:$('.case3d',st),x:e.clientX,y:e.clientY,ry:S.cs.ry,rx:S.cs.rx,moved:false,target:e.target};
 });
 document.addEventListener('pointermove',e=>{
@@ -1051,7 +1072,7 @@ document.addEventListener('dragend',()=>{dragId=null;$$('#cavity .sp.dragging,#c
    ENTRY PANEL — pulling one off the shelf
    ============================================================ */
 function openEntry(id){
-  if(!byId(id))return;
+  const w=byId(id); if(!w)return;
   if(S.open!==id)S.cs={ry:-24,rx:5,open:false};
   S.open=id; renderPanel();
   $$('#cavity .sp').forEach(el=>el.classList.toggle('pulled',el.dataset.id===id));
@@ -1084,13 +1105,13 @@ function renderPanel(){
   </div>
   <div class="pn-body">
     ${caseHTML(it)}
-    <h2 class="pn-title" id="pn-h">${esc(it.t)}${it.type==='series'?`<small>Season ${it.s}${it.eps?`, ${it.eps} episodes`:''}</small>`:''}</h2>
-    <p class="byline">${esc(kindText(it))} · ${it.y||''}${it.dir||it.min?' · ':''}${it.dir?`${it.type==='series'?'Created by':'Directed by'} ${esc(it.dir)} · `:''}${it.min?`${it.min} min${it.type==='series'?' an episode':''}`:''}${it.gen&&it.gen.length?` · ${esc(it.gen.join(', '))}`:''}</p>
-    ${it.syn?`<p class="syn">${esc(it.syn)}</p>`:''}
+    <h2 class="pn-title" id="pn-h">${esc(it.t)}${it.type==='series'?`<small>Season ${it.s}${!waiting&&it.eps?`, ${it.eps} episodes`:''}</small>`:''}</h2>
+    <p class="byline">${waiting?`${it.type==='series'?'Series, season '+it.s:'Film'} · ${it.y||''}`:`${esc(kindText(it))} · ${it.y||''}`}${!waiting&&(it.dir||it.min)?' · ':''}${!waiting&&it.dir?`${it.type==='series'?'Created by':'Directed by'} ${esc(it.dir)} · `:''}${!waiting&&it.min?`${it.min} min${it.type==='series'?' an episode':''}`:''}${!waiting&&it.gen&&it.gen.length?` · ${esc(it.gen.join(', '))}`:''}</p>
+    ${!waiting&&it.syn?`<p class="syn">${esc(it.syn)}</p>`:''}
 
     <section class="pn-sec" aria-label="${waiting?'Waiting in the wrapper':'Your copy'}">
       ${waiting?`<p class="wrapnote">${it.note?`“${esc(it.note)}”`:'Not yet. Saved for a good night.'}</p>
-        <p class="byline">Added ${fmt(it.added)}.</p>
+        <p class="byline">Added ${fmt(it.added)}. Its case, synopsis and details stay sealed until you’ve watched it.</p>
         <div class="pn-acts"><button class="btn" type="button" data-act="log" data-id="${esc(it.id)}">We watched it</button></div>`
       :`<div class="facts">
           <div><b>${ws.length}</b><span>${ws.length===1?'Evening':'Evenings'}</span></div>
@@ -1143,7 +1164,7 @@ function removeWatch(i){
   const it=byId(S.open); if(!it||!it.watches[i])return;
   if(!confirm('Remove this evening from the record?'))return;
   it.watches.splice(i,1);
-  if(!it.watches.length)it.status='waiting';
+  if(!it.watches.length){it.status='waiting';save();closeEntry();refreshView(true);toast('Back in the wrapper.');return}
   save();renderPanel();refreshView(true);
 }
 function refreshView(keepPanel){

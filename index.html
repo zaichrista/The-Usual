@@ -131,7 +131,7 @@ ul,ol{list-style:none}
 .ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
 .tabbar{
-  position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 1fr 84px 1fr;
+  position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 84px 1fr;
   align-items:end;padding:6px 8px calc(8px + env(safe-area-inset-bottom));
   background:linear-gradient(0deg,var(--bg) 70%,transparent);
 }
@@ -799,6 +799,27 @@ textarea.txt{resize:vertical;min-height:80px;font-size:16px;line-height:1.4}
 .sh-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
 .backlink{display:inline-block;margin-bottom:10px;font-weight:600;font-size:14px}
 
+/* ---------- v0.6: Home room, wrapped cases, one shelf ---------- */
+.sp-wrap{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:linear-gradient(112deg,rgba(255,255,255,.34),rgba(255,255,255,.06) 36%,rgba(255,255,255,.28) 52%,rgba(255,255,255,.02) 74%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.32)}
+.spine.wrap .sp-r{font-size:calc(7px*var(--unit));letter-spacing:.08em;text-transform:uppercase;color:var(--si)}
+.cv-wrapfilm{position:absolute;inset:0;pointer-events:none;z-index:3;border-radius:inherit;
+  background:linear-gradient(115deg,rgba(255,255,255,.36) 0,rgba(255,255,255,.07) 30%,rgba(255,255,255,.28) 48%,rgba(255,255,255,.03) 70%),
+   repeating-linear-gradient(98deg,transparent 0 21cqw,rgba(255,255,255,.1) 21cqw 21.9cqw);
+  box-shadow:inset 0 0 0 .9cqw rgba(255,255,255,.26)}
+.cv-new{position:absolute;right:5cqw;top:14cqw;z-index:4;padding:1.6cqw 3.2cqw;background:var(--oxblood);color:var(--cream);
+  font:700 4.6cqw/1 var(--font);letter-spacing:.14em;text-transform:uppercase;transform:rotate(7deg);box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.upnext{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:18px 12px;margin-top:12px}
+.upnext .gcase b{font-size:13px;margin-top:7px;line-height:1.15}
+.upnext .gcase i{font-size:10px}
+.layoutrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-8px 0 18px;color:var(--ink-soft);font-size:13px}
+.addbar{display:flex;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);color:var(--ink-soft);font-size:14px}
+.pit.ready .lampbtn{animation:ring 2.2s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(228,198,163,.6)}100%{box-shadow:0 0 0 24px rgba(228,198,163,0)}}
+.onnow.playing{background:color-mix(in srgb,var(--espresso),var(--mauve) 20%)}
+.home .tonight{margin-top:6px}
+
 /* motion preferences */
 .rm *,.rm *::before,.rm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 @media (prefers-reduced-motion:reduce){
@@ -941,7 +962,7 @@ const KEY='the-usual-proto-v2';
 const S={
   user:{name:'Zai',handle:'zai',colour:'--copper',mode:'couple'},
   authed:false,
-  screen:'shelf', filter:'all', sort:'recent', view:'shelf',
+  screen:'home', filter:'all', scope:'all', unified:true, session:null, sort:'recent', view:'shelf',
   open:null, flip:false, caseOpen:false,
   us:'sam', usual:'sam',
   cases:[], tonight:[], mine:[], order:[], dim:false, tab:'ours', howtoOpen:true, sub:null, progress:{id:'hacks-s1',ep:4}, vetoes:{you:false}, pick:null, pickMode:'both', mood:null, mins:null,
@@ -949,7 +970,7 @@ const S={
   draft:null, landed:null,
   theme:'dark', rm:false
 };
-function saveState(){tryLS.set(KEY,JSON.stringify({cases:S.cases,tonight:S.tonight,mine:S.mine,order:S.order,howtoOpen:S.howtoOpen,progress:S.progress,pending:S.pending,theme:S.theme,rm:S.rm,user:S.user,authed:S.authed,view:S.view,usual:S.usual,people:PEOPLE}))}
+function saveState(){tryLS.set(KEY,JSON.stringify({cases:S.cases,tonight:S.tonight,mine:S.mine,order:S.order,howtoOpen:S.howtoOpen,progress:S.progress,pending:S.pending,theme:S.theme,rm:S.rm,user:S.user,authed:S.authed,view:S.view,usual:S.usual,unified:S.unified,scope:S.scope,session:S.session,draft:S.draft,people:PEOPLE}))}
 function loadState(){
   const raw=tryLS.get(KEY);
   S.cases=JSON.parse(JSON.stringify(SEED_CASES));
@@ -959,7 +980,7 @@ function loadState(){
   try{
     const d=JSON.parse(raw);
     if(d.cases)S.cases=d.cases; if(d.tonight)S.tonight=d.tonight; if(d.mine)S.mine=d.mine; if(d.order)S.order=d.order; if(typeof d.howtoOpen==='boolean')S.howtoOpen=d.howtoOpen; if(d.progress)S.progress=d.progress; if(d.pending)S.pending=d.pending;
-    if(d.theme)S.theme=d.theme; if(typeof d.rm==='boolean')S.rm=d.rm; if(d.user)S.user={mode:'couple',...d.user}; if(d.authed)S.authed=d.authed; if(d.view)S.view=d.view; if(d.usual)S.usual=d.usual;
+    if(d.theme)S.theme=d.theme; if(typeof d.rm==='boolean')S.rm=d.rm; if(d.user)S.user={mode:'couple',...d.user}; if(d.authed)S.authed=d.authed; if(d.view)S.view=d.view; if(d.usual)S.usual=d.usual; if(typeof d.unified==='boolean')S.unified=d.unified; if(d.scope)S.scope=d.scope; if(d.session)S.session=d.session; if(d.draft)S.draft=d.draft;
     if(d.people)Object.keys(d.people).forEach(k=>{if(!PEOPLE[k])PEOPLE[k]=d.people[k]});
   }catch(e){}
 }
@@ -983,6 +1004,19 @@ const initial=t=>(t.replace(/^(the|a|an)\s+/i,'')[0]||'U').toUpperCase();
 function topSnack(list){const m={};list.forEach(w=>w.sn.forEach(s=>m[s]=(m[s]||0)+1));const e=Object.entries(m).sort((a,b)=>b[1]-a[1])[0];return e?e[0]:null}
 function allWatches(){return S.cases.flatMap(c=>c.w.map((w,i)=>({c,w,i})))}
 function minutesOf(c,w){return c.type==='tv'?c.eps*c.min:c.min}
+const lastDate=c=>c.w.length?lastW(c).d:'0000-00-00';
+function getCase(id){
+  const c=caseById(id); if(c)return c;
+  const t=EXTRAS.find(e=>e.id===id); if(!t)return null;
+  const p=placeholderCase(t); const o=S.tonight.some(x=>x.id===id), m=S.mine.includes(id);
+  p.wrapped=o||m; p.list=o?'ours':m?'mine':null; return p;
+}
+function wantedItems(){
+  const out=[], seen=new Set();
+  S.tonight.forEach(t=>{const x=EXTRAS.find(e=>e.id===t.id); if(!x||caseById(t.id))return; const c=placeholderCase(x); c.wrapped=true; c.list='ours'; c.by=t.by; out.push(c); seen.add(t.id)});
+  S.mine.forEach(id=>{if(seen.has(id))return; const x=EXTRAS.find(e=>e.id===id); if(!x||caseById(id))return; const c=placeholderCase(x); c.wrapped=true; c.list='mine'; out.push(c)});
+  return out;
+}
 function placeholderCase(t){ // new case from catalogue title
   const h=hash(t.id);
   return {id:t.id,t:t.t,y:t.y,type:t.type,min:t.min,dir:t.dir,gen:t.gen,syn:t.syn,pal:h%PAL.length,tpl:1+(h>>3)%6,w:[],...(t.type==='tv'?{s:t.s,eps:t.eps}:{}),short:t.short};
@@ -1004,6 +1038,7 @@ function cover(c,opts={}){
     ${r?`<div class="cv-foil">${num(r)}</div>`:''}
     ${n?`<div class="cv-re">Rewatch ×${n}</div>`:''}
     <div class="cv-sheen"></div>
+    ${c.wrapped?'<div class="cv-wrapfilm"></div><div class="cv-new">New</div>':''}
   </div>`;
 }
 function spine(c,opts={}){
@@ -1013,12 +1048,13 @@ function spine(c,opts={}){
   const t=tt, fs=Math.max(7.5,Math.min(12,(hh-54)/(t.length*0.7)));
   const lw=lastW(c), who=(lw&&lw.who[0])||'you', r=lastR(c), n=rew(c);
   const dim=opts.dim?' dim':'', land=S.landed===c.id?' landing':'';
-  return `<button class="spine ${tv?'season':''}${dim}${land}" data-open="${c.id}" aria-label="${esc(heading(c))}, ${c.y}${n?', rewatched '+n+' time'+(n>1?'s':''):''}"
+  const tab=c.wrapped?(c.list==='ours'?V('--champagne'):V(S.user.colour||'--copper')):pcol(who);
+  return `<button class="spine ${tv?'season':''}${c.wrapped?' wrap':''}${dim}${land}" data-open="${c.id}" aria-label="${esc(heading(c))}, ${c.y}${c.wrapped?', still in the wrapper':''}${n?', rewatched '+n+' time'+(n>1?'s':''):''}"
    style="--w:${w};--h:${hh};--fs:${fs.toFixed(2)};--sb:${V(p.bg)};--sa:${V(p.cap)};--sc:${V(p.capink||'--espresso')};--si:${V(p.ink)};--lean:${lean}deg">
    <span class="sp-cap">${tv?'S'+c.s:String(c.y).slice(2)}</span>
    <span class="sp-title">${esc(t)}</span>
-   <span class="sp-foot">${n?'<i class="sp-re"></i>':''}<i class="sp-r">${r?num(r):'·'}</i></span>
-   <i class="sp-tab" style="background:${pcol(who)}"></i></button>`;
+   <span class="sp-foot">${n?'<i class="sp-re"></i>':''}<i class="sp-r">${r?num(r):(c.wrapped?'New':'·')}</i></span>
+   ${c.wrapped?'<i class="sp-wrap"></i>':''}<i class="sp-tab" style="background:${tab}"></i></button>`;
 }
 function caseHTML(c){
   const h=hash(c.id), p=PAL[c.pal%PAL.length], lw=lastW(c), sorted=c.w.slice().sort(byDateDesc);
@@ -1068,6 +1104,7 @@ const ICON={
   shelf:'<svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M3.5 12h17M8 5.5v4.5M11 6.5v3.5M15 5.5v4.5M7 14v4.5M12 14.5v4M16 13.5v5"/></svg>',
   together:'<svg class="ico" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 19c.5-3.6 3-5.5 5.5-5.5S13.500 15.400 14 19M14.500 15c.6-.3 1.200-.4 1.800-.4 2 0 4 1.500 4.700 4.400"/></svg>',
   tonight:'<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 3.500l3 3.500 3-3.500M7 19v1.500M17 19v1.500"/></svg>',
+  home:'<svg class="ico" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4zM10 20v-6h4v6"/></svg>',
   plus:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
   search:'<svg class="ico" viewBox="0 0 24 24"><circle cx="10.500" cy="10.500" r="6"/><path d="M15 15l5 5"/></svg>'
 };
@@ -1075,9 +1112,10 @@ const wordmark=()=>`<span class="wordmark"><small>The</small>Usual</span>`;
 
 function navHTML(kind){
   const tab=(k,l)=>`<a class="tab" href="#${k}" data-go="${k}" ${S.screen===k?'aria-current="page"':''}>${ICON[k]}<span>${l}</span></a>`;
-  const plus=`<button class="plus" data-act="log" aria-label="Log a watch (N)">${ICON.plus}${S.draft?'<i class="pip"></i>':''}</button>`;
-  if(kind==='rail')return `${wordmark()}${tab('shelf','Shelf')}${tab('together','Together')}${plus}${tab('tonight','Tonight')}<div class="grow"></div>`;
-  return `${tab('shelf','Shelf')}${tab('together','Together')}${plus}${tab('tonight','Tonight')}`;
+  const pip=S.draft||(S.session&&S.session.phase==='after');
+  const plus=`<button class="plus" data-act="log" aria-label="Log something you watched (N)">${ICON.plus}${pip?'<i class="pip"></i>':''}</button>`;
+  if(kind==='rail')return `${wordmark()}${tab('home','Home')}${tab('shelf','Shelf')}${plus}<div class="grow"></div>`;
+  return `${tab('home','Home')}${plus}${tab('shelf','Shelf')}`;
 }
 function renderShell(){
   $('#app').innerHTML=`<div class="shell">
@@ -1171,71 +1209,106 @@ function renderWelcome(){
   $('#app').innerHTML=welcomeHTML(); fillBackwall();
   setTimeout(()=>{const e=$('#em'); if(e)e.focus({preventScroll:true})},50);
 }
-function welcomeEnter(){S.authed=true;saveState();toast('Welcome in.');go('shelf')}
+function welcomeEnter(){S.authed=true;saveState();toast('Welcome in.');go('home')}
 
 /* ============================================================
    ROUTER
    ============================================================ */
-function parseHash(){return (location.hash||'#shelf').slice(1).split('/')}
+function parseHash(){return (location.hash||'#home').slice(1).split('/')}
 function go(screen){
   if(location.hash!=='#'+screen)location.hash='#'+screen; else route();
 }
+const ALIAS={tonight:'home',together:'home',us:'home'};
 function route(){
   if(!S.authed){renderWelcome();return}
-  const [scr,sub]=parseHash(); S.sub=sub||null;
-  const valid=['shelf','together','tonight','me'];
-  S.screen=valid.includes(scr)?scr:(scr==='us'?'together':'shelf');
+  let [scr,sub]=parseHash(); S.sub=sub||null;
+  if(ALIAS[scr]){ if(scr==='together'&&sub==='shelf'){S.scope='ours';scr='shelf'}else scr=ALIAS[scr]; history.replaceState(null,'','#'+scr) }
+  S.screen=['home','shelf','me'].includes(scr)?scr:'home';
   if(!$('#view'))renderShell();
   refreshNav(); renderView();
   window.scrollTo({top:0});
 }
 function renderView(){
   const v=$('#view');
-  v.innerHTML=({shelf:viewShelf,together:viewUs,tonight:viewTonight,me:viewMe})[S.screen]();
-  if(S.screen==='shelf')layoutShelves();
-  if(S.screen==='together')layoutShelves();
-  S.landed=null;
+  v.innerHTML=({home:viewHome,shelf:viewShelf,me:viewMe})[S.screen]();
+  if(S.screen==='home'||S.screen==='shelf')layoutShelves();
+  S.landed=null; tickElapsed();
 }
 
 /* ============================================================
    SHELF
    ============================================================ */
-const FILTERS=[['all','All'],['movie','Films'],['tv','Shows'],['re','Rewatches'],['w:sam','With Sam'],['wo:sam','Without Sam']];
+const FILTERS=[['all','All'],['want','To watch'],['seen','Watched'],['re','Rewatches'],['movie','Films'],['tv','Shows']];
+const lname=l=>S.unified?(l==='ours'?'Ours':'Mine'):(l==='ours'?'Our list':'My list');
+function inScope(c){
+  const sc=S.scope; if(sc==='all')return true;
+  if(c.wrapped)return c.list===sc;
+  return sc==='ours'?c.w.some(x=>x.who.includes(S.usual)):true;
+}
 function match(c){
   const f=S.filter;
-  if(f==='all')return true; if(f==='movie')return c.type==='movie'; if(f==='tv')return c.type==='tv'; if(f==='re')return rew(c)>0;
-  if(f.startsWith('w:'))return c.w.some(x=>x.who.includes(f.slice(2)));
-  if(f.startsWith('wo:'))return c.w.some(x=>!x.who.includes(f.slice(3)));
+  if(f==='all')return true; if(f==='want')return !!c.wrapped; if(f==='seen')return !c.wrapped;
+  if(f==='movie')return c.type==='movie'; if(f==='tv')return c.type==='tv'; if(f==='re')return rew(c)>0;
   return true;
 }
 function sortCases(list){
   const a=list.slice();
-  const k={recent:(x,y)=>lastW(y).d.localeCompare(lastW(x).d),rating:(x,y)=>(lastR(y)||0)-(lastR(x)||0),title:(x,y)=>x.t.localeCompare(y.t),year:(x,y)=>y.y-x.y}[S.sort];
+  const k={recent:(x,y)=>((y.wrapped?1:0)-(x.wrapped?1:0))||lastDate(y).localeCompare(lastDate(x)),rating:(x,y)=>(lastR(y)||0)-(lastR(x)||0),title:(x,y)=>x.t.localeCompare(y.t),year:(x,y)=>y.y-x.y}[S.sort];
   return a.sort(k);
 }
 let SETS={};
-function subline(){
-  const re=S.cases.reduce((n,c)=>n+rew(c),0), sn=topSnack(allWatches().flatMap(x=>[x.w]));
-  return `${S.cases.length} cases. ${re} rewatches. Most ordered: ${esc(sn||'nothing yet')}.`;
+function subline(items){
+  const seen=items.filter(c=>!c.wrapped), want=items.length-seen.length, re=seen.reduce((n,c)=>n+rew(c),0), sn=topSnack(seen.flatMap(c=>c.w));
+  return `${seen.length} watched${S.unified?`, ${want} still in the wrapper`:''}. ${re} rewatches. Most ordered: ${esc(sn||'nothing yet')}.`;
+}
+function shelfItems(){const seen=S.cases.filter(inScope), want=S.unified?wantedItems().filter(inScope):[]; return [...want,...seen]}
+function highlightsHTML(){
+  const k=S.usual, p=PEOPLE[k], shared=sharedWith(k);
+  const ws=allWatches().filter(x=>x.w.who.includes(k));
+  const first=ws.slice().sort((a,b)=>a.w.d.localeCompare(b.w.d))[0];
+  const mostRe=shared.slice().sort((a,b)=>rew(b)-rew(a))[0];
+  const dis=ws.filter(x=>x.w.r&&x.w.pr&&x.w.pr[k]!=null).map(x=>({...x,d:Math.abs(x.w.r-x.w.pr[k])})).sort((a,b)=>b.d-a.d)[0];
+  const snack=topSnack(ws.map(x=>x.w));
+  const long=shared.slice().sort((a,b)=>(b.type==='tv'?b.eps*b.min:b.min)-(a.type==='tv'?a.eps*a.min:a.min))[0];
+  const stub=(kk,b,s)=>`<div class="stub"><div class="k">${kk}</div><b>${esc(b)}</b><span>${esc(s)}</span></div>`;
+  const hrs=Math.round(ws.reduce((n,x)=>n+minutesOf(x.c,x.w),0)/60);
+  return `<div class="us-head"><h2 class="display">You &amp; ${esc(p.n)}</h2><span class="cap">${shared.length} titles · ${hrs} hours · since ${fmt(p.since).replace(/^\d+ /,'')}</span></div>
+    <p class="sub">The Usual · <b style="color:var(--ink)">${esc(p.ritual||'No ritual named yet')}</b> <button class="link" data-act="ritual" data-id="${k}">Rename</button></p>
+    <div class="stubs">
+      ${first?stub('First one',first.c.t,fmt(first.w.d)):''}
+      ${mostRe&&rew(mostRe)?stub('Most rewatched',mostRe.t,`×${rew(mostRe)} rewatches`):''}
+      ${dis&&dis.d>0?stub('Biggest disagreement',dis.c.t,`${num(dis.w.r)}★ vs ${num(dis.w.pr[k])}★`):''}
+      ${snack?stub('Usual order',snack,'Most ordered between you'):''}
+      ${long?stub('Longest sit',long.t,rtText(long)):''}
+    </div>`;
 }
 function viewShelf(){
-  const films=sortCases(S.cases.filter(c=>c.type==='movie')), shows=sortCases(S.cases.filter(c=>c.type==='tv'));
-  const recent=[...S.cases].sort((a,b)=>lastW(b).d.localeCompare(lastW(a).d)).slice(0,10);
+  if(!S.unified&&(S.filter==='want'||S.filter==='seen'))S.filter='all';
+  const items=shelfItems();
+  const films=sortCases(items.filter(c=>c.type==='movie')), shows=sortCases(items.filter(c=>c.type==='tv'));
+  const recent=S.cases.filter(inScope).sort((a,b)=>lastDate(b).localeCompare(lastDate(a))).slice(0,10);
   SETS={films,shows,recent};
-  const shown=S.cases.filter(match).length;
+  const shown=items.filter(match).length;
+  const title={all:'The shelf',ours:'Our shelf',mine:'My shelf'}[S.scope];
+  const filters=FILTERS.filter(([k])=>S.unified||(k!=='want'&&k!=='seen'));
   const body=S.view==='grid'
-   ? `<div class="grid">${sortCases(S.cases).map(c=>`<button class="gcase ${match(c)?'':'dim'}" data-open="${c.id}" aria-label="${esc(heading(c))}">${cover(c)}<b>${esc(c.t)}</b><i>${c.type==='tv'?'Season '+c.s:c.y}${rew(c)?' · rewatch ×'+rew(c):''}</i></button>`).join('')}</div>`
+   ? `<div class="grid">${sortCases(items).map(c=>`<button class="gcase ${match(c)?'':'dim'}" data-open="${c.id}" aria-label="${esc(heading(c))}">${cover(c)}<b>${esc(c.t)}</b><i>${c.wrapped?'In the wrapper':(c.type==='tv'?'Season '+c.s:c.y)+(rew(c)?' · rewatch ×'+rew(c):'')}</i></button>`).join('')}</div>`
    : `<div class="cabwrap"><div class="cabinet">
         <div class="door door-l"><span class="plate">Shows</span><div class="shelfset" data-set="shows"></div><i class="hinge a"></i><i class="hinge b"></i></div>
         <div class="carcass"><div class="cornice"><span class="plate">Films · ${films.length}</span></div><i class="reel"></i><div class="shelfset" data-set="films"></div></div>
         <div class="door door-r"><span class="plate">Lately</span><div class="shelfset" data-set="recent"></div><i class="hinge a"></i><i class="hinge b"></i></div>
       </div></div>`;
   return `<section>
-    <div class="head"><div><h1 class="display">Your shelf</h1><p class="sub">${subline()}</p></div>
-      <div class="tools"><div class="seg" role="group" aria-label="View"><button data-view="shelf" aria-pressed="${S.view==='shelf'}">Shelf</button><button data-view="grid" aria-pressed="${S.view==='grid'}">Grid</button></div>
-      <label class="sr" for="sort">Sort</label><select class="sel" id="sort" data-sort>${[['recent','Recently watched'],['rating','Highest rated'],['title','Title'],['year','Release year']].map(([k,l])=>`<option value="${k}" ${S.sort===k?'selected':''}>${l}</option>`).join('')}</select></div></div>
-    <div class="chips filters" role="group" aria-label="Filter">${FILTERS.map(([k,l])=>`<button class="chip" data-filter="${k}" aria-pressed="${S.filter===k}">${l}</button>`).join('')}<span class="count">${shown} of ${S.cases.length}</span></div>
-    ${body}</section>`;
+    <div class="head"><div><h1 class="display">${title}</h1><p class="sub">${subline(items)}</p></div>
+      <div class="tools"><div class="seg" role="group" aria-label="Whose shelf">${[['all','All'],['ours','Ours'],['mine','Mine']].map(([k,l])=>`<button data-scope="${k}" aria-pressed="${S.scope===k}">${l}</button>`).join('')}</div>
+      <div class="seg" role="group" aria-label="View"><button data-view="shelf" aria-pressed="${S.view==='shelf'}">Shelf</button><button data-view="grid" aria-pressed="${S.view==='grid'}">Grid</button></div>
+      <label class="sr" for="sort">Sort</label><select class="sel" id="sort" data-sort>${[['recent','Up next, then recent'],['rating','Highest rated'],['title','Title'],['year','Release year']].map(([k,l])=>`<option value="${k}" ${S.sort===k?'selected':''}>${l}</option>`).join('')}</select>
+      <button class="btn small" data-act="addToList">${S.unified?'Add to the shelf':'Add to a list'}</button></div></div>
+    <div class="chips filters" role="group" aria-label="Filter">${filters.map(([k,l])=>`<button class="chip" data-filter="${k}" aria-pressed="${S.filter===k}">${l}</button>`).join('')}<span class="count">${shown} of ${items.length}</span></div>
+    <div class="layoutrow"><span>Layout</span><div class="seg" role="group" aria-label="Layout"><button data-layout="one" aria-pressed="${S.unified}">One shelf</button><button data-layout="split" aria-pressed="${!S.unified}">Shelf + lists</button></div><span>${S.unified?'Films you want sit in shrink-wrap until you watch them.':'The classic layout: what you have watched, with lists kept apart.'}</span></div>
+    ${S.scope==='ours'?highlightsHTML():''}
+    ${body}
+    ${!S.unified?`<h2 class="display sh-h">Lists</h2>${listsSection()}`:''}</section>`;
 }
 const PROPS=['<span class="prop p-vase"><i class="nk"></i><i class="bd"></i></span>','<span class="prop p-stack"><i></i><i></i><i></i></span>','<span class="prop p-lamp"><i class="sh"></i><i class="st"></i><i class="bs"></i></span>','<span class="prop p-frame"><i></i></span>'];
 function fillShelf(el,list,opts={}){
@@ -1278,7 +1351,7 @@ function openCase(id){
 function closeCase(){S.open=null;renderDock()}
 function renderDock(){
   const d=$('#dock'); if(!d)return;
-  const c=S.open&&caseById(S.open);
+  const c=S.open&&getCase(S.open);
   if(!c){d.hidden=true;document.body.classList.remove('dock-open');requestAnimationFrame(()=>{if($('.shelfset'))layoutShelves()});return}
   const sorted=c.w.slice().sort(byDateDesc), lw=sorted[0], n=rew(c);
   const people=[...new Set(c.w.flatMap(w=>w.who))];
@@ -1294,13 +1367,20 @@ function renderDock(){
      <h2 class="display">${esc(c.t)}${c.type==='tv'?' <span style="color:var(--ink-soft)">S'+c.s+'</span>':''}</h2>
      <p class="meta">${c.y} · ${esc(c.dir)} · ${rtText(c)} · ${esc(c.gen.join(', '))}</p>
      <p>${esc(c.syn)}</p>
-     <div class="chips" style="margin-top:14px">${n?`<span class="chip on">Rewatch ×${n}</span>`:''}${people.map(k=>`<span class="chip"><i class="dot" style="background:${pcol(k)}"></i>${esc(nm(k))}</span>`).join('')}</div>
-     <div class="sec"><h3>Watch history</h3><ol class="tl">${tl||'<li><div class="k"><b>Nothing logged</b></div></li>'}</ol></div>
-     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"><button class="btn" data-act="log" data-id="${c.id}">Log a ${c.w.length?'rewatch':'watch'}</button><button class="btn ghost" data-act="addOurs" data-id="${c.id}">Add to Our list</button><button class="btn ghost" data-act="saveMine" data-id="${c.id}">Save to My list</button></div>
+     <div class="chips" style="margin-top:14px">${c.wrapped?`<span class="chip on">In the wrapper \u00b7 ${lname(c.list)}</span>`:''}${!c.w.length&&SAM_MINE.includes(c.id)?'<span class="chip">Sam wants this too</span>':''}${n?`<span class="chip on">Rewatch ×${n}</span>`:''}${people.map(k=>`<span class="chip"><i class="dot" style="background:${pcol(k)}"></i>${esc(nm(k))}</span>`).join('')}</div>
+     ${c.w.length?`<div class="sec"><h3>Watch history</h3><ol class="tl">${tl}</ol></div>`:`<div class="sec"><h3>Not watched yet</h3><p class="hint">${c.wrapped?'It is waiting on the shelf in its wrapper. Watch it tonight, or log it if you already have.':'Add it to the shelf to keep it for later, or start it tonight.'}</p></div>`}
+     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">${dockActions(c)}</div>
    </div>`;
   d.scrollTop=0;
   requestAnimationFrame(()=>{if($('.shelfset'))layoutShelves()});
   const cb=$('[data-act=close]',d); if(cb&&window.innerWidth<1100)cb.focus({preventScroll:true});
+}
+function dockActions(c){
+  const id=c.id, seen=c.w.length>0, ours=inOurs(id), mine=inMine(id);
+  if(seen)return `<button class="btn" data-act="startTonight" data-id="${id}">Watch it again tonight</button><button class="btn ghost" data-act="log" data-id="${id}">Log a rewatch</button>`;
+  return `<button class="btn" data-act="startTonight" data-id="${id}">Watch tonight</button><button class="btn ghost" data-act="log" data-id="${id}">I\u2019ve watched it</button>`
+   +(ours?`<button class="btn ghost" data-act="saveMine" data-id="${id}">Move to ${lname('mine')}</button>`:mine?`<button class="btn ghost" data-act="addOurs" data-id="${id}">Move to ${lname('ours')}</button>`:`<button class="btn ghost" data-act="addOurs" data-id="${id}">Add to ${lname('ours')}</button><button class="btn ghost" data-act="saveMine" data-id="${id}">Add to ${lname('mine')}</button>`)
+   +((ours||mine)?`<button class="btn ghost small" data-act="removeFrom" data-id="${id}" data-list="${ours?'ours':'mine'}" data-close="1">Remove</button>`:'');
 }
 function dockCtl(act){
   const st=$('#stage'); if(!st)return;
@@ -1320,61 +1400,103 @@ document.addEventListener('pointermove',e=>{
    US (sunken sofa)
    ============================================================ */
 function sharedWith(k){return S.cases.filter(c=>c.w.some(w=>w.who.includes(k)))}
-function viewUs(){
-  if(S.sub==='shelf')return viewShared();
-  const k=S.usual, p=PEOPLE[k], shared=sharedWith(k);
+function isDim(){return !!(S.session&&S.session.phase==='playing')}
+const fmtMins=m=>m>=60?`${Math.floor(m/60)}h ${m%60}m`:`${m}m`;
+function elapsedMins(){return S.session?Math.max(0,Math.round((Date.now()-S.session.start)/60000)):0}
+function tickElapsed(){const e=$('#elapsed');if(e&&S.session)e.textContent=fmtMins(elapsedMins())}
+function viewHome(){
+  const k=S.usual, p=PEOPLE[k], ss=S.session;
   const pend=S.pending.filter(x=>!x.done&&x.who===k);
-  const ws=allWatches().filter(x=>x.w.who.includes(k));
-  const first=ws.slice().sort((a,b)=>a.w.d.localeCompare(b.w.d))[0];
-  const mostRe=shared.slice().sort((a,b)=>rew(b)-rew(a))[0];
-  const dis=ws.filter(x=>x.w.r&&x.w.pr&&x.w.pr[k]!=null).map(x=>({...x,d:Math.abs(x.w.r-x.w.pr[k])})).sort((a,b)=>b.d-a.d)[0];
-  const snack=topSnack(ws.map(x=>x.w));
-  const long=shared.slice().sort((a,b)=>(b.type==='tv'?b.eps*b.min:b.min)-(a.type==='tv'?a.eps*a.min:a.min))[0];
-  const stub=(kk,b,s)=>`<div class="stub"><div class="k">${kk}</div><b>${esc(b)}</b><span>${esc(s)}</span></div>`;
-  SETS.us=sortCases(shared); SETS.mini=miniList();
-  const hrs=Math.round(ws.reduce((n,x)=>n+minutesOf(x.c,x.w),0)/60);
-  return `<section>
-    <div class="head"><div><h1 class="display">Together</h1><p class="sub">You and ${esc(p.n)}. Each of you keeps your own shelf. This is the one you share.</p></div></div>
-    <div class="pit${S.dim?' dim':''}" id="pit">
+  const phase=ss?ss.phase:(S.draft?'ready':'decide');
+  const cur=ss?getCase(ss.id):(S.draft?getCase(S.draft):null);
+  const wd=new Date().toLocaleDateString('en-GB',{weekday:'long'}), ritual=p.ritual||'';
+  const usualNight=ritual&&ritual.toLowerCase().includes(wd.toLowerCase());
+  const head={playing:'Now showing.',after:'That’s a wrap.',ready:'Lights down when you’re ready.',decide:usualNight?`It’s ${wd} night.`:'What are we watching?'}[phase];
+  const sub={decide:usualNight?`Your Usual with ${p.n}. Pick something below, or click the lamp when you already know.`:'Pick something below, or click the lamp when you already know.',
+    ready:cur?`${cur.t} is tonight’s pick. Click the lamp to start.`:'',playing:cur?`${cur.t}. Click the lamp when it’s over.`:'',after:cur?`${cur.t}. Tell us what you thought while it’s fresh.`:''}[phase];
+  SETS.mini=miniList();
+  const hint={decide:'Click the lamp to start a film. Drag spines to rearrange the shelf; click one to open it.',ready:'Click the lamp to dim the lights and start.',playing:'Click the lamp when the credits roll.',after:'Click the lamp to log how it went.'}[phase];
+  const lampLabel={decide:'Lights down: start a film',ready:'Lights down: start the film',playing:'Lights up: the film is over',after:'Log how it went'}[phase];
+  let panel='';
+  if(phase==='playing')panel=`<div class="onnow playing"><div>${cover(cur)}</div><div class="txt"><b>Now showing: ${esc(heading(cur))}</b><span>Lights down <span id="elapsed">${fmtMins(elapsedMins())}</span> ago · ${rtText(cur)}</span></div><div class="acts"><button class="btn" data-act="lamp">Lights up</button><button class="btn ghost" data-act="cancelSession">Not this one</button></div></div>`;
+  else if(phase==='after')panel=`<div class="onnow"><div>${cover(cur)}</div><div class="txt"><b>How was ${esc(heading(cur))}?</b><span>You watched for ${fmtMins(ss.mins||1)}. Log it while it is fresh.</span></div><div class="acts"><button class="btn" data-act="lamp">Log it</button><button class="btn ghost" data-act="cancelSession">Discard</button></div></div>`;
+  else if(phase==='ready')panel=`<div class="onnow"><div>${cover(cur)}</div><div class="txt"><b>Tonight: ${esc(heading(cur))}</b><span>Click the lamp when you are ready, or change your mind.</span></div><div class="acts"><button class="btn" data-act="lamp">Lights down</button><button class="btn ghost" data-act="clearDraft">Not this one</button></div></div>`;
+  const lower=phase==='decide'?`<div class="tonight"><div>${deciderHTML()}</div><div>${progressHTML()}${upnextHTML()}</div></div>`:phase==='ready'?`<div>${upnextHTML()}</div>`:'';
+  return `<section class="home">
+    <div class="head"><div><h1 class="display">${head}</h1><p class="sub">${sub}</p></div></div>
+    ${phase==='playing'?'':pend.map(x=>pendingHTML(x)).join('')}
+    <div class="pit${isDim()?' dim':''}${phase==='ready'?' ready':''}" id="pit">
       <div class="pit-row">
         <div class="sofa">
-          <div class="biglamp">${BIGLAMP}<button class="lampbtn" data-act="lamp" aria-label="${S.dim?'Turn the lamp on':'Turn the lamp off'}"></button></div>
+          <div class="biglamp">${BIGLAMP}<button class="lampbtn" data-act="lamp" aria-label="${lampLabel}"></button></div>
           <div class="sb"></div><div class="ss"></div><i class="throw"></i>
           <button class="seatp" data-act="say" data-who="you" style="left:27%;--pc:${V(S.user.colour||'--copper')}"><span class="av">${esc(S.user.name[0])}</span><span class="nm">You</span></button>
           <button class="seatp" data-act="say" data-who="${k}" style="left:64%;--pc:${pcol(k)}"><span class="av">${esc(p.n[0])}</span><span class="nm">${esc(p.n)}</span></button>
           <i class="pool"></i>
           <div class="table"><i class="top"></i><i class="leg"></i><span class="bowl"></span></div>
         </div>
-        <div class="cabcol"><div class="minicab" id="minicab"><span class="plate">Our shelf · ${shared.length}</span><div class="shelfset" data-set="mini"></div></div><div class="minitip" id="minitip" aria-hidden="true"></div></div>
+        <div class="cabcol"><div class="minicab" id="minicab"><span class="plate">Our shelf · ${SETS.mini.length}</span><div class="shelfset" data-set="mini"></div></div><div class="minitip" id="minitip" aria-hidden="true"></div></div>
       </div><div class="floor"></div></div>
-    <div class="minibar"><p class="hint">Drag a spine to rearrange the shelf. Click one to open its case. Click the lamp to dim the lights.</p>
-      <div class="mini-tools"><button class="btn ghost small" data-act="miniShuffle">Shuffle</button><button class="btn ghost small" data-act="miniPull">Pull one out</button><a class="btn small" href="#together/shelf">Open the full shelf</a></div></div>
-    <div class="us-head"><h2 class="display">You &amp; ${esc(p.n)}</h2><span class="cap">${shared.length} titles · ${hrs} hours · since ${fmt(p.since).replace(/^\d+ /,'')}</span></div>
-    <p class="sub">The Usual · <b style="color:var(--ink)">${esc(p.ritual||'No ritual named yet')}</b> <button class="link" data-act="ritual" data-id="${k}">Rename</button></p>
-    ${pend.map(x=>pendingHTML(x)).join('')}
-    <div class="stubs">
-      ${first?stub('First one',first.c.t,fmt(first.w.d)):''}
-      ${mostRe&&rew(mostRe)?stub('Most rewatched',mostRe.t,`×${rew(mostRe)} rewatches`):''}
-      ${dis&&dis.d>0?stub('Biggest disagreement',dis.c.t,`${num(dis.w.r)}★ vs ${num(dis.w.pr[k])}★`):''}
-      ${snack?stub('Usual order',snack,'Most ordered between you'):''}
-      ${long?stub('Longest sit',long.t,rtText(long)):''}
-    </div>
-    <div class="sh-row"><h2 class="display sh-h">Shared Shelf</h2><a class="link" href="#together/shelf">Open the full shelf</a></div>
-    ${shared.length?`<div class="minishelf"><div class="shelfset" data-set="us"></div></div>`:`<div class="empty"><p class="display">Nothing here yet.</p>What was the first one?</div>`}
+    <div class="minibar"><p class="hint">${hint}</p>
+      <div class="mini-tools"><button class="btn ghost small" data-act="miniShuffle">Shuffle</button><button class="btn ghost small" data-act="miniPull">Pull one out</button><button class="btn small" data-act="openOurShelf">Open our shelf</button></div></div>
+    ${panel}
+    ${lower}
   </section>`;
 }
-function viewShared(){
-  const k=S.usual, p=PEOPLE[k], list=sortCases(sharedWith(k));
-  SETS.shared=list;
-  const fl=FILTERS.slice(0,4), n=list.filter(match).length;
-  const body=S.view==='grid'
-    ? `<div class="grid">${list.map(c=>`<button class="gcase ${match(c)?'':'dim'}" data-open="${c.id}" aria-label="${esc(heading(c))}">${cover(c)}<b>${esc(c.t)}</b><i>${c.type==='tv'?'Season '+c.s:c.y}${rew(c)?' · rewatch ×'+rew(c):''}</i></button>`).join('')}</div>`
-    : `<div class="cabwrap single"><div class="cabinet"><div class="carcass"><div class="cornice"><span class="plate">Our shelf · ${list.length}</span></div><div class="shelfset" data-set="shared"></div></div></div></div>`;
-  return `<section>
-    <div class="head"><div><a class="link backlink" href="#together">← Together</a><h1 class="display">Our shelf</h1><p class="sub">Everything you and ${esc(p.n)} have watched together. Open any case to see both of your ratings.</p></div>
-      <div class="tools"><div class="seg" role="group" aria-label="View"><button data-view="shelf" aria-pressed="${S.view==='shelf'}">Shelf</button><button data-view="grid" aria-pressed="${S.view==='grid'}">Grid</button></div></div></div>
-    <div class="chips filters" role="group" aria-label="Filter">${fl.map(([k2,l])=>`<button class="chip" data-filter="${k2}" aria-pressed="${S.filter===k2}">${l}</button>`).join('')}<span class="count">${n} of ${list.length}</span></div>
-    ${body}</section>`;
+function progressHTML(){
+  const prog=S.progress&&titleById(S.progress.id), pc=prog&&(prog.w?prog:placeholderCase(prog));
+  return pc?`<h3 class="sh2">Currently watching together</h3><div class="watching"><div>${cover(pc)}</div><div><b class="display" style="font-size:22px">${esc(heading(pc))}</b>
+        <div class="stepper"><button data-act="epDown" aria-label="Back one episode">−</button><b>Up to S${pc.s} E${S.progress.ep} of ${pc.eps}</b><button data-act="epUp" aria-label="Forward one episode">+</button></div></div></div>`:'';
+}
+function deciderHTML(){
+  const modes=[['both','Both said yes'],['surprise','Roulette'],['mood','Mood match']];
+  const moodUI=S.pickMode==='mood'?`<div class="moodrow" style="margin-top:4px">${Object.keys(MOOD_GENRES).map(m=>`<button class="chip" data-mood="${m}" aria-pressed="${S.mood===m}">${m}</button>`).join('')}</div>
+    <div class="moodrow" style="margin-top:6px">${[['90','Under 90 min'],['120','Under 2 hours'],['999','Any length']].map(([k,l])=>`<button class="chip" data-mins="${k}" aria-pressed="${String(S.mins)===k}">${l}</button>`).join('')}</div>`:'';
+  const nm_=PEOPLE[S.usual].n;
+  return `<section class="howto ${S.howtoOpen?'open':''}"><button class="howto-h" data-act="toggleHowto" aria-expanded="${S.howtoOpen}" aria-controls="howto-b"><span>How this works</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+     <div class="howto-b" id="howto-b" ${S.howtoOpen?'':'hidden'}><ol>
+     <li><b>${lname('ours')}</b> is shared: either of you can add. <b>${lname('mine')}</b> is only yours, and ${esc(nm_)} keeps their own. ${S.unified?'Anything you want to see waits on the shelf in its wrapper. ':''}If you both want the same title, it counts as “both said yes”.</li>
+     <li>Press <b>Pick for us</b>, or pull a case off the shelf. You see the blurb, and can keep it for later or skip it with your veto.</li>
+     <li><b>Watch tonight</b> sets the pick. Then click the <b>lamp</b>: lights down starts the film; lights up and we ask what you both thought.</li></ol></div></section>
+   <div class="tv"><div class="tv-screen" style="min-height:300px"><div class="tv-in" id="tv-in">${tvContent()}</div></div>
+     <div class="tv-side"><span class="knob" style="--k:-10deg"></span><span class="vent"></span><span class="vent"></span><span class="knob" style="--k:70deg"></span></div></div>
+   <div class="console"></div>
+   <div style="margin-top:20px"><span class="lbl">How should we pick?</span>
+     <div class="seg" role="group" aria-label="Mode">${modes.map(([k,l])=>`<button data-mode="${k}" aria-pressed="${S.pickMode===k}">${l}</button>`).join('')}</div>
+     <p class="modehelp">${modeHelp(S.pickMode)}</p>${moodUI}
+     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px"><button class="btn" data-act="pick">Pick for us</button><button class="link" data-act="resetRound" title="Gives you both a fresh veto">Start a new round</button></div></div>
+   <div id="pickbar">${pickBar()}</div>`;
+}
+function modeHelp(m){
+  return {both:'Films you both want: on both of your private lists, or that you both added to the shared one.',surprise:`A random pick from ${lname('ours')}.`,mood:'Choose a mood and how long you have. We search both lists, plus a few suggestions.'}[m];
+}
+function upnextHTML(){
+  if(!S.unified)return listsSection();
+  const ours=S.tab==='ours', nm_=PEOPLE[S.usual].n;
+  const items=wantedItems().filter(c=>c.list===S.tab);
+  return `<div class="listhead"><div class="seg" role="tablist" aria-label="Up next"><button data-tab="ours" aria-pressed="${ours}">Ours · ${S.tonight.length}</button><button data-tab="mine" aria-pressed="${!ours}">Mine · ${S.mine.length}</button></div>
+      <button class="btn ghost small" data-act="addToList">Add to ${lname(S.tab)}</button></div>
+    <p class="hint">${ours?`Up next, shared with ${esc(nm_)}. Either of you can add. Click a case to watch it, move it or remove it.`:`Only you can see this. Titles ${esc(nm_)} also wants are marked, and count as “both said yes”.`}</p>
+    ${items.length?`<div class="upnext">${items.slice(0,9).map(c=>`<button class="gcase" data-open="${c.id}" aria-label="${esc(heading(c))}, still in the wrapper">${cover(c)}<b>${esc(c.t)}</b><i>${!ours&&SAM_MINE.includes(c.id)?'Sam wants this too':c.y}</i></button>`).join('')}</div>${items.length>9?`<p class="hint" style="margin-top:12px">${items.length-9} more on the shelf.</p>`:''}`
+      :`<div class="empty"><p class="display">Nothing waiting.</p>${ours?'Add something the two of you could watch.':'Add anything you want to see. Only you can see this.'}</div>`}`;
+}
+function listsSection(){
+  const ours=S.tab==='ours', nm_=PEOPLE[S.usual].n;
+  return `<div class="listhead"><div class="seg" role="tablist" aria-label="Lists"><button data-tab="ours" aria-pressed="${ours}">Our list · ${S.tonight.length}</button><button data-tab="mine" aria-pressed="${!ours}">My list · ${S.mine.length}</button></div>
+        <button class="btn ghost small" data-act="addToList">Add to ${ours?'Our':'My'} list</button></div>
+      <p class="hint">${ours?`Shared with ${esc(nm_)}. Either of you can add or remove.`:`Only you can see this. Titles ${esc(nm_)} also has on theirs are marked, and those count as “both said yes”.`}</p>
+      <ul class="queue">${listRows()}</ul>`;
+}
+function lampClick(){
+  const ss=S.session;
+  if(ss&&ss.phase==='playing'){ss.mins=Math.max(1,elapsedMins());ss.phase='after';saveState();renderView();refreshNav();toast('Lights up.');openLog(ss.id,{fromSession:true,mins:ss.mins});return}
+  if(ss&&ss.phase==='after'){openLog(ss.id,{fromSession:true,mins:ss.mins});return}
+  if(S.draft){startSession(S.draft);return}
+  openSearch('play');
+}
+function startSession(id){
+  S.session={id,start:Date.now(),phase:'playing'}; S.draft=null; saveState();
+  closeLayer(); if(S.open)closeCase(); refreshNav(); if(S.screen==='home')renderView(); else go('home'); toast('Lights down. Enjoy.');
 }
 const BIGLAMP=`<svg viewBox="0 0 460 330" aria-hidden="true"><defs>
   <linearGradient id="brassG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4C6A3"/><stop offset=".5" stop-color="#D8B596"/><stop offset="1" stop-color="#B77D55"/></linearGradient>
@@ -1386,7 +1508,7 @@ const BIGLAMP=`<svg viewBox="0 0 460 330" aria-hidden="true"><defs>
   <path d="M190 96 Q250 8 310 96 Z" fill="url(#shadeG)"/><rect x="186" y="94" width="128" height="7" rx="3" fill="url(#brassG)"/>
   <ellipse class="bulb" cx="250" cy="102" rx="30" ry="8" fill="#fff4d6"/></svg>`;
 function miniList(){
-  const base=sortCases(sharedWith(S.usual));
+  const base=[...(S.unified?wantedItems().filter(c=>c.list==='ours'):[]),...sortCases(sharedWith(S.usual))];
   if(!S.order.length)return base;
   return base.slice().sort((a,b)=>{const ia=S.order.indexOf(a.id),ib=S.order.indexOf(b.id); if(ia<0&&ib<0)return 0; if(ia<0)return -1; if(ib<0)return 1; return ia-ib});
 }
@@ -1426,7 +1548,7 @@ document.addEventListener('pointerover',e=>{
   const tip=$('#minitip'); if(!tip)return;
   const sp=e.target.closest&&e.target.closest('.minicab .spine');
   if(!sp||DR&&DR.moving){tip.classList.remove('on');return}
-  const c=caseById(sp.dataset.open); if(!c)return;
+  const c=getCase(sp.dataset.open); if(!c)return;
   const col=$('.cabcol'), r=sp.getBoundingClientRect(), cr=col.getBoundingClientRect(), rt=lastR(c);
   tip.textContent=heading(c)+(rt?' · '+num(rt)+'★':'');
   tip.style.left=(r.left-cr.left+r.width/2)+'px'; tip.style.top=(r.top-cr.top-4)+'px'; tip.classList.add('on');
@@ -1435,8 +1557,8 @@ function pendingHTML(x){
   const c=caseById(x.caseId), w=c.w[x.wi];
   return `<article class="envelope" data-pend="${S.pending.indexOf(x)}"><div class="seal" aria-hidden="true">U</div>
     <div><h3>${esc(c.t)}${w.k==='re'?' <em style="font-size:.6em;font-style:normal;font-family:var(--cond);letter-spacing:.2em;text-transform:uppercase;color:var(--oxblood)">Rewatch</em>':''}</h3>
-    <p>${fmt(w.d)}, with ${esc(nm(x.who))}. ${esc(nm(x.who))} has already sealed their Take. Seal yours and the wax breaks.</p>
-    <div class="pend-r">${starsHTML(0)}</div>
+    <p>${fmt(w.d)}, with ${esc(nm(x.who))}. ${x.mine!=null?`You have sealed yours and ${esc(nm(x.who))} has sealed theirs. Break the seal to compare.`:`${esc(nm(x.who))} has already sealed their Take. Seal yours and the wax breaks.`}</p>
+    <div class="pend-r">${starsHTML(x.mine||0)}</div>
     <input type="text" placeholder="One line, if you like" aria-label="One line take" maxlength="120">
     <button class="btn" data-act="reveal">Break the seal</button></div></article>`;
 }
@@ -1479,12 +1601,12 @@ function tvContent(){
 function pickBar(){
   if(!S.pick||S.spinning)return '';
   const id=S.pick.id;
-  return `<div class="pickbar"><button class="btn" data-act="startTonight" data-id="${id}">Watch this tonight</button>
-    <button class="btn ghost" data-act="addOurs" data-id="${id}" ${inOurs(id)?'disabled':''}>${inOurs(id)?'On Our list':'Add to Our list'}</button>
-    <button class="btn ghost" data-act="saveMine" data-id="${id}" ${inMine(id)?'disabled':''}>${inMine(id)?'On My list':'Save to My list'}</button>
+  return `<div class="pickbar"><button class="btn" data-act="startTonight" data-id="${id}">Watch tonight</button>
+    <button class="btn ghost" data-act="addOurs" data-id="${id}" ${inOurs(id)?'disabled':''}>${inOurs(id)?'On '+lname('ours'):'Add to '+lname('ours')}</button>
+    <button class="btn ghost" data-act="saveMine" data-id="${id}" ${inMine(id)?'disabled':''}>${inMine(id)?'On '+lname('mine'):'Save to '+lname('mine')}</button>
     <button class="btn ghost small" data-act="veto" ${S.vetoes.you?'disabled':''}>${S.vetoes.you?'Veto used':'Veto (1 left)'}</button>
     <button class="btn ghost small" data-act="pickAgain">Another</button></div>
-    <p class="pickhint"><b>Watch this tonight</b> makes it tonight’s pick; log it when you finish. <b>Add</b> or <b>Save</b> keeps it for later without choosing it. <b>Veto</b> skips it, once per round.</p>`;
+    <p class="pickhint"><b>Watch tonight</b> sets the pick; click the lamp to start. <b>Add</b> or <b>Save</b> keeps it for later without choosing it. <b>Veto</b> skips it, once per round.</p>`;
 }
 function listRows(){
   const ours=S.tab==='ours';
@@ -1498,40 +1620,6 @@ function listRows(){
       <button class="btn ghost small" data-act="log" data-id="${id}">Watched it</button><button class="btn ghost small" data-act="removeFrom" data-id="${id}" data-list="${ours?'ours':'mine'}" aria-label="Remove ${esc(c.t)}">Remove</button></div></li>`;
   }).join('');
 }
-function viewTonight(){
-  const prog=S.progress&&titleById(S.progress.id), pc=prog&&(prog.w?prog:placeholderCase(prog));
-  const modes=[['both','Both said yes'],['surprise','Roulette'],['mood','Mood match']];
-  const moodUI=S.pickMode==='mood'?`<div class="moodrow" style="margin-top:4px">${Object.keys(MOOD_GENRES).map(m=>`<button class="chip" data-mood="${m}" aria-pressed="${S.mood===m}">${m}</button>`).join('')}</div>
-    <div class="moodrow" style="margin-top:6px">${[['90','Under 90 min'],['120','Under 2 hours'],['999','Any length']].map(([k,l])=>`<button class="chip" data-mins="${k}" aria-pressed="${String(S.mins)===k}">${l}</button>`).join('')}</div>`:'';
-  const dr=S.draft&&titleById(S.draft), dc=dr&&(dr.w?dr:placeholderCase(dr));
-  const ours=S.tab==='ours', nm_=PEOPLE[S.usual].n;
-  return `<section><div class="head"><div><h1 class="display">Tonight</h1><p class="sub">Two lists and a picker. Our list is shared with ${esc(nm_)}. My list is just yours.</p></div></div>
-   ${dc?`<div class="onnow"><div>${cover(dc)}</div><div class="txt"><b>Tonight: ${esc(heading(dc))}</b><span>You picked it. Log it when you finish.</span></div><div class="acts"><button class="btn" data-act="log" data-id="${dc.id}">We finished it</button><button class="btn ghost" data-act="clearDraft">Not this one</button></div></div>`:''}
-   <section class="howto ${S.howtoOpen?'open':''}"><button class="howto-h" data-act="toggleHowto" aria-expanded="${S.howtoOpen}" aria-controls="howto-b"><span>How Tonight works</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-     <div class="howto-b" id="howto-b" ${S.howtoOpen?'':'hidden'}><ol>
-     <li><b>Our list</b> is shared: either of you can add to it. <b>My list</b> is only yours, and ${esc(nm_)} keeps their own. If you both have the same title, it counts as “both said yes”.</li>
-     <li>Choose a way to pick, then press <b>Pick for us</b>. You see the film’s blurb and can add it to a list, or skip it with your veto.</li>
-     <li><b>Watch this tonight</b> makes it tonight’s pick. When you finish, tap <b>We finished it</b> to log it.</li></ol></div></section>
-   <div class="tonight">
-    <div>
-      <div class="tv"><div class="tv-screen" style="min-height:300px"><div class="tv-in" id="tv-in">${tvContent()}</div></div>
-        <div class="tv-side"><span class="knob" style="--k:-10deg"></span><span class="vent"></span><span class="vent"></span><span class="knob" style="--k:70deg"></span></div></div>
-      <div class="console"></div>
-      <div style="margin-top:20px"><span class="lbl">How should we pick?</span>
-        <div class="seg" role="group" aria-label="Mode">${modes.map(([k,l])=>`<button data-mode="${k}" aria-pressed="${S.pickMode===k}">${l}</button>`).join('')}</div>
-        <p class="modehelp">${MODE_HELP[S.pickMode]}</p>${moodUI}
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px"><button class="btn" data-act="pick">Pick for us</button><button class="link" data-act="resetRound" title="Gives you both a fresh veto">Start a new round</button></div></div>
-      <div id="pickbar">${pickBar()}</div>
-    </div>
-    <div>
-      ${pc?`<h3 class="sh2">Currently watching together</h3><div class="watching"><div>${cover(pc)}</div><div><b class="display" style="font-size:22px">${esc(heading(pc))}</b>
-        <div class="stepper"><button data-act="epDown" aria-label="Back one episode">−</button><b>Up to S${pc.s} E${S.progress.ep} of ${pc.eps}</b><button data-act="epUp" aria-label="Forward one episode">+</button></div></div></div>`:''}
-      <div class="listhead"><div class="seg" role="tablist" aria-label="Lists"><button data-tab="ours" aria-pressed="${ours}">Our list · ${S.tonight.length}</button><button data-tab="mine" aria-pressed="${!ours}">My list · ${S.mine.length}</button></div>
-        <button class="btn ghost small" data-act="addToList">Add to ${ours?'Our':'My'} list</button></div>
-      <p class="hint">${ours?`Shared with ${esc(nm_)}. Either of you can add or remove.`:`Only you can see this. Titles ${esc(nm_)} also has on theirs are marked, and those count as “both said yes”.`}</p>
-      <ul class="queue">${listRows()}</ul>
-    </div></div></section>`;
-}
 function poolFor(){
   const ex=S.vetoed||[]; let ids=[],why='';
   if(S.pickMode==='both')ids=bothSet();
@@ -1543,26 +1631,28 @@ function poolFor(){
   return ids.filter(id=>!ex.includes(id)&&titleById(id)&&!caseById(id));
 }
 function whyFor(id){
-  if(S.pickMode==='both')return inOurs(id)&&S.tonight.find(t=>t.id===id).by.length>1?'You both added it to Our list.':'It is on both of your My lists.';
-  if(S.pickMode==='surprise')return 'Drawn at random from Our list.';
+  if(S.pickMode==='both')return inOurs(id)&&S.tonight.find(t=>t.id===id).by.length>1?'You both added it to the shared list.':'It is on both of your private lists.';
+  if(S.pickMode==='surprise')return 'Drawn at random from the shared list.';
   return `Fits ${S.mood?'“'+S.mood+'”':'any mood'} and ${+S.mins&&+S.mins<999?'under '+S.mins+' minutes':'any length'}.`;
 }
 function doPick(){
   const cand=poolFor(); S.pickNone=null;
-  if(!cand.length){S.pick=null;S.pickNone=S.pickMode==='both'?'Nothing is on both of your lists yet. Add to Our list, or try Roulette.':S.pickMode==='surprise'?'Our list is empty, or you have vetoed everything on it.':'Nothing fits that mood and length. Loosen one.';updateTV();return}
+  if(!cand.length){S.pick=null;S.pickNone=S.pickMode==='both'?'Nothing is on both of your lists yet. Add to the shared list, or try Roulette.':S.pickMode==='surprise'?'The shared list is empty, or you have vetoed everything on it.':'Nothing fits that mood and length. Loosen one.';updateTV();return}
   let id=cand[Math.floor(Math.random()*cand.length)]; if(cand.length>1&&S.pick&&S.pick.id===id)id=cand.find(x=>x!==id);
   S.spinning=true;S.pick=null;updateTV();
   setTimeout(()=>{S.spinning=false;S.pick={id,why:whyFor(id)};updateTV()},S.rm?100:1400);
 }
 function updateTV(){const t=$('#tv-in');if(t)t.innerHTML=tvContent();const b=$('#pickbar');if(b)b.innerHTML=pickBar()}
 function addTo(id,list){
-  if(list==='mine'){ if(inMine(id))toast('Already on My list'); else{S.mine.push(id);toast('Saved to My list')} }
-  else{
+  if(list==='mine'){
+    if(inMine(id)&&!inOurs(id))toast('Already on '+lname('mine'));
+    else{if(!inMine(id))S.mine.push(id);S.tonight=S.tonight.filter(x=>x.id!==id);toast('Saved to '+lname('mine'))}
+  }else{
     const ex=S.tonight.find(x=>x.id===id);
-    if(ex){if(!ex.by.includes('you'))ex.by.push('you');toast('Already on Our list')}else{S.tonight.push({id,by:['you']});toast('Added to Our list')}
+    if(ex){if(!ex.by.includes('you'))ex.by.push('you');toast('Already on '+lname('ours'))}else{S.tonight.push({id,by:['you']});toast('Added to '+lname('ours'))}
     S.mine=S.mine.filter(x=>x!==id);
   }
-  saveState(); if(S.screen==='tonight')renderView();
+  saveState(); renderView(); if(S.open===id)renderDock();
 }
 
 /* ============================================================
@@ -1589,6 +1679,8 @@ function viewMe(){
       <div class="hist" aria-label="Rating spread">${Object.entries(dist).map(([r,n])=>`<i style="height:${Math.max(3,n/mx*100)}%" title="${n} at ${r}"><span>${r%1?'':r}</span></i>`).join('')}</div><div style="height:22px"></div>
     </div>
     <div><h2 class="sh2 ruled">Settings</h2>
+      <div class="setting"><div>Shelf layout<small>One shelf keeps films you want in shrink-wrap beside the ones you have watched. Shelf + lists keeps them apart.</small></div><div class="seg"><button data-layout="one" aria-pressed="${S.unified}">One shelf</button><button data-layout="split" aria-pressed="${!S.unified}">Shelf + lists</button></div></div>
+      <div class="setting"><div>Your Usual<small>${esc(PEOPLE[S.usual].n)} \u00b7 ${esc(PEOPLE[S.usual].ritual||'unnamed')}</small></div><button class="btn ghost small" data-act="ritual" data-id="${S.usual}">Rename</button></div>
       <div class="setting"><div>Theme<small>Espresso is the home theme.</small></div><div class="seg">${[['dark','Espresso'],['light','Cream'],['auto','Auto']].map(([k,l])=>`<button data-theme-set="${k}" aria-pressed="${S.theme===k}">${l}</button>`).join('')}</div></div>
       <div class="setting"><div>Your spine colour<small>What people see on shared cases.</small></div><div class="swatches">${SPINE_COLOURS.map(c=>`<button class="sw" style="--sc:${V(c)};width:26px;height:26px" data-colour="${c}" aria-label="${c.slice(2)}" aria-pressed="${S.user.colour===c}"></button>`).join('')}</div></div>
       ${sw('rm','Reduce motion','Swap the flips and spins for fades.',S.rm)}
@@ -1630,12 +1722,13 @@ function importCSV(text){
    LOG A WATCH (sheet)
    ============================================================ */
 let LG={};
-function openLog(id){
+function openLog(id,opts){
   const t=id?titleById(id):(S.draft?titleById(S.draft):null);
-  LG={id:t?t.id:null,who:S.usual?[S.usual]:[],when:'today',date:TODAY,r:0,sn:[],at:'Couch',m:[],choice:'re'};
+  LG={id:t?t.id:null,who:S.usual?[S.usual]:[],when:'today',date:TODAY,r:0,sn:[],at:'Couch',m:[],choice:'re',fromSession:!!(opts&&opts.fromSession),mins:opts&&opts.mins};
   const L=$('#layer'); L.innerHTML=`<div class="scrim" id="scrim"><form class="sheet" id="logform" role="dialog" aria-modal="true" aria-labelledby="lg-h">
-    <div class="sheet-h"><h2 class="display" id="lg-h">Log a watch</h2><button type="button" class="btn ghost small" data-act="closeLayer">Cancel</button></div>
+    <div class="sheet-h"><h2 class="display" id="lg-h">${LG.fromSession?'How was it?':'Log a watch'}</h2><button type="button" class="btn ghost small" data-act="closeLayer">Cancel</button></div>
     <div class="sheet-b">
+     ${LG.mins?`<p class="hint" style="margin:0">Lights up. You watched for ${fmtMins(LG.mins)}.</p>`:''}
      <div class="fld"><label class="cap" for="lg-t">What did you watch?</label><input class="txt" id="lg-t" autocomplete="off" placeholder="Search films and shows" role="combobox" aria-expanded="false"><div class="results" id="lg-res" role="listbox"></div><div id="lg-pick"></div><div id="lg-prompt"></div></div>
      <fieldset class="fld"><legend class="cap">Companions</legend><div class="chips" id="lg-who"></div>
        <div style="display:flex;gap:8px"><input class="txt" id="lg-guest" placeholder="Guest companion: type a name" style="padding:9px 12px"><button type="button" class="btn ghost small" data-act="addGuest">Add</button></div></fieldset>
@@ -1692,13 +1785,13 @@ function saveLog(){
     if(choice==='fix'){Object.assign(c.w.slice().sort((a,b)=>a.d.localeCompare(b.d))[0],{d:date,r:r||c.w[0].r,n:note||c.w[0].n,who:w.who,sn:w.sn,at:w.at,m:w.m})}
     else{w.k='re';c.w.push(w)}
   }else c.w.push(w);
-  S.tonight=S.tonight.filter(x=>x.id!==c.id); S.mine=S.mine.filter(x=>x!==c.id); if(S.draft===c.id)S.draft=null;
+  S.tonight=S.tonight.filter(x=>x.id!==c.id); S.mine=S.mine.filter(x=>x!==c.id); if(S.draft===c.id)S.draft=null; if(S.session&&S.session.id===c.id)S.session=null;
   const linked=w.who.find(k=>LINKED.includes(k));
   if(linked&&choice!=='fix'){S.pending.push({caseId:c.id,wi:c.w.length-1,who:linked,theirs:[3.5,4,4.5,5][hash(c.id+date)%4],mine:null,done:false});if(r){/* rated already; keep secret flow only if no rating */ const p=S.pending[S.pending.length-1];p.mine=r}}
   S.landed=c.id; saveState(); closeLayer(); refreshNav();
   const rewatch=w.k==='re'&&choice!=='fix';
   toast(rewatch?`Rewatch ×${rew(c)}. On the shelf.`:isNew?'On the shelf.':'Updated.');
-  if(S.screen!=='shelf')go('shelf');else renderView();
+  if(S.screen==='me')go('shelf');else renderView();
   if(linked&&!(r&&false))setTimeout(()=>toast(`${nm(linked)} has been asked for a Sealed Take`),3000);
 }
 function closeLayer(){const l=$('#layer');if(l)l.innerHTML=''}
@@ -1709,19 +1802,31 @@ function closeLayer(){const l=$('#layer');if(l)l.innerHTML=''}
 let SMODE='open';
 function openSearch(mode='open'){
   SMODE=mode;
-  $('#layer').innerHTML=`<div class="scrim top" id="scrim"><div class="searchbox" role="dialog" aria-modal="true" aria-label="Search"><input id="sq" placeholder="${mode==='add'?'Add to '+(S.tab==='mine'?'My':'Our')+' list…':'Search films, shows, people…'}" autocomplete="off"><div class="results" id="sres"></div></div></div>`;
+  const ph=mode==='add'?'Add to '+lname(S.tab)+'…':mode==='play'?'What are you watching?':'Search films and shows…';
+  $('#layer').innerHTML=`<div class="scrim top" id="scrim"><div class="searchbox" role="dialog" aria-modal="true" aria-label="Search"><input id="sq" placeholder="${ph}" autocomplete="off">
+    ${mode==='add'?`<div class="addbar"><span>Add to</span><div class="seg addseg" role="group" aria-label="Which list">${['ours','mine'].map(k=>`<button type="button" data-tab="${k}" aria-pressed="${S.tab===k}">${lname(k)}</button>`).join('')}</div></div>`:''}
+    <div class="results" id="sres"></div></div></div>`;
   searchResults(''); setTimeout(()=>{const e=$('#sq');if(e)e.focus()},40);
 }
 function searchResults(q){
   q=q.trim().toLowerCase(); const el=$('#sres'); let h='';
-  const shelf=S.cases.filter(c=>!q||c.t.toLowerCase().includes(q)||c.dir.toLowerCase().includes(q)).slice(0,q?8:5);
-  const else_=EXTRAS.filter(e=>!S.cases.some(c=>c.id===e.id)&&(!q||e.t.toLowerCase().includes(q)||e.dir.toLowerCase().includes(q))).slice(0,6);
-  const ppl=SMODE==='add'?[]:LINKED.filter(k=>q&&nm(k).toLowerCase().includes(q));
+  const hit=c=>!q||c.t.toLowerCase().includes(q)||(c.dir||'').toLowerCase().includes(q);
+  const shelf=S.cases.filter(hit), wanted=wantedItems().filter(hit);
+  const listed=new Set([...S.tonight.map(t=>t.id),...S.mine]);
+  const else_=EXTRAS.filter(e=>!caseById(e.id)&&!listed.has(e.id)&&hit(e));
   const row=(c,tag,attr)=>`<button class="res" ${attr}><span>${cover(c.w?c:placeholderCase(c))}</span><span><b>${esc(heading(c))}</b><br><small>${c.y} · ${esc(c.dir)}</small></span><em>${tag}</em></button>`;
-  if(SMODE!=='add'&&shelf.length)h+=`<div class="group cap">${q?'On your shelf':'Recently on your shelf'}</div>`+shelf.sort((a,b)=>q?0:lastW(b).d.localeCompare(lastW(a).d)).map(c=>row(c,rew(c)?'Rewatched':'',`data-open="${c.id}"`)).join('');
-  if(else_.length)h+=`<div class="group cap">${SMODE==='add'?'Suggestions':'Elsewhere'}</div>`+else_.map(c=>row(c,SMODE==='add'?'Add':'Log it',SMODE==='add'?`data-addt="${c.id}"`:`data-logt="${c.id}"`)).join('');
-  if(SMODE==='add'&&shelf.length&&q)h+=`<div class="group cap">Rewatch something</div>`+shelf.map(c=>row(c,'Add',`data-addt="${c.id}"`)).join('');
-  if(ppl.length)h+=`<div class="group cap">People</div>`+ppl.map(k=>`<button class="res" data-us="${k}" data-closeS="1"><span class="avatar" style="width:36px;height:36px;background:${pcol(k)}">${esc(nm(k)[0])}</span><span><b>${esc(nm(k))}</b><br><small>${shared(k)} watched together</small></span><em>Us</em></button>`).join('');
+  const grp=t=>`<div class="group cap">${t}</div>`;
+  if(SMODE==='play'){
+    if(wanted.length)h+=grp('Up next')+wanted.slice(0,6).map(c=>row(c,'Start',`data-play="${c.id}"`)).join('');
+    if(shelf.length)h+=grp('Watch again')+shelf.slice(0,q?6:3).map(c=>row(c,'Start',`data-play="${c.id}"`)).join('');
+    if(else_.length)h+=grp('Something new')+else_.slice(0,6).map(c=>row(c,'Start',`data-play="${c.id}"`)).join('');
+  }else if(SMODE==='add'){
+    if(else_.length)h+=grp('Suggestions')+else_.slice(0,8).map(c=>row(c,'Add',`data-addt="${c.id}"`)).join('');
+  }else{
+    if(wanted.length)h+=grp('In the wrapper')+wanted.slice(0,5).map(c=>row(c,lname(c.list),`data-open="${c.id}"`)).join('');
+    if(shelf.length)h+=grp(q?'On your shelf':'Recently watched')+shelf.sort((a,b)=>lastDate(b).localeCompare(lastDate(a))).slice(0,q?8:4).map(c=>row(c,rew(c)?'Rewatched':'',`data-open="${c.id}"`)).join('');
+    if(else_.length)h+=grp('Elsewhere')+else_.slice(0,6).map(c=>row(c,'View',`data-open="${c.id}"`)).join('');
+  }
   el.innerHTML=h||'<p class="empty">Nothing yet. In the real app this searches all of TMDB.</p>';
 }
 const shared=k=>sharedWith(k).length;
@@ -1737,7 +1842,7 @@ function applyTheme(){
 }
 document.addEventListener('click',e=>{
   if(S.dragEnd&&performance.now()-S.dragEnd<350&&e.target.closest&&e.target.closest('.minicab')){return}
-  const t=e.target.closest('[data-w],[data-tab],[data-mode2],[data-modeset],[data-sw],[data-go],[data-open],[data-act],[data-view],[data-filter],[data-us],[data-lw],[data-lwhen],[data-lat],[data-lm],[data-rmsn],[data-pickt],[data-mode],[data-mood],[data-mins],[data-theme-set],[data-colour],[data-addt],[data-logt],.stars button');
+  const t=e.target.closest('[data-w],[data-tab],[data-play],[data-layout],[data-scope],[data-mode2],[data-modeset],[data-sw],[data-go],[data-open],[data-act],[data-view],[data-filter],[data-us],[data-lw],[data-lwhen],[data-lat],[data-lm],[data-rmsn],[data-pickt],[data-mode],[data-mood],[data-mins],[data-theme-set],[data-colour],[data-addt],[data-logt],.stars button');
   if(!t){ if(e.target.id==='scrim'){closeLayer()} return }
   const d=t.dataset;
   if(d.w){let n=d.w;
@@ -1764,7 +1869,10 @@ document.addEventListener('click',e=>{
   if(d.themeSet){S.theme=d.themeSet;saveState();applyTheme();renderView();return}
   if(d.colour){S.user.colour=d.colour;saveState();renderView();return}
   if(d.addt){closeLayer();addTo(d.addt,S.tab);return}
-  if(d.tab){S.tab=d.tab;renderView();return}
+  if(d.tab){S.tab=d.tab;if($('#scrim')){$$('.addseg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===S.tab));const q=$('#sq');if(q&&SMODE==='add')q.placeholder='Add to '+lname(S.tab)+'\u2026'}else renderView();return}
+  if(d.play){closeLayer();startSession(d.play);return}
+  if(d.layout){S.unified=d.layout==='one';saveState();renderView();toast(S.unified?'One shelf.':'Shelf + lists.');return}
+  if(d.scope){S.scope=d.scope;renderView();return}
   if(d.logt){closeLayer();openLog(d.logt);return}
   if(d.sw&&t.closest('#view')){
     if(d.sw==='rm'){S.rm=!S.rm;applyTheme();saveState();renderView()} else {t.setAttribute('aria-checked',t.getAttribute('aria-checked')!=='true')}
@@ -1779,9 +1887,11 @@ document.addEventListener('click',e=>{
     case 'addOurs':addTo(d.id,'ours');break;
     case 'saveMine':addTo(d.id,'mine');break;
     case 'clearDraft':S.draft=null;saveState();refreshNav();renderView();break;
-    case 'removeFrom':if(d.list==='mine')S.mine=S.mine.filter(x=>x!==d.id);else S.tonight=S.tonight.filter(x=>x.id!==d.id);saveState();renderView();break;
+    case 'removeFrom':if(d.list==='mine')S.mine=S.mine.filter(x=>x!==d.id);else S.tonight=S.tonight.filter(x=>x.id!==d.id);saveState();if(d.close)closeCase();renderView();break;
     case 'addToList':openSearch('add');break;
-    case 'lamp':{S.dim=!S.dim;const p=$('#pit');if(p)p.classList.toggle('dim',S.dim);t.setAttribute('aria-label',S.dim?'Turn the lamp on':'Turn the lamp off');toast(S.dim?'Lights down.':'Lights up.');break}
+    case 'lamp':lampClick();break;
+    case 'cancelSession':S.session=null;S.draft=null;saveState();refreshNav();renderView();toast('Back to deciding.');break;
+    case 'openOurShelf':S.scope='ours';go('shelf');break;
     case 'say':{const b=t.closest('.seatp');$$('.bubble').forEach(x=>x.remove());const el=document.createElement('span');el.className='bubble';el.textContent=SAYS[(sayI++)%SAYS.length];b.appendChild(el);setTimeout(()=>el.remove(),2600);break}
     case 'miniShuffle':{const ids=(SETS.mini||[]).map(c=>c.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}S.order=ids;saveState();fillMini();const m=$('#minicab');if(m){m.classList.add('shuf');setTimeout(()=>m.classList.remove('shuf'),1200)}break}
     case 'miniPull':{const list=SETS.mini||[];if(!list.length)break;const c=list[Math.floor(Math.random()*list.length)];$$('.minicab .spine.pulled').forEach(x=>x.classList.remove('pulled'));const sp=$('.minicab .spine[data-open="'+c.id+'"]');if(sp)sp.classList.add('pulled');toast('How about '+heading(c)+'?');break}
@@ -1794,11 +1904,11 @@ document.addEventListener('click',e=>{
     case 'pick':case 'pickAgain':doPick();break;
     case 'veto':if(!S.vetoes.you&&S.pick){S.vetoes.you=true;S.vetoed=[...(S.vetoed||[]),S.pick.id];toast('Vetoed. Spinning again.');doPick();}break;
     case 'resetRound':S.vetoes={you:false};S.vetoed=[];S.pick=null;S.pickNone=null;toast('Fresh round, fresh vetoes');renderView();break;
-    case 'startTonight':{S.draft=d.id;saveState();refreshNav();toast('Tonight\u2019s pick is set. Log it when you finish.');if(S.screen==='tonight')renderView();break}
+    case 'startTonight':{S.draft=d.id;S.session=null;saveState();refreshNav();if(S.open)closeCase();toast('Tonight\u2019s pick is set. Click the lamp when you are ready.');if(S.screen==='home')renderView();else go('home');break}
     case 'epUp':{const p=titleById(S.progress.id);S.progress.ep=Math.min(p.eps,S.progress.ep+1);saveState();renderView();break}
     case 'epDown':S.progress.ep=Math.max(0,S.progress.ep-1);saveState();renderView();break;
     case 'export':{const b=new Blob([JSON.stringify({cases:S.cases,tonight:S.tonight},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='the-usual-export.json';a.click();toast('Exported');break}
-    case 'signout':S.authed=false;saveState();wstep='in';location.hash='#shelf';renderWelcome();break;
+    case 'signout':S.authed=false;saveState();wstep='in';location.hash='#home';renderWelcome();break;
   }
 });
 document.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('howto'))S.howtoOpen=e.target.open},true);
@@ -1841,7 +1951,8 @@ window.addEventListener('hashchange',()=>{closeCase();route()});
    BOOT
    ============================================================ */
 loadState(); applyTheme();
-if(!location.hash)history.replaceState(null,'','#shelf');
+if(!location.hash)history.replaceState(null,'','#home');
+setInterval(tickElapsed,20000);
 route();
 </script>
 </body>

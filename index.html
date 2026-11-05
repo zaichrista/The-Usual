@@ -131,7 +131,7 @@ ul,ol{list-style:none}
 .ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
 .tabbar{
-  position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 84px 1fr;
+  position:fixed;z-index:40;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 1fr 84px 1fr;
   align-items:end;padding:6px 8px calc(8px + env(safe-area-inset-bottom));
   background:linear-gradient(0deg,var(--bg) 70%,transparent);
 }
@@ -214,7 +214,7 @@ ul,ol{list-style:none}
 .cv-foil{position:absolute;right:5cqw;top:14cqw;width:15cqw;height:15cqw;border-radius:50%;display:grid;place-items:center;
   background:radial-gradient(circle at 30% 25%,var(--gold),var(--champagne) 45%,var(--copper));color:var(--espresso);
   font:700 5.6cqw/1 var(--cond);letter-spacing:.04em;box-shadow:0 1px 3px rgba(0,0,0,.45);transform:rotate(8deg)}
-.cv-re{position:absolute;left:0;top:28cqw;padding:1.7cqw 3cqw 1.7cqw 9cqw;background:var(--oxblood);color:var(--cream);
+.cv-re{position:absolute;left:0;top:15cqw;padding:1.7cqw 3cqw 1.7cqw 9cqw;background:var(--oxblood);color:var(--cream);
   font:700 4.3cqw/1 var(--cond);letter-spacing:.14em;text-transform:uppercase;box-shadow:0 1px 3px rgba(0,0,0,.4)}
 /* templates */
 .cv1 .cv-art::before{content:"";position:absolute;left:50%;top:21cqw;width:62cqw;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;
@@ -222,7 +222,7 @@ ul,ol{list-style:none}
 .cv1 .cv-art::after{content:"";position:absolute;left:0;right:0;top:56cqw;height:5cqw;background:var(--c-bg);box-shadow:0 7cqw 0 var(--c-bg),0 -3cqw 0 -2cqw var(--c-bg)}
 .cv2 .cv-art{background:linear-gradient(152deg,transparent 54%,var(--c-a) 54%)}
 .cv2 .cv-art::before{content:"";position:absolute;right:9cqw;top:19cqw;width:21cqw;aspect-ratio:1;border-radius:50%;border:1.4cqw solid var(--c-b)}
-.cv2 .cv-title{bottom:auto;top:22cqw;right:34cqw;font-size:10.5cqw}
+.cv2 .cv-title{bottom:auto;top:26cqw;right:34cqw;font-size:10.5cqw}
 .cv2 .cv-title.l{font-size:8cqw}
 .cv3 .cv-art{background:
   radial-gradient(circle at 26% 36%,var(--c-bg) 0 8cqw,var(--c-b) 8.4cqw 9.8cqw,transparent 10.2cqw),
@@ -233,7 +233,7 @@ ul,ol{list-style:none}
   background:repeating-linear-gradient(0deg,var(--c-a) 0 2.6cqw,transparent 2.6cqw 6cqw);opacity:.9}
 .cv4 .cv-art::after{content:"";position:absolute;left:50%;bottom:44%;width:46cqw;height:23cqw;transform:translateX(-50%);
   border-radius:23cqw 23cqw 0 0;background:linear-gradient(0deg,var(--c-b),var(--c-a))}
-.cv4 .cv-title{bottom:auto;top:22cqw}
+.cv4 .cv-title{bottom:auto;top:27cqw}
 .cv5 .cv-art::before{content:attr(data-i);position:absolute;left:50%;top:6cqw;transform:translateX(-50%);
   font:700 96cqw/1 var(--display);color:var(--c-a);opacity:.34}
 .cv5 .cv-art::after{content:"";position:absolute;left:9cqw;right:7cqw;bottom:12cqw;height:.6cqw;background:var(--c-b)}
@@ -820,6 +820,123 @@ textarea.txt{resize:vertical;min-height:80px;font-size:16px;line-height:1.4}
 .onnow.playing{background:color-mix(in srgb,var(--espresso),var(--mauve) 20%)}
 .home .tonight{margin-top:6px}
 
+/* ============================================================
+   v0.7 THE ROOM IS THE APP: one flat, warm illustrated world
+   ============================================================ */
+#view.bleed{max-width:none;padding:0}
+.lounge{position:relative;display:flex;flex-direction:column;min-height:calc(100dvh - 70px);overflow:hidden;
+  background:
+    radial-gradient(ellipse 55% 50% at 40% 46%,color-mix(in srgb,var(--gold) 9%,transparent),transparent 72%),
+    repeating-linear-gradient(90deg,transparent 0 238px,var(--wall) 238px 241px),
+    linear-gradient(180deg,var(--bg2),var(--bg));transition:background .8s}
+.lounge.dim{background:linear-gradient(180deg,#171110,#090504)}
+.lounge .floor2{position:absolute;left:0;right:0;bottom:0;height:58px;z-index:1;
+  background:repeating-linear-gradient(90deg,transparent 0 139px,rgba(0,0,0,.28) 139px 140px),linear-gradient(180deg,color-mix(in srgb,var(--walnut),#000 22%),color-mix(in srgb,var(--walnut),#000 52%));
+  box-shadow:inset 0 3px 0 rgba(228,198,163,.22)}
+.roomhint{position:absolute;left:clamp(16px,4vw,48px);bottom:18px;z-index:2;font-size:13px;color:color-mix(in srgb,var(--cream) 70%,transparent);max-width:60ch}
+.roomtop{position:absolute;left:clamp(16px,4vw,48px);top:clamp(18px,3vw,34px);max-width:min(500px,52%);z-index:6}
+.roomtop h1{font-size:clamp(30px,3.6vw,46px);text-wrap:balance}
+.roomtop .sub{margin-top:8px;font-size:15px}
+.roomtop .onnow{margin:16px 0 0;grid-template-columns:48px 1fr}
+.roomtop .onnow .cover{width:48px}
+.roomtop .onnow .acts{grid-column:1/-1}
+.nudge{display:flex;gap:12px;align-items:center;margin-top:14px;padding:9px 16px 9px 10px;border-radius:40px;background:var(--cream);color:var(--espresso);text-align:left;font-size:14px;box-shadow:0 8px 16px rgba(0,0,0,.4);transition:transform .2s var(--ease)}
+.nudge:hover{transform:translateY(-2px)}
+.nudge i{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 14px var(--font);font-style:normal;color:var(--champagne);background:radial-gradient(circle at 36% 30%,#9a4a3e,var(--oxblood) 60%,#3b1c18)}
+.rwin{position:absolute;z-index:0;border-radius:50%;width:clamp(120px,13vw,190px);aspect-ratio:1;
+  background:radial-gradient(circle at 50% 78%,color-mix(in srgb,var(--blue) 60%,var(--mauve)),color-mix(in srgb,var(--mauve) 55%,var(--espresso)) 58%,var(--espresso));
+  box-shadow:inset 0 0 0 clamp(7px,.8vw,11px) var(--walnut),inset 0 0 0 clamp(8px,.9vw,12px) rgba(228,198,163,.25),0 0 50px rgba(156,175,203,.12);transition:filter .8s}
+.rwin.w1{left:46%;top:9%}.rwin.w2{right:7%;top:12%}
+.lounge.dim .rwin{filter:brightness(.55)}
+.room-row{position:relative;z-index:2;margin-top:auto;display:flex;align-items:flex-end;justify-content:center;gap:clamp(14px,3.5vw,60px);padding:0 clamp(16px,4vw,56px) 58px}
+.room-row .sofa{flex:1 1 0;min-width:200px;max-width:500px}
+.lounge.dim .biglamp .cone{opacity:0}.lounge.dim .biglamp .bulb{opacity:.15}
+.lounge.dim .pool{opacity:0}
+.lounge.dim .seatp .av{box-shadow:0 0 0 3px var(--oxblood),0 0 0 4px var(--champagne),0 0 26px 5px rgba(156,175,203,.5);animation:bob 5s ease-in-out infinite,flick 3.4s steps(1) infinite}
+.lounge.ready .lampbtn{animation:ring 2.2s ease-out infinite}
+.lamplabel{position:absolute;left:47%;top:7%;z-index:7;white-space:nowrap;font-size:11px;padding:5px 11px 4px;pointer-events:none}
+/* the TV, same flat language as everything else */
+.tvcol{flex:0 0 clamp(190px,21vw,300px);position:relative;z-index:3;display:grid;justify-items:center}
+.tvmini{display:block;width:100%;padding:11px 11px 15px;border-radius:14px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--walnut),#fff 8%),var(--walnut));
+  box-shadow:0 20px 28px -12px rgba(0,0,0,.7),inset 0 2px 0 rgba(228,198,163,.3);transition:transform .3s var(--ease)}
+.tvmini:hover,.tvmini:focus-visible{transform:translateY(-4px)}
+.tvm-screen{position:relative;display:grid;place-items:center;align-content:center;gap:6px;aspect-ratio:4/3;overflow:hidden;border-radius:8px;padding:10px;text-align:center;color:var(--cream);
+  background:radial-gradient(ellipse at 50% 40%,#2c221e,#0c0807);box-shadow:inset 0 0 22px rgba(0,0,0,.85)}
+.tvm-screen::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+.tvm-t{font:700 clamp(18px,2vw,24px)/1.05 var(--font);letter-spacing:-.03em;text-shadow:0 0 12px rgba(228,198,163,.4)}
+.tvm-s{font-size:12px;color:var(--champagne);letter-spacing:.04em}
+.tvm-pick{display:grid;grid-template-columns:34% 1fr;gap:10px;align-items:center;text-align:left;width:100%;position:relative;z-index:1}
+.tvm-pick b{font:700 15px/1.1 var(--font);letter-spacing:-.02em;display:block}
+.tvm-pick span{font-size:12px;color:var(--champagne)}
+.tvm-now{display:grid;justify-items:center;gap:8px;position:relative;z-index:1}
+.tvm-now .cover{width:38%;box-shadow:0 0 28px 4px rgba(228,198,163,.35)}
+.tvm-now span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--champagne)}
+.tvstand{position:relative;width:88%;height:60px}
+.tvstand::before{content:"";position:absolute;left:0;right:0;top:0;height:12px;border-radius:3px;background:linear-gradient(180deg,color-mix(in srgb,var(--walnut),#fff 10%),var(--walnut));box-shadow:0 5px 8px rgba(0,0,0,.45)}
+.tvstand::after{content:"";position:absolute;left:7%;right:7%;top:12px;bottom:0;background:linear-gradient(90deg,var(--walnut) 0 9px,transparent 9px calc(100% - 9px),var(--walnut) calc(100% - 9px))}
+.tvplate{position:absolute;left:50%;top:-12px;transform:translateX(-50%);z-index:4;white-space:nowrap;pointer-events:none}
+.spinner.mini{width:46px;height:46px;position:relative;z-index:1}
+/* our shelf in the room */
+.room-row .cabcol{flex:0 0 clamp(200px,23vw,310px)}
+.minicab{background:linear-gradient(180deg,color-mix(in srgb,var(--walnut),#fff 8%),var(--walnut));padding-top:34px}
+.minicab .plate-btn{border:0;cursor:pointer;left:8px;top:8px;font-size:10px;padding:5px 10px 4px}
+.minicab .plate-btn:hover{filter:brightness(1.1)}
+.mini-tools-i{position:absolute;right:8px;top:8px;display:flex;gap:4px;z-index:3}
+.mini-tools-i button{font:700 10px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;padding:6px 8px;border-radius:2px;background:rgba(0,0,0,.35);color:var(--cream)}
+.mini-tools-i button:hover{background:rgba(0,0,0,.55)}
+/* the diary on the coffee table */
+.table .diarybtn{position:absolute;left:62%;bottom:25px;width:38px;height:27px;pointer-events:auto;border-radius:2px 4px 4px 2px;background:linear-gradient(135deg,var(--copper),var(--oxblood));box-shadow:0 3px 5px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.18);transform:rotate(-8deg);transition:transform .25s var(--ease)}
+.table .diarybtn::before{content:"";position:absolute;left:5px;top:0;bottom:0;width:2px;background:rgba(0,0,0,.35)}
+.table .diarybtn::after{content:"";position:absolute;right:5px;top:-4px;width:5px;height:14px;background:var(--champagne);clip-path:polygon(0 0,100% 0,100% 100%,50% 75%,0 100%)}
+.table .diarybtn:hover{transform:rotate(-2deg) translateY(-4px)}
+.table .bowl{left:36%}
+@media(max-width:899px){
+  .lounge{min-height:0}
+  .roomtop{position:relative;left:0;top:0;max-width:none;padding:18px 16px 0}
+  .rwin{display:none}
+  .room-row{flex-direction:column;align-items:center;gap:60px;padding:30px 16px 112px;margin-top:0}
+  .lounge .floor2,.roomhint{display:none}
+  .tvcol{flex:none;width:min(66%,270px)}
+  .tvcol::after,.room-row .sofa::after,.room-row .cabcol::after{content:"";position:absolute;left:-60px;right:-60px;bottom:-34px;height:34px;z-index:-1;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--walnut),#000 22%),color-mix(in srgb,var(--walnut),#000 52%));box-shadow:inset 0 3px 0 rgba(228,198,163,.22)}
+  .room-row .sofa{flex:none;width:100%;max-width:340px;min-width:0;margin-top:150px}
+  .room-row .cabcol{flex:none;width:min(100%,340px)}
+  .biglamp{left:-12%;width:122%}
+}
+@media(min-width:900px){.room-row .biglamp{left:-6%;width:112%}}
+/* sheets (the TV and the sealed take open here) */
+.sheet.wide{width:min(1040px,96vw)}
+.decide{display:grid;gap:28px}
+@media(min-width:960px){.decide{grid-template-columns:1.1fr 1fr;align-items:start}}
+/* ============================================================
+   POSTER-LED SHELF + DIARY
+   ============================================================ */
+.shelfpage .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:36px 22px;margin-top:22px}
+@media(min-width:768px){.shelfpage .grid{grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:44px 28px}}
+.shelfpage .gcase .cover{box-shadow:0 18px 28px -10px rgba(0,0,0,.7),0 2px 3px rgba(0,0,0,.5)}
+.shelfpage .gcase b{font-size:15px}
+.shelfpage .chips.filters{margin:18px 0 6px;align-items:center}
+.layoutnote{margin-top:40px;font-size:13px;color:var(--ink-soft)}
+.diary{max-width:860px}
+.diary .month{font:700 13px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:38px 0 6px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.entry{display:grid;grid-template-columns:54px 62px 1fr auto;gap:16px;align-items:start;width:100%;text-align:left;padding:18px 4px;border-bottom:1px solid var(--line);transition:background .2s}
+.entry:hover{background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.edate{text-align:center;line-height:1}
+.edate b{display:block;font:700 30px/1 var(--font);letter-spacing:-.04em}
+.edate i{font:600 11px/1 var(--font);font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.ecover .cover{width:62px;box-shadow:0 8px 14px -6px rgba(0,0,0,.65)}
+.etitle{display:block;font:700 19px/1.15 var(--font);letter-spacing:-.02em}
+.etitle em{font:700 11px var(--font);font-style:normal;letter-spacing:.14em;text-transform:uppercase;margin-left:8px;padding:2px 6px;border-radius:2px;background:var(--oxblood);color:var(--cream);vertical-align:middle}
+.emeta{display:block;font-size:13px;color:var(--ink-soft);margin-top:4px}
+.enote{display:block;margin-top:8px;font-style:italic;font-size:15px;line-height:1.4;max-width:52ch}
+.erate{display:grid;gap:6px;justify-items:end;text-align:right;min-width:60px}
+.erate b{font:700 17px/1 var(--font);color:var(--link)}
+.erate i{display:block;font:600 10px var(--font);font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-top:2px}
+.diary-seal{display:flex;gap:14px;align-items:center;width:100%;margin-top:22px;padding:14px 16px;border-radius:4px;background:var(--cream);color:var(--espresso);text-align:left}
+.diary-seal i{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:700 15px var(--font);font-style:normal;color:var(--champagne);background:radial-gradient(circle at 36% 30%,#9a4a3e,var(--oxblood) 60%,#3b1c18)}
+@media(max-width:599px){.entry{grid-template-columns:44px 52px 1fr;gap:12px}.erate{grid-column:3;justify-items:start;grid-auto-flow:column;gap:14px;text-align:left}.ecover .cover{width:52px}}
+
 /* motion preferences */
 .rm *,.rm *::before,.rm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 @media (prefers-reduced-motion:reduce){
@@ -853,11 +970,11 @@ const tryLS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},se
    ============================================================ */
 const PEOPLE={
   you:{n:'You',c:'--copper'},
-  sam:{n:'Sam',c:'--blue',since:'2025-03-14',ritual:'Sunday nights'},
+  tim:{n:'Tim',c:'--blue',since:'2025-03-14',ritual:'Sunday nights'},
   jess:{n:'Jess',c:'--mauve',guest:true},
   mum:{n:'Mum',c:'--champagne',guest:true}
 };
-const LINKED=['sam'];
+const LINKED=['tim'];
 const SPINE_COLOURS=['--copper','--oxblood','--mauve','--blue','--champagne','--walnut','--gold','--cream'];
 const PAL=[
   {bg:'--oxblood',a:'--champagne',b:'--gold',ink:'--cream',cap:'--champagne'},
@@ -878,69 +995,69 @@ const C=(id,t,y,type,min,dir,gen,syn,pal,tpl,w,o={})=>({id,t,y,type,min,dir,gen,
 
 const SEED_CASES=[
 C('mood-for-love','In the Mood for Love',2000,'movie',98,'Wong Kar-wai',['Romance','Drama'],'Two neighbours in 1960s Hong Kong discover their spouses are having an affair, and slowly drift toward each other.',0,3,[
-  W('first','2025-03-14',['sam'],5,'Our first one. Neither of us spoke for ten minutes after.',['jasmine tea','prawn crackers'],'Couch',['cosy','cried'],{sam:5})],{short:'In the Mood for Love'}),
+  W('first','2025-03-14',['tim'],5,'Our first one. Neither of us spoke for ten minutes after.',['jasmine tea','prawn crackers'],'Couch',['cosy','cried'],{tim:5})],{short:'In the Mood for Love'}),
 C('past-lives','Past Lives',2023,'movie',106,'Celine Song',['Romance','Drama'],'Two childhood friends from Seoul reunite over twenty-four years, and one night in New York asks what might have been.',5,6,[
-  W('first','2025-04-19',['sam'],4.5,'Sam went quiet at the ferry scene.',['kimchi crisps'],'Couch',['cried'],{sam:4.5}),
-  W('re','2026-02-14',['sam'],5,'Valentine’s. Worse idea than it sounds, better night.',['dumplings','red wine'],'Couch',['cried','cosy'],{sam:5})]),
+  W('first','2025-04-19',['tim'],4.5,'Tim went quiet at the ferry scene.',['kimchi crisps'],'Couch',['cried'],{tim:4.5}),
+  W('re','2026-02-14',['tim'],5,'Valentine’s. Worse idea than it sounds, better night.',['dumplings','red wine'],'Couch',['cried','cosy'],{tim:5})]),
 C('godfather','The Godfather',1972,'movie',175,'Francis Ford Coppola',['Crime','Drama'],'The aging patriarch of a crime dynasty hands the family business to his reluctant youngest son.',1,2,[
-  W('first','2025-05-03',['sam'],4.5,'Three hours. Zero regrets. Sam hated the orange.',['popcorn'],'Couch',['tense'],{sam:4})]),
+  W('first','2025-05-03',['tim'],4.5,'Three hours. Zero regrets. Tim hated the orange.',['popcorn'],'Couch',['tense'],{tim:4})]),
 C('before-sunset','Before Sunset',2004,'movie',80,'Richard Linklater',['Romance','Drama'],'Nine years after one night in Vienna, two strangers meet again in Paris with one afternoon before a flight.',2,5,[
   W('first','2025-06-21',['jess'],4,'Short. Perfect weeknight length.',['tea'],'Couch',['cosy'],{jess:4}),
-  W('re','2026-06-21',['sam'],4.5,'Exactly a year on. Sam now owns the Julie Delpy waltz.',['tea','shortbread'],'Couch',['cosy'],{sam:4.5})]),
+  W('re','2026-06-21',['tim'],4.5,'Exactly a year on. Tim now owns the Julie Delpy waltz.',['tea','shortbread'],'Couch',['cosy'],{tim:4.5})]),
 C('amelie','Amélie',2001,'movie',122,'Jean-Pierre Jeunet',['Comedy','Romance'],'A shy Parisian waitress secretly sets out to improve the lives of those around her, and then her own.',6,4,[
   W('first','2025-07-12',['mum'],4,'Mum knew every scene. I knew none. Lovely.',['pain au chocolat'],'Couch',['cosy','laughed'])]),
 C('spirited-away','Spirited Away',2001,'movie',125,'Hayao Miyazaki',['Animation','Family'],'A girl wanders into a spirit-world bathhouse where her parents have been turned into pigs.',3,1,[
-  W('first','2025-08-09',['sam'],5,'',['mochi'],'Couch',['cosy'],{sam:5}),
-  W('re','2026-03-28',['sam'],5,'Rainy Saturday. Same mochi.',['mochi'],'Couch',['cosy','rewatch-worthy'],{sam:5}),
+  W('first','2025-08-09',['tim'],5,'',['mochi'],'Couch',['cosy'],{tim:5}),
+  W('re','2026-03-28',['tim'],5,'Rainy Saturday. Same mochi.',['mochi'],'Couch',['cosy','rewatch-worthy'],{tim:5}),
   W('re','2026-10-10',['jess'],5,'Jess had never seen it. Fixed that.',['rice crackers'],'Couch',['cosy'],{jess:4.5})]),
 C('lost-in-translation','Lost in Translation',2003,'movie',102,'Sofia Coppola',['Drama','Comedy'],'A faded actor and a young newlywed strike up an unlikely friendship in Tokyo.',4,3,[
-  W('first','2025-09-06',['sam'],4,'',['whisky'],'Couch',['cosy'],{sam:3.5})],{short:'Lost in Translation'}),
+  W('first','2025-09-06',['tim'],4,'',['whisky'],'Couch',['cosy'],{tim:3.5})],{short:'Lost in Translation'}),
 C('moonlight','Moonlight',2016,'movie',111,'Barry Jenkins',['Drama'],'Three chapters in the life of a young man growing up in Miami.',7,4,[
-  W('first','2025-09-20',['sam'],5,'We walked home without talking.',[],'Couch',['cried'],{sam:5})]),
+  W('first','2025-09-20',['tim'],5,'We walked home without talking.',[],'Couch',['cried'],{tim:5})]),
 C('paddington-2','Paddington 2',2017,'movie',103,'Paul King',['Comedy','Family'],'Paddington is framed for a theft and sent to prison, where he wins over the inmates with marmalade.',6,2,[
-  W('first','2025-12-20',['sam'],5,'Prison marmalade. Fight me.',['marmalade sandwiches','hot chocolate'],'Couch',['cosy','laughed'],{sam:4.5}),
+  W('first','2025-12-20',['tim'],5,'Prison marmalade. Fight me.',['marmalade sandwiches','hot chocolate'],'Couch',['cosy','laughed'],{tim:4.5}),
   W('re','2025-12-28',['mum'],5,'Mum cried at the pop-up book. So did I.',['marmalade sandwiches'],'Couch',['cosy'])],{short:'Paddington 2'}),
 C('portrait','Portrait of a Lady on Fire',2019,'movie',122,'Céline Sciamma',['Romance','Drama'],'A painter is commissioned to secretly paint a reluctant bride on a remote island in eighteenth-century Brittany.',0,6,[
-  W('first','2026-01-10',['sam'],5,'The last shot. We rewound it.',['red wine'],'Couch',['cried'],{sam:5})],{short:'Lady on Fire'}),
+  W('first','2026-01-10',['tim'],5,'The last shot. We rewound it.',['red wine'],'Couch',['cried'],{tim:5})],{short:'Lady on Fire'}),
 C('princess-bride','The Princess Bride',1987,'movie',98,'Rob Reiner',['Family','Comedy'],'A grandfather reads a fairy tale of true love, pirates and giants to his sick grandson.',3,5,[
   W('first','2025-10-31',['jess'],4.5,'Halloween alternative. Worked.',['candy corn'],'Couch',['laughed'],{jess:4}),
-  W('re','2026-05-02',['sam'],4,'Sam quotes it constantly now.',['popcorn'],'Couch',['laughed'],{sam:4})]),
+  W('re','2026-05-02',['tim'],4,'Tim quotes it constantly now.',['popcorn'],'Couch',['laughed'],{tim:4})]),
 C('eternal-sunshine','Eternal Sunshine of the Spotless Mind',2004,'movie',108,'Michel Gondry',['Romance','Drama'],'After a painful breakup, a couple undergo a procedure to erase each other from their memories.',1,1,[
-  W('first','2025-11-15',['sam'],5,'A year ago this week, almost to the day.',['takeaway noodles'],'Couch',['cried'],{sam:5}),
-  W('re','2026-04-03',['sam'],4.5,'',['takeaway noodles'],'Couch',['cosy'],{sam:4.5}),
-  W('re',YESTERDAY,['sam'],null,'Third time. Still worth it.',['popcorn','two Cokes'],'Couch',['cosy','rewatch-worthy'],null)],{short:'Eternal Sunshine'}),
+  W('first','2025-11-15',['tim'],5,'A year ago this week, almost to the day.',['takeaway noodles'],'Couch',['cried'],{tim:5}),
+  W('re','2026-04-03',['tim'],4.5,'',['takeaway noodles'],'Couch',['cosy'],{tim:4.5}),
+  W('re',YESTERDAY,['tim'],null,'Third time. Still worth it.',['popcorn','two Cokes'],'Couch',['cosy','rewatch-worthy'],null)],{short:'Eternal Sunshine'}),
 C('notting-hill','Notting Hill',1999,'movie',124,'Roger Michell',['Romance','Comedy'],'A bookshop owner’s life changes when a famous actress walks in.',2,4,[
   W('first','2026-02-01',['mum'],3.5,'Mum’s pick. Tolerated, then enjoyed.',['shortbread'],'Couch',['cosy'])]),
 C('heat','Heat',1995,'movie',170,'Michael Mann',['Crime','Thriller'],'A detective and a master thief circle each other across Los Angeles.',7,2,[
-  W('first','2026-02-22',['sam'],4,'The diner scene. Just the diner scene, on repeat.',['takeaway pizza'],'Couch',['tense'],{sam:4.5})]),
+  W('first','2026-02-22',['tim'],4,'The diner scene. Just the diner scene, on repeat.',['takeaway pizza'],'Couch',['tense'],{tim:4.5})]),
 C('roma','Roma',2018,'movie',135,'Alfonso Cuarón',['Drama'],'A year in the life of a domestic worker in 1970s Mexico City.',5,1,[
-  W('first','2026-03-14',['sam'],4.5,'',['tortilla chips'],'Couch',['cried'],{sam:4.5})]),
+  W('first','2026-03-14',['tim'],4.5,'',['tortilla chips'],'Couch',['cried'],{tim:4.5})]),
 C('call-me-by-your-name','Call Me by Your Name',2017,'movie',132,'Luca Guadagnino',['Romance','Drama'],'A summer romance between a teenager and his father’s research assistant in 1983 Italy.',6,6,[
   W('first','2026-04-25',['jess'],4,'We ate peaches. Obviously.',['peaches'],'Couch',['cosy'],{jess:4.5})],{short:'Call Me by Your Name'}),
 C('jaws','Jaws',1975,'movie',124,'Steven Spielberg',['Thriller','Adventure'],'A police chief, a marine biologist and a fisherman hunt a great white shark off a summer resort town.',1,5,[
-  W('first','2026-07-04',['sam'],4,'Projector in the garden. A bat flew through the beam.',['burgers','lemonade'],'Outdoors',['tense','laughed'],{sam:4})]),
+  W('first','2026-07-04',['tim'],4,'Projector in the garden. A bat flew through the beam.',['burgers','lemonade'],'Outdoors',['tense','laughed'],{tim:4})]),
 C('eeaao','Everything Everywhere All at Once',2022,'movie',139,'Daniels',['Sci-Fi','Comedy'],'A laundromat owner is pulled into a multiverse to save everything, including her family.',4,3,[
-  W('first','2026-08-15',['sam'],5,'Biggest disagreement of the year. He did not get the hot dog fingers.',['noodles'],'Couch',['laughed','cried'],{sam:3.5})],{short:'Everything Everywhere'}),
+  W('first','2026-08-15',['tim'],5,'Biggest disagreement of the year. Tim did not get the hot dog fingers.',['noodles'],'Couch',['laughed','cried'],{tim:3.5})],{short:'Everything Everywhere'}),
 C('whiplash','Whiplash',2014,'movie',107,'Damien Chazelle',['Drama','Music'],'A young drummer enters a ferocious conservatory where a teacher pushes him to the edge.',0,2,[
   W('first','2026-09-12',[],4.5,'Solo. Drummed on the sofa arm afterwards.',['cheese on toast'],'Couch',['tense'])]),
 C('fury-road','Mad Max: Fury Road',2015,'movie',120,'George Miller',['Action','Adventure'],'In a desert wasteland, a drifter and a rebel soldier flee a warlord across the sand.',6,4,[
-  W('first','2026-09-26',['sam'],4,'Cinema. Loud. Slushies.',['cinema popcorn','slushie'],'Cinema',['laughed'],{sam:4.5})],{short:'Fury Road'}),
+  W('first','2026-09-26',['tim'],4,'Cinema. Loud. Slushies.',['cinema popcorn','slushie'],'Cinema',['laughed'],{tim:4.5})],{short:'Fury Road'}),
 
 C('fleabag-s2','Fleabag',2019,'tv',27,'Phoebe Waller-Bridge',['Comedy','Drama'],'A sharp, sad comedy about a woman in London. The second season brings a new priest to the family dinner.',0,1,[
-  W('first','2025-10-05',['sam'],5,'Two nights. Sam said “it’s not even funny” and was crying.',['crisps','tea'],'Couch',['laughed','cried'],{sam:5})],{s:2,eps:6}),
+  W('first','2025-10-05',['tim'],5,'Two nights. Tim said “it’s not even funny” and was crying.',['crisps','tea'],'Couch',['laughed','cried'],{tim:5})],{s:2,eps:6}),
 C('the-bear-s1','The Bear',2022,'tv',34,'Christopher Storer',['Drama','Comedy'],'A young chef returns to run his late brother’s Chicago sandwich shop.',1,2,[
-  W('first','2025-11-30',['sam'],4.5,'We watched the whole thing in a weekend. Hungry throughout.',['sandwiches'],'Couch',['tense'],{sam:4.5})],{s:1,eps:8}),
+  W('first','2025-11-30',['tim'],4.5,'We watched the whole thing in a weekend. Hungry throughout.',['sandwiches'],'Couch',['tense'],{tim:4.5})],{s:1,eps:8}),
 C('severance-s1','Severance',2022,'tv',50,'Dan Erickson',['Sci-Fi','Thriller'],'Office workers have their memories surgically split between work and home.',7,3,[
-  W('first','2026-01-25',['sam'],5,'Nine nights. We’re not discussing the finale.',['crisps'],'Couch',['tense'],{sam:5})],{s:1,eps:9}),
+  W('first','2026-01-25',['tim'],5,'Nine nights. We’re not discussing the finale.',['crisps'],'Couch',['tense'],{tim:5})],{s:1,eps:9}),
 C('normal-people-s1','Normal People',2020,'tv',28,'Lenny Abrahamson',['Drama','Romance'],'Two teenagers in the west of Ireland drift together and apart over several years.',2,5,[
   W('first','2026-05-17',['jess'],4.5,'Jess had read the book. I had not. Sorry.',['tea'],'Couch',['cried'],{jess:5})],{s:1,eps:12}),
 C('twin-peaks-s1','Twin Peaks',1990,'tv',48,'Lynch & Frost',['Mystery','Drama'],'An FBI agent arrives in a small town to investigate the murder of a homecoming queen.',3,4,[
-  W('first','2025-12-06',['sam'],4,'Cherry pie, obviously.',['cherry pie','black coffee'],'Couch',['cosy'],{sam:4}),
-  W('re','2026-10-24',['sam'],4.5,'Halloween week. It lands differently now.',['cherry pie'],'Couch',['cosy'],{sam:4.5})],{s:1,eps:8}),
+  W('first','2025-12-06',['tim'],4,'Cherry pie, obviously.',['cherry pie','black coffee'],'Couch',['cosy'],{tim:4}),
+  W('re','2026-10-24',['tim'],4.5,'Halloween week. It lands differently now.',['cherry pie'],'Couch',['cosy'],{tim:4.5})],{s:1,eps:8}),
 C('succession-s3','Succession',2021,'tv',60,'Jesse Armstrong',['Drama','Comedy'],'The Roy family fights over who inherits control of a media empire.',1,6,[
-  W('first','2026-06-13',['sam'],4.5,'',['red wine'],'Couch',['tense','laughed'],{sam:4.5})],{s:3,eps:9}),
+  W('first','2026-06-13',['tim'],4.5,'',['red wine'],'Couch',['tense','laughed'],{tim:4.5})],{s:3,eps:9}),
 C('chernobyl-s1','Chernobyl',2019,'tv',65,'Craig Mazin',['Drama','History'],'The story of the 1986 nuclear disaster and the people who contained it.',7,1,[
-  W('first','2026-08-29',['sam'],4.5,'Heavy. Worth it. No snacks, it felt wrong.',[],'Couch',['tense'],{sam:4.5})],{s:1,eps:5})
+  W('first','2026-08-29',['tim'],4.5,'Heavy. Worth it. No snacks, it felt wrong.',[],'Couch',['tense'],{tim:4.5})],{s:1,eps:5})
 ];
 
 const EXTRAS=[
@@ -958,15 +1075,15 @@ const EXTRAS=[
 /* ============================================================
    STATE + PERSISTENCE
    ============================================================ */
-const KEY='the-usual-proto-v2';
+const KEY='the-usual-proto-v3';
 const S={
   user:{name:'Zai',handle:'zai',colour:'--copper',mode:'couple'},
   authed:false,
-  screen:'home', filter:'all', scope:'all', unified:true, session:null, sort:'recent', view:'shelf',
+  screen:'home', filter:'all', scope:'ours', unified:true, session:null, sheet:null, sheetBack:null, sort:'recent', view:'grid',
   open:null, flip:false, caseOpen:false,
-  us:'sam', usual:'sam',
-  cases:[], tonight:[], mine:[], order:[], dim:false, tab:'ours', howtoOpen:true, sub:null, progress:{id:'hacks-s1',ep:4}, vetoes:{you:false}, pick:null, pickMode:'both', mood:null, mins:null,
-  pending:[{caseId:'eternal-sunshine',wi:2,who:'sam',theirs:4,mine:null,done:false}],
+  us:'tim', usual:'tim',
+  cases:[], tonight:[], mine:[], order:[], dim:false, tab:'ours', howtoOpen:false, sub:null, progress:{id:'hacks-s1',ep:4}, vetoes:{you:false}, pick:null, pickMode:'both', mood:null, mins:null,
+  pending:[{caseId:'eternal-sunshine',wi:2,who:'tim',theirs:4,mine:null,done:false}],
   draft:null, landed:null,
   theme:'dark', rm:false
 };
@@ -974,7 +1091,7 @@ function saveState(){tryLS.set(KEY,JSON.stringify({cases:S.cases,tonight:S.tonig
 function loadState(){
   const raw=tryLS.get(KEY);
   S.cases=JSON.parse(JSON.stringify(SEED_CASES));
-  S.tonight=[{id:'parasite',by:['sam']},{id:'about-time',by:['you','sam']},{id:'arrival',by:['you','sam']},{id:'pride',by:['sam']}];
+  S.tonight=[{id:'parasite',by:['tim']},{id:'about-time',by:['you','tim']},{id:'arrival',by:['you','tim']},{id:'pride',by:['tim']}];
   S.mine=['aftersun','columbus','holdovers'];
   if(!raw)return;
   try{
@@ -1105,17 +1222,18 @@ const ICON={
   together:'<svg class="ico" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 19c.5-3.6 3-5.5 5.5-5.5S13.500 15.400 14 19M14.500 15c.6-.3 1.200-.4 1.800-.4 2 0 4 1.500 4.700 4.400"/></svg>',
   tonight:'<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M9 3.500l3 3.500 3-3.500M7 19v1.500M17 19v1.500"/></svg>',
   home:'<svg class="ico" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4zM10 20v-6h4v6"/></svg>',
+  diary:'<svg class="ico" viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h11M9 8h6"/></svg>',
   plus:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
   search:'<svg class="ico" viewBox="0 0 24 24"><circle cx="10.500" cy="10.500" r="6"/><path d="M15 15l5 5"/></svg>'
 };
 const wordmark=()=>`<span class="wordmark"><small>The</small>Usual</span>`;
 
 function navHTML(kind){
-  const tab=(k,l)=>`<a class="tab" href="#${k}" data-go="${k}" ${S.screen===k?'aria-current="page"':''}>${ICON[k]}<span>${l}</span></a>`;
+  const tab=(k,l)=>`<a class="tab" href="#${k}" data-go="${k}" ${S.screen===k?'aria-current="page"':''}>${ICON[k==='home'?'home':k]}<span>${l}</span></a>`;
   const pip=S.draft||(S.session&&S.session.phase==='after');
-  const plus=`<button class="plus" data-act="log" aria-label="Log something you watched (N)">${ICON.plus}${pip?'<i class="pip"></i>':''}</button>`;
-  if(kind==='rail')return `${wordmark()}${tab('home','Home')}${tab('shelf','Shelf')}${plus}<div class="grow"></div>`;
-  return `${tab('home','Home')}${plus}${tab('shelf','Shelf')}`;
+  const plus=`<button class="plus" data-act="log" aria-label="Write an entry: log something you watched (N)">${ICON.plus}${pip?'<i class="pip"></i>':''}</button>`;
+  if(kind==='rail')return `${wordmark()}${tab('home','Room')}${tab('shelf','Shelf')}${tab('diary','Diary')}${plus}<div class="grow"></div>`;
+  return `${tab('home','Room')}${tab('shelf','Shelf')}${plus}${tab('diary','Diary')}`;
 }
 function renderShell(){
   $('#app').innerHTML=`<div class="shell">
@@ -1223,16 +1341,17 @@ function route(){
   if(!S.authed){renderWelcome();return}
   let [scr,sub]=parseHash(); S.sub=sub||null;
   if(ALIAS[scr]){ if(scr==='together'&&sub==='shelf'){S.scope='ours';scr='shelf'}else scr=ALIAS[scr]; history.replaceState(null,'','#'+scr) }
-  S.screen=['home','shelf','me'].includes(scr)?scr:'home';
+  S.screen=['home','shelf','diary','me'].includes(scr)?scr:'home';
   if(!$('#view'))renderShell();
   refreshNav(); renderView();
   window.scrollTo({top:0});
 }
 function renderView(){
   const v=$('#view');
-  v.innerHTML=({home:viewHome,shelf:viewShelf,me:viewMe})[S.screen]();
+  v.classList.toggle('bleed',S.screen==='home');
+  v.innerHTML=({home:viewHome,shelf:viewShelf,diary:viewDiary,me:viewMe})[S.screen]();
   if(S.screen==='home'||S.screen==='shelf')layoutShelves();
-  S.landed=null; tickElapsed();
+  S.landed=null; tickElapsed(); if(S.sheet)drawSheet();
 }
 
 /* ============================================================
@@ -1290,7 +1409,7 @@ function viewShelf(){
   SETS={films,shows,recent};
   const shown=items.filter(match).length;
   const title={all:'The shelf',ours:'Our shelf',mine:'My shelf'}[S.scope];
-  const filters=FILTERS.filter(([k])=>S.unified||(k!=='want'&&k!=='seen'));
+  const filters=FILTERS.filter(([k])=>S.unified||(k!=='want'&&k!=='seen')).filter(([k])=>k!=='movie'&&k!=='tv'||true);
   const body=S.view==='grid'
    ? `<div class="grid">${sortCases(items).map(c=>`<button class="gcase ${match(c)?'':'dim'}" data-open="${c.id}" aria-label="${esc(heading(c))}">${cover(c)}<b>${esc(c.t)}</b><i>${c.wrapped?'In the wrapper':(c.type==='tv'?'Season '+c.s:c.y)+(rew(c)?' · rewatch ×'+rew(c):'')}</i></button>`).join('')}</div>`
    : `<div class="cabwrap"><div class="cabinet">
@@ -1298,17 +1417,15 @@ function viewShelf(){
         <div class="carcass"><div class="cornice"><span class="plate">Films · ${films.length}</span></div><i class="reel"></i><div class="shelfset" data-set="films"></div></div>
         <div class="door door-r"><span class="plate">Lately</span><div class="shelfset" data-set="recent"></div><i class="hinge a"></i><i class="hinge b"></i></div>
       </div></div>`;
-  return `<section>
+  return `<section class="shelfpage">
     <div class="head"><div><h1 class="display">${title}</h1><p class="sub">${subline(items)}</p></div>
-      <div class="tools"><div class="seg" role="group" aria-label="Whose shelf">${[['all','All'],['ours','Ours'],['mine','Mine']].map(([k,l])=>`<button data-scope="${k}" aria-pressed="${S.scope===k}">${l}</button>`).join('')}</div>
-      <div class="seg" role="group" aria-label="View"><button data-view="shelf" aria-pressed="${S.view==='shelf'}">Shelf</button><button data-view="grid" aria-pressed="${S.view==='grid'}">Grid</button></div>
-      <label class="sr" for="sort">Sort</label><select class="sel" id="sort" data-sort>${[['recent','Up next, then recent'],['rating','Highest rated'],['title','Title'],['year','Release year']].map(([k,l])=>`<option value="${k}" ${S.sort===k?'selected':''}>${l}</option>`).join('')}</select>
+      <div class="tools"><div class="seg" role="group" aria-label="Whose shelf">${[['ours','Ours'],['mine','Mine'],['all','All']].map(([k,l])=>`<button data-scope="${k}" aria-pressed="${S.scope===k}">${l}</button>`).join('')}</div>
       <button class="btn small" data-act="addToList">${S.unified?'Add to the shelf':'Add to a list'}</button></div></div>
-    <div class="chips filters" role="group" aria-label="Filter">${filters.map(([k,l])=>`<button class="chip" data-filter="${k}" aria-pressed="${S.filter===k}">${l}</button>`).join('')}<span class="count">${shown} of ${items.length}</span></div>
-    <div class="layoutrow"><span>Layout</span><div class="seg" role="group" aria-label="Layout"><button data-layout="one" aria-pressed="${S.unified}">One shelf</button><button data-layout="split" aria-pressed="${!S.unified}">Shelf + lists</button></div><span>${S.unified?'Films you want sit in shrink-wrap until you watch them.':'The classic layout: what you have watched, with lists kept apart.'}</span></div>
-    ${S.scope==='ours'?highlightsHTML():''}
+    <div class="chips filters" role="group" aria-label="Filter">${filters.map(([k,l])=>`<button class="chip" data-filter="${k}" aria-pressed="${S.filter===k}">${l}</button>`).join('')}
+      <span class="count" style="margin-left:auto"><span class="seg" role="group" aria-label="View"><button data-view="grid" aria-pressed="${S.view==='grid'}">Posters</button><button data-view="shelf" aria-pressed="${S.view==='shelf'}">Spines</button></span></span></div>
     ${body}
-    ${!S.unified?`<h2 class="display sh-h">Lists</h2>${listsSection()}`:''}</section>`;
+    ${!S.unified?`<h2 class="display sh-h">Lists</h2>${listsSection()}`:''}
+    <p class="layoutnote">${shown} of ${items.length} shown. Layout: ${S.unified?'one shelf, with films you want in shrink-wrap.':'shelf + lists.'} <button class="link" data-layout="${S.unified?'split':'one'}">Switch to ${S.unified?'shelf + lists':'one shelf'}</button></p></section>`;
 }
 const PROPS=['<span class="prop p-vase"><i class="nk"></i><i class="bd"></i></span>','<span class="prop p-stack"><i></i><i></i><i></i></span>','<span class="prop p-lamp"><i class="sh"></i><i class="st"></i><i class="bs"></i></span>','<span class="prop p-frame"><i></i></span>'];
 function fillShelf(el,list,opts={}){
@@ -1367,7 +1484,7 @@ function renderDock(){
      <h2 class="display">${esc(c.t)}${c.type==='tv'?' <span style="color:var(--ink-soft)">S'+c.s+'</span>':''}</h2>
      <p class="meta">${c.y} · ${esc(c.dir)} · ${rtText(c)} · ${esc(c.gen.join(', '))}</p>
      <p>${esc(c.syn)}</p>
-     <div class="chips" style="margin-top:14px">${c.wrapped?`<span class="chip on">In the wrapper \u00b7 ${lname(c.list)}</span>`:''}${!c.w.length&&SAM_MINE.includes(c.id)?'<span class="chip">Sam wants this too</span>':''}${n?`<span class="chip on">Rewatch ×${n}</span>`:''}${people.map(k=>`<span class="chip"><i class="dot" style="background:${pcol(k)}"></i>${esc(nm(k))}</span>`).join('')}</div>
+     <div class="chips" style="margin-top:14px">${c.wrapped?`<span class="chip on">In the wrapper \u00b7 ${lname(c.list)}</span>`:''}${!c.w.length&&TIM_MINE.includes(c.id)?'<span class="chip">Tim wants this too</span>':''}${n?`<span class="chip on">Rewatch ×${n}</span>`:''}${people.map(k=>`<span class="chip"><i class="dot" style="background:${pcol(k)}"></i>${esc(nm(k))}</span>`).join('')}</div>
      ${c.w.length?`<div class="sec"><h3>Watch history</h3><ol class="tl">${tl}</ol></div>`:`<div class="sec"><h3>Not watched yet</h3><p class="hint">${c.wrapped?'It is waiting on the shelf in its wrapper. Watch it tonight, or log it if you already have.':'Add it to the shelf to keep it for later, or start it tonight.'}</p></div>`}
      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">${dockActions(c)}</div>
    </div>`;
@@ -1404,6 +1521,12 @@ function isDim(){return !!(S.session&&S.session.phase==='playing')}
 const fmtMins=m=>m>=60?`${Math.floor(m/60)}h ${m%60}m`:`${m}m`;
 function elapsedMins(){return S.session?Math.max(0,Math.round((Date.now()-S.session.start)/60000)):0}
 function tickElapsed(){const e=$('#elapsed');if(e&&S.session)e.textContent=fmtMins(elapsedMins())}
+function tvMiniContent(){
+  if(S.session&&S.session.phase==='playing'){const c=getCase(S.session.id);return `<div class="tvm-now">${cover(c)}<span>Now playing</span></div>`}
+  if(S.spinning)return '<div class="spinner mini" aria-label="Choosing"></div>';
+  if(S.pick){const c=getCase(S.pick.id);if(c)return `<div class="tvm-pick"><span style="display:block">${cover(c)}</span><span><b>${esc(c.t)}</b>${c.y}</span></div>`}
+  return `<b class="tvm-t">What’s on?</b><span class="tvm-s">Pick for us</span>`;
+}
 function viewHome(){
   const k=S.usual, p=PEOPLE[k], ss=S.session;
   const pend=S.pending.filter(x=>!x.done&&x.who===k);
@@ -1412,36 +1535,61 @@ function viewHome(){
   const wd=new Date().toLocaleDateString('en-GB',{weekday:'long'}), ritual=p.ritual||'';
   const usualNight=ritual&&ritual.toLowerCase().includes(wd.toLowerCase());
   const head={playing:'Now showing.',after:'That’s a wrap.',ready:'Lights down when you’re ready.',decide:usualNight?`It’s ${wd} night.`:'What are we watching?'}[phase];
-  const sub={decide:usualNight?`Your Usual with ${p.n}. Pick something below, or click the lamp when you already know.`:'Pick something below, or click the lamp when you already know.',
+  const sub={decide:`Your diary for two. Click the lamp to start a film, the TV to choose one, or the diary to remember one.`,
     ready:cur?`${cur.t} is tonight’s pick. Click the lamp to start.`:'',playing:cur?`${cur.t}. Click the lamp when it’s over.`:'',after:cur?`${cur.t}. Tell us what you thought while it’s fresh.`:''}[phase];
   SETS.mini=miniList();
-  const hint={decide:'Click the lamp to start a film. Drag spines to rearrange the shelf; click one to open it.',ready:'Click the lamp to dim the lights and start.',playing:'Click the lamp when the credits roll.',after:'Click the lamp to log how it went.'}[phase];
-  const lampLabel={decide:'Lights down: start a film',ready:'Lights down: start the film',playing:'Lights up: the film is over',after:'Log how it went'}[phase];
-  let panel='';
-  if(phase==='playing')panel=`<div class="onnow playing"><div>${cover(cur)}</div><div class="txt"><b>Now showing: ${esc(heading(cur))}</b><span>Lights down <span id="elapsed">${fmtMins(elapsedMins())}</span> ago · ${rtText(cur)}</span></div><div class="acts"><button class="btn" data-act="lamp">Lights up</button><button class="btn ghost" data-act="cancelSession">Not this one</button></div></div>`;
-  else if(phase==='after')panel=`<div class="onnow"><div>${cover(cur)}</div><div class="txt"><b>How was ${esc(heading(cur))}?</b><span>You watched for ${fmtMins(ss.mins||1)}. Log it while it is fresh.</span></div><div class="acts"><button class="btn" data-act="lamp">Log it</button><button class="btn ghost" data-act="cancelSession">Discard</button></div></div>`;
-  else if(phase==='ready')panel=`<div class="onnow"><div>${cover(cur)}</div><div class="txt"><b>Tonight: ${esc(heading(cur))}</b><span>Click the lamp when you are ready, or change your mind.</span></div><div class="acts"><button class="btn" data-act="lamp">Lights down</button><button class="btn ghost" data-act="clearDraft">Not this one</button></div></div>`;
-  const lower=phase==='decide'?`<div class="tonight"><div>${deciderHTML()}</div><div>${progressHTML()}${upnextHTML()}</div></div>`:phase==='ready'?`<div>${upnextHTML()}</div>`:'';
-  return `<section class="home">
-    <div class="head"><div><h1 class="display">${head}</h1><p class="sub">${sub}</p></div></div>
-    ${phase==='playing'?'':pend.map(x=>pendingHTML(x)).join('')}
-    <div class="pit${isDim()?' dim':''}${phase==='ready'?' ready':''}" id="pit">
-      <div class="pit-row">
-        <div class="sofa">
-          <div class="biglamp">${BIGLAMP}<button class="lampbtn" data-act="lamp" aria-label="${lampLabel}"></button></div>
-          <div class="sb"></div><div class="ss"></div><i class="throw"></i>
-          <button class="seatp" data-act="say" data-who="you" style="left:27%;--pc:${V(S.user.colour||'--copper')}"><span class="av">${esc(S.user.name[0])}</span><span class="nm">You</span></button>
-          <button class="seatp" data-act="say" data-who="${k}" style="left:64%;--pc:${pcol(k)}"><span class="av">${esc(p.n[0])}</span><span class="nm">${esc(p.n)}</span></button>
-          <i class="pool"></i>
-          <div class="table"><i class="top"></i><i class="leg"></i><span class="bowl"></span></div>
-        </div>
-        <div class="cabcol"><div class="minicab" id="minicab"><span class="plate">Our shelf · ${SETS.mini.length}</span><div class="shelfset" data-set="mini"></div></div><div class="minitip" id="minitip" aria-hidden="true"></div></div>
-      </div><div class="floor"></div></div>
-    <div class="minibar"><p class="hint">${hint}</p>
-      <div class="mini-tools"><button class="btn ghost small" data-act="miniShuffle">Shuffle</button><button class="btn ghost small" data-act="miniPull">Pull one out</button><button class="btn small" data-act="openOurShelf">Open our shelf</button></div></div>
-    ${panel}
-    ${lower}
+  const lampLabel={decide:'Start a film',ready:'Lights down',playing:'Lights up',after:'Log it'}[phase];
+  let card='';
+  if(phase==='playing')card=`<div class="onnow playing"><div>${cover(cur)}</div><div class="txt"><b>${esc(heading(cur))}</b><span>Lights down <span id="elapsed">${fmtMins(elapsedMins())}</span> ago</span></div><div class="acts"><button class="btn" data-act="lamp">Lights up</button><button class="btn ghost" data-act="cancelSession">Not this one</button></div></div>`;
+  else if(phase==='after')card=`<div class="onnow"><div>${cover(cur)}</div><div class="txt"><b>How was ${esc(heading(cur))}?</b><span>You watched for ${fmtMins(ss.mins||1)}.</span></div><div class="acts"><button class="btn" data-act="lamp">Write the entry</button><button class="btn ghost" data-act="cancelSession">Discard</button></div></div>`;
+  else if(phase==='ready')card=`<div class="onnow"><div>${cover(cur)}</div><div class="txt"><b>Tonight: ${esc(heading(cur))}</b><span>Whenever you’re ready.</span></div><div class="acts"><button class="btn" data-act="lamp">Lights down</button><button class="btn ghost" data-act="clearDraft">Not this one</button></div></div>`;
+  const nudge=(phase!=='playing'&&pend.length)?`<button class="nudge" data-act="openSeal"><i>U</i><span><b>${esc(p.n)} has sealed their take</b> on ${esc(caseById(pend[0].caseId).t)}. Seal yours.</span></button>`:'';
+  return `<section class="lounge${isDim()?' dim':''}${phase==='ready'?' ready':''}" id="pit">
+    <i class="rwin w1"></i><i class="rwin w2"></i>
+    <div class="roomtop"><h1 class="display">${head}</h1><p class="sub">${sub}</p>${card}${nudge}</div>
+    <div class="room-row">
+      <div class="tvcol"><span class="plate tvplate">What to watch</span>
+        <button class="tvmini" data-act="openDecide" aria-label="Open the picker: what are we watching?"><span class="tvm-screen" id="tvm">${tvMiniContent()}</span></button><i class="tvstand"></i></div>
+      <div class="sofa">
+        <div class="biglamp">${BIGLAMP}<span class="plate lamplabel">${lampLabel}</span><button class="lampbtn" data-act="lamp" aria-label="${lampLabel}"></button></div>
+        <div class="sb"></div><div class="ss"></div><i class="throw"></i>
+        <button class="seatp" data-act="say" data-who="you" style="left:27%;--pc:${V(S.user.colour||'--copper')}"><span class="av">${esc(S.user.name[0])}</span><span class="nm">You</span></button>
+        <button class="seatp" data-act="say" data-who="${k}" style="left:64%;--pc:${pcol(k)}"><span class="av">${esc(p.n[0])}</span><span class="nm">${esc(p.n)}</span></button>
+        <i class="pool"></i>
+        <div class="table"><i class="top"></i><i class="leg"></i><span class="bowl"></span><button class="diarybtn" data-go="diary" aria-label="Open our diary" title="Our diary"></button></div>
+      </div>
+      <div class="cabcol"><div class="minicab" id="minicab"><button class="plate plate-btn" data-act="openOurShelf">Our shelf · ${SETS.mini.length} →</button><span class="mini-tools-i"><button data-act="miniShuffle" aria-label="Shuffle the shelf">Shuffle</button><button data-act="miniPull" aria-label="Pull one out at random">Pull</button></span><div class="shelfset" data-set="mini"></div></div><div class="minitip" id="minitip" aria-hidden="true"></div></div>
+    </div>
+    <div class="floor2"></div>
+    <p class="roomhint">Drag spines to rearrange the shelf. Click one to open it.</p>
   </section>`;
+}
+function viewDiary(){
+  const k=S.usual, p=PEOPLE[k], ours=S.scope!=='mine';
+  const entries=allWatches().filter(x=>ours?x.w.who.includes(k):true).sort((a,b)=>b.w.d.localeCompare(a.w.d));
+  const pend=S.pending.filter(x=>!x.done&&x.who===k);
+  const months={}; entries.forEach(x=>{(months[x.w.d.slice(0,7)]=months[x.w.d.slice(0,7)]||[]).push(x)});
+  const body=Object.keys(months).sort().reverse().map(m=>`<h2 class="month">${new Date(m+'-15').toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</h2>`+months[m].map(({c,w})=>{
+    const d=new Date(w.d+'T12:00:00'), pr=w.pr&&w.pr[k];
+    return `<button class="entry" data-open="${c.id}" aria-label="${esc(heading(c))}, ${fmt(w.d)}"><span class="edate"><b>${d.getDate()}</b><i>${d.toLocaleDateString('en-GB',{weekday:'short'})}</i></span>
+      <span class="ecover">${cover(c)}</span>
+      <span class="ebody"><b class="etitle">${esc(heading(c))}${w.k==='re'?'<em>Rewatch</em>':''}</b><span class="emeta">${esc(withNames(w))} · ${esc(w.at)}${w.sn.length?' · '+esc(w.sn.join(', ')):''}</span>${w.n?`<span class="enote">“${esc(w.n)}”</span>`:''}</span>
+      <span class="erate">${w.r?`<span><b>${num(w.r)}★</b><i>You</i></span>`:`<span><b>—</b><i>You</i></span>`}${ours&&pr?`<span><b>${num(pr)}★</b><i>${esc(p.n)}</i></span>`:''}</span></button>`}).join('')).join('');
+  return `<section class="diary">
+    <div class="head"><div><h1 class="display">${ours?'Our diary':'My diary'}</h1><p class="sub">${entries.length} night${entries.length===1?'':'s'}${ours?` with ${esc(p.n)}`:''}. ${ours?`The Usual · ${esc(p.ritual||'unnamed')}`:'Everything you have watched, with or without anyone.'}</p></div>
+      <div class="tools"><div class="seg" role="group" aria-label="Whose diary">${[['ours','Ours'],['mine','All mine']].map(([k2,l])=>`<button data-scope="${k2==='mine'?'mine':'ours'}" aria-pressed="${(k2==='mine')===(!ours)}">${l}</button>`).join('')}</div>
+      <button class="btn small" data-act="log">Write an entry</button></div></div>
+    ${pend.length?`<button class="diary-seal" data-act="openSeal"><i>U</i><span><b>${esc(p.n)} has sealed their take on ${esc(caseById(pend[0].caseId).t)}.</b><br><small>Seal yours to read it.</small></span></button>`:''}
+    ${ours?highlightsHTML():''}
+    ${body||'<div class="empty"><p class="display">A blank page.</p>Watch something and it will be written here.</div>'}</section>`;
+}
+function drawSheet(){
+  if(!S.sheet)return;
+  const k=S.usual, pend=S.pending.filter(x=>!x.done&&x.who===k);
+  const inner=S.sheet==='decide'
+    ? `<div class="sheet-h"><h2 class="display">What are we watching?</h2><button class="btn ghost small" data-act="closeLayer">Close</button></div><div class="sheet-b decide"><div>${deciderHTML()}</div><div>${progressHTML()}${upnextHTML()}</div></div>`
+    : `<div class="sheet-h"><h2 class="display">Sealed Take</h2><button class="btn ghost small" data-act="closeLayer">Close</button></div><div class="sheet-b">${pend.length?pend.map(x=>pendingHTML(x)).join(''):'<p class="hint">Nothing waiting.</p>'}</div>`;
+  $('#layer').innerHTML=`<div class="scrim" id="scrim"><div class="sheet wide" role="dialog" aria-modal="true">${inner}</div></div>`;
 }
 function progressHTML(){
   const prog=S.progress&&titleById(S.progress.id), pc=prog&&(prog.w?prog:placeholderCase(prog));
@@ -1458,13 +1606,13 @@ function deciderHTML(){
      <li><b>${lname('ours')}</b> is shared: either of you can add. <b>${lname('mine')}</b> is only yours, and ${esc(nm_)} keeps their own. ${S.unified?'Anything you want to see waits on the shelf in its wrapper. ':''}If you both want the same title, it counts as “both said yes”.</li>
      <li>Press <b>Pick for us</b>, or pull a case off the shelf. You see the blurb, and can keep it for later or skip it with your veto.</li>
      <li><b>Watch tonight</b> sets the pick. Then click the <b>lamp</b>: lights down starts the film; lights up and we ask what you both thought.</li></ol></div></section>
-   <div class="tv"><div class="tv-screen" style="min-height:300px"><div class="tv-in" id="tv-in">${tvContent()}</div></div>
-     <div class="tv-side"><span class="knob" style="--k:-10deg"></span><span class="vent"></span><span class="vent"></span><span class="knob" style="--k:70deg"></span></div></div>
-   <div class="console"></div>
-   <div style="margin-top:20px"><span class="lbl">How should we pick?</span>
+   <div style="margin-top:18px"><span class="lbl">How should we pick?</span>
      <div class="seg" role="group" aria-label="Mode">${modes.map(([k,l])=>`<button data-mode="${k}" aria-pressed="${S.pickMode===k}">${l}</button>`).join('')}</div>
      <p class="modehelp">${modeHelp(S.pickMode)}</p>${moodUI}
      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px"><button class="btn" data-act="pick">Pick for us</button><button class="link" data-act="resetRound" title="Gives you both a fresh veto">Start a new round</button></div></div>
+   <div style="margin-top:18px"><div class="tv"><div class="tv-screen" style="min-height:300px"><div class="tv-in" id="tv-in">${tvContent()}</div></div>
+     <div class="tv-side"><span class="knob" style="--k:-10deg"></span><span class="vent"></span><span class="vent"></span><span class="knob" style="--k:70deg"></span></div></div>
+   <div class="console"></div></div>
    <div id="pickbar">${pickBar()}</div>`;
 }
 function modeHelp(m){
@@ -1477,7 +1625,7 @@ function upnextHTML(){
   return `<div class="listhead"><div class="seg" role="tablist" aria-label="Up next"><button data-tab="ours" aria-pressed="${ours}">Ours · ${S.tonight.length}</button><button data-tab="mine" aria-pressed="${!ours}">Mine · ${S.mine.length}</button></div>
       <button class="btn ghost small" data-act="addToList">Add to ${lname(S.tab)}</button></div>
     <p class="hint">${ours?`Up next, shared with ${esc(nm_)}. Either of you can add. Click a case to watch it, move it or remove it.`:`Only you can see this. Titles ${esc(nm_)} also wants are marked, and count as “both said yes”.`}</p>
-    ${items.length?`<div class="upnext">${items.slice(0,9).map(c=>`<button class="gcase" data-open="${c.id}" aria-label="${esc(heading(c))}, still in the wrapper">${cover(c)}<b>${esc(c.t)}</b><i>${!ours&&SAM_MINE.includes(c.id)?'Sam wants this too':c.y}</i></button>`).join('')}</div>${items.length>9?`<p class="hint" style="margin-top:12px">${items.length-9} more on the shelf.</p>`:''}`
+    ${items.length?`<div class="upnext">${items.slice(0,9).map(c=>`<button class="gcase" data-open="${c.id}" aria-label="${esc(heading(c))}, still in the wrapper">${cover(c)}<b>${esc(c.t)}</b><i>${!ours&&TIM_MINE.includes(c.id)?'Tim wants this too':c.y}</i></button>`).join('')}</div>${items.length>9?`<p class="hint" style="margin-top:12px">${items.length-9} more on the shelf.</p>`:''}`
       :`<div class="empty"><p class="display">Nothing waiting.</p>${ours?'Add something the two of you could watch.':'Add anything you want to see. Only you can see this.'}</div>`}`;
 }
 function listsSection(){
@@ -1579,11 +1727,11 @@ function reveal(card){
 /* ============================================================
    TONIGHT (TV)
    ============================================================ */
-const SAM_MINE=['aftersun','pride','holdovers','ted-lasso-s1'];
+const TIM_MINE=['aftersun','pride','holdovers','ted-lasso-s1'];
 const MODE_HELP={both:'Titles that are on both of your My lists, or that you both added to Our list.',surprise:'A random title from Our list.',mood:'Choose a mood and how long you have. We search both of your lists, plus a few suggestions.'};
 const inOurs=id=>S.tonight.some(t=>t.id===id), inMine=id=>S.mine.includes(id);
 function bothSet(){
-  const a=S.tonight.filter(t=>t.by.includes('you')&&t.by.includes(S.usual)).map(t=>t.id), b=S.mine.filter(id=>SAM_MINE.includes(id));
+  const a=S.tonight.filter(t=>t.by.includes('you')&&t.by.includes(S.usual)).map(t=>t.id), b=S.mine.filter(id=>TIM_MINE.includes(id));
   return [...new Set([...a,...b])];
 }
 function tvContent(){
@@ -1614,8 +1762,8 @@ function listRows(){
   if(!items.length)return `<li class="empty"><span class="display">${ours?'Nothing on Our list.':'Nothing on My list.'}</span><br>${ours?'Add something the two of you could watch.':'Add anything you want to see. Only you can see this list.'}</li>`;
   return items.map(({id,by})=>{
     const t=titleById(id); if(!t)return ''; const c=t.w?t:placeholderCase(t);
-    const sam=!ours&&SAM_MINE.includes(id);
-    return `<li><div>${cover(c)}</div><div><b>${esc(heading(c))}</b>${sam?'<span class="match">Sam wants this too</span>':''}<small>${c.y} · ${rtText(c)} · ${esc(c.gen[0]||'')}</small>${ours?`<span class="by" title="Added by ${esc(by.map(nm).join(' & '))}">${by.map(b=>`<i style="--pc:${pcol(b)}"></i>`).join('')}</span>`:''}</div>
+    const tim=!ours&&TIM_MINE.includes(id);
+    return `<li><div>${cover(c)}</div><div><b>${esc(heading(c))}</b>${tim?'<span class="match">Tim wants this too</span>':''}<small>${c.y} · ${rtText(c)} · ${esc(c.gen[0]||'')}</small>${ours?`<span class="by" title="Added by ${esc(by.map(nm).join(' & '))}">${by.map(b=>`<i style="--pc:${pcol(b)}"></i>`).join('')}</span>`:''}</div>
       <div class="row-acts">${ours?`<button class="btn small" data-act="startTonight" data-id="${id}">Watch tonight</button>`:`<button class="btn small" data-act="addOurs" data-id="${id}">Move to Our list</button>`}
       <button class="btn ghost small" data-act="log" data-id="${id}">Watched it</button><button class="btn ghost small" data-act="removeFrom" data-id="${id}" data-list="${ours?'ours':'mine'}" aria-label="Remove ${esc(c.t)}">Remove</button></div></li>`;
   }).join('');
@@ -1642,7 +1790,7 @@ function doPick(){
   S.spinning=true;S.pick=null;updateTV();
   setTimeout(()=>{S.spinning=false;S.pick={id,why:whyFor(id)};updateTV()},S.rm?100:1400);
 }
-function updateTV(){const t=$('#tv-in');if(t)t.innerHTML=tvContent();const b=$('#pickbar');if(b)b.innerHTML=pickBar()}
+function updateTV(){const t=$('#tv-in');if(t)t.innerHTML=tvContent();const b=$('#pickbar');if(b)b.innerHTML=pickBar();const m=$('#tvm');if(m)m.innerHTML=tvMiniContent()}
 function addTo(id,list){
   if(list==='mine'){
     if(inMine(id)&&!inOurs(id))toast('Already on '+lname('mine'));
@@ -1652,7 +1800,7 @@ function addTo(id,list){
     if(ex){if(!ex.by.includes('you'))ex.by.push('you');toast('Already on '+lname('ours'))}else{S.tonight.push({id,by:['you']});toast('Added to '+lname('ours'))}
     S.mine=S.mine.filter(x=>x!==id);
   }
-  saveState(); renderView(); if(S.open===id)renderDock();
+  saveState(); if(S.sheetBack){S.sheet=S.sheetBack;S.sheetBack=null} renderView(); if(S.open===id)renderDock();
 }
 
 /* ============================================================
@@ -1723,6 +1871,7 @@ function importCSV(text){
    ============================================================ */
 let LG={};
 function openLog(id,opts){
+  S.sheet=null;
   const t=id?titleById(id):(S.draft?titleById(S.draft):null);
   LG={id:t?t.id:null,who:S.usual?[S.usual]:[],when:'today',date:TODAY,r:0,sn:[],at:'Couch',m:[],choice:'re',fromSession:!!(opts&&opts.fromSession),mins:opts&&opts.mins};
   const L=$('#layer'); L.innerHTML=`<div class="scrim" id="scrim"><form class="sheet" id="logform" role="dialog" aria-modal="true" aria-labelledby="lg-h">
@@ -1794,14 +1943,14 @@ function saveLog(){
   if(S.screen==='me')go('shelf');else renderView();
   if(linked&&!(r&&false))setTimeout(()=>toast(`${nm(linked)} has been asked for a Sealed Take`),3000);
 }
-function closeLayer(){const l=$('#layer');if(l)l.innerHTML=''}
+function closeLayer(){const had=S.sheet;S.sheet=null;const l=$('#layer');if(l)l.innerHTML='';if(had&&S.authed&&$('#view'))renderView()}
 
 /* ============================================================
    SEARCH
    ============================================================ */
 let SMODE='open';
 function openSearch(mode='open'){
-  SMODE=mode;
+  SMODE=mode; S.sheetBack=(mode==='add'&&S.sheet)?S.sheet:null; S.sheet=null;
   const ph=mode==='add'?'Add to '+lname(S.tab)+'…':mode==='play'?'What are you watching?':'Search films and shows…';
   $('#layer').innerHTML=`<div class="scrim top" id="scrim"><div class="searchbox" role="dialog" aria-modal="true" aria-label="Search"><input id="sq" placeholder="${ph}" autocomplete="off">
     ${mode==='add'?`<div class="addbar"><span>Add to</span><div class="seg addseg" role="group" aria-label="Which list">${['ours','mine'].map(k=>`<button type="button" data-tab="${k}" aria-pressed="${S.tab===k}">${lname(k)}</button>`).join('')}</div></div>`:''}
@@ -1890,6 +2039,8 @@ document.addEventListener('click',e=>{
     case 'removeFrom':if(d.list==='mine')S.mine=S.mine.filter(x=>x!==d.id);else S.tonight=S.tonight.filter(x=>x.id!==d.id);saveState();if(d.close)closeCase();renderView();break;
     case 'addToList':openSearch('add');break;
     case 'lamp':lampClick();break;
+    case 'openDecide':S.sheet='decide';drawSheet();break;
+    case 'openSeal':S.sheet='seal';drawSheet();break;
     case 'cancelSession':S.session=null;S.draft=null;saveState();refreshNav();renderView();toast('Back to deciding.');break;
     case 'openOurShelf':S.scope='ours';go('shelf');break;
     case 'say':{const b=t.closest('.seatp');$$('.bubble').forEach(x=>x.remove());const el=document.createElement('span');el.className='bubble';el.textContent=SAYS[(sayI++)%SAYS.length];b.appendChild(el);setTimeout(()=>el.remove(),2600);break}
@@ -1904,7 +2055,7 @@ document.addEventListener('click',e=>{
     case 'pick':case 'pickAgain':doPick();break;
     case 'veto':if(!S.vetoes.you&&S.pick){S.vetoes.you=true;S.vetoed=[...(S.vetoed||[]),S.pick.id];toast('Vetoed. Spinning again.');doPick();}break;
     case 'resetRound':S.vetoes={you:false};S.vetoed=[];S.pick=null;S.pickNone=null;toast('Fresh round, fresh vetoes');renderView();break;
-    case 'startTonight':{S.draft=d.id;S.session=null;saveState();refreshNav();if(S.open)closeCase();toast('Tonight\u2019s pick is set. Click the lamp when you are ready.');if(S.screen==='home')renderView();else go('home');break}
+    case 'startTonight':{closeLayer();S.draft=d.id;S.session=null;saveState();refreshNav();if(S.open)closeCase();toast('Tonight\u2019s pick is set. Click the lamp when you are ready.');if(S.screen==='home')renderView();else go('home');break}
     case 'epUp':{const p=titleById(S.progress.id);S.progress.ep=Math.min(p.eps,S.progress.ep+1);saveState();renderView();break}
     case 'epDown':S.progress.ep=Math.max(0,S.progress.ep-1);saveState();renderView();break;
     case 'export':{const b=new Blob([JSON.stringify({cases:S.cases,tonight:S.tonight},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='the-usual-export.json';a.click();toast('Exported');break}

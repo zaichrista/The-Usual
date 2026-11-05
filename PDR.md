@@ -1,9 +1,25 @@
 # The Usual — Product Design Requirements (PDR)
 
-**Version:** 0.5 · **Date:** 2026-11-05 · **Owner:** Zai
+**Version:** 0.7 · **Date:** 2026-11-05 · **Owner:** Zai
 **Build status:** Front-end prototype built (`index.html`, mock data, no backend). Supabase, TMDB and real auth are not started.
 
 > Status key: **[LOCKED]** = decided, build to it. **[DEFAULT]** = recommended, assumed unless overruled. **[LATER]** = explicitly not in the first build.
+
+### Changelog v0.7 (from v0.6): the room is the app
+- **A diary for two.** Your partner is **Tim** (all examples updated). Copy never assumes their pronouns.
+- **Home is one full-screen room** in a single flat, warm illustrated style (no dashboard beneath it). Four things to touch: the **lamp** (start/end a film), the **TV** (what to watch, opens the picker as a sheet and mirrors the current pick on its screen), the **shelf** (playable miniature, opens the full shelf), and the **diary** on the coffee table.
+- **New Diary page** (`/diary`): your nights, newest first, grouped by month. Each entry has the poster, date, who with, where, what you ate, your note, and both ratings. It also holds the highlights (first one, most rewatched, biggest disagreement, usual order, longest sit) and the waiting Sealed Take.
+- **Shelf is quiet and poster-led**: posters by default (Spines is one toggle away), one filter row, Ours / Mine / All. The sort and layout controls moved off the page.
+- **Nav is Room · Shelf · Diary, plus (+)**; Me is the avatar.
+- The picker and the Sealed Take open as **sheets** from the room. "How this works" starts collapsed.
+- Round windows on the wall, taken from the reference photos, use the iridescent blue and mauve.
+
+### Changelog v0.6 (from v0.5): the product loop
+- **The app now follows one loop: Decide, Watch, React, Remember.** Three places instead of four: **Home** (the room), **Shelf**, **Me** (avatar menu). Together and Tonight are folded into Home and the Shelf.
+- **The lamp starts and ends a watch.** Lights down = the film starts (a timer runs). Lights up = "How was it?" opens the log sheet with the rating, which is also your Sealed Take.
+- **One shelf (trial).** Films you want to see sit on the shelf *in shrink-wrap*; logging a watch unwraps them. This replaces the separate lists-and-diary pair. **A switch ("One shelf" / "Shelf + lists") lets you go back** until we lock the choice (§6.15).
+- **Notifications are out of v1** (§6.12).
+- Three jobs the app must do well: **make lists, log what you watched, decide what to watch.**
 
 ### Changelog v0.5 (from v0.4)
 - **Together hero is playful but quiet**: a big arc lamp arches over the sofa (click it to dim the lights for "movie mode"), a throw on the sofa arm, a popcorn bowl on a small table, and the two of you who say a dry line when clicked.
@@ -184,7 +200,7 @@ On Save, the case slides onto the shelf.
 **Rewatch rules [LOCKED, per owner]:**
 - If the title (or season) is already on your shelf, the app asks once: **"You've watched this before. Log as a Rewatch?"** Default answer: Rewatch. The only alternative offered is "Log as new date for the first watch" (correcting a mistake); it is never the default.
 - A Rewatch is stored as its own Watch (`kind = rewatch`), never overwriting the original.
-- The case shows a clear **"Rewatch ×N"** badge. The case's flip side shows a timeline of every watch: "First watch · 12 Mar 2025 · with Sam", "Rewatch · 3 Nov 2026 · with Jess".
+- The case shows a clear **"Rewatch ×N"** badge. The case's flip side shows a timeline of every watch: "First watch · 12 Mar 2025 · with Tim", "Rewatch · 3 Nov 2026 · with Jess".
 - Rewatch ratings and notes are separate from the first watch; the case face shows the latest rating, the timeline shows the history.
 - Stats count first watches and rewatches separately ("142 films, 31 rewatches").
 - Filters include **Rewatches only**.
@@ -217,37 +233,28 @@ Drafts autosave locally.
   - "Open the full shelf" goes to the Shared Shelf page.
   - All motion respects reduced-motion.
 - **Shared Shelf page** (`/together/shelf`): the full cabinet (or grid) of every case you have watched together, with Films / Shows / Rewatches filters. Opening a case shows both ratings.
-- Header: "You & Sam", titles, hours, "since March 2025", and **The Usual** ritual name ("Sunday nights", renamable).
+- Header: "You & Tim", titles, hours, "since March 2025", and **The Usual** ritual name ("Sunday nights", renamable).
 - **Sealed Take** card appears here when your partner has sealed theirs and you have not.
 - Highlights as ticket stubs: first one, most rewatched, biggest disagreement, usual order, longest sit.
 - Either person can add a case to the Shared Shelf; the other receives it and, if relevant, a Sealed Take prompt.
 
-### 6.7 Tonight [LOCKED, rebuilt in v0.4]
+### 6.7 Home: deciding, watching, reacting [LOCKED, rebuilt in v0.6]
 
-**Goal:** make it obvious what the lists are, what the picker does, and what each button commits you to.
+Home is a state machine with four moments. The room (sofa, two of you, big arc lamp, our shelf in miniature) is always there; a panel below it changes.
 
-**Two lists**
-- **Our list**: shared with your partner. Either of you can add or remove. Each row shows who added it.
-- **My list**: only you can see it. Your partner has their own. A title that is on both My lists gets a "Partner wants this too" marker on yours (and nothing else about their list is revealed).
-- Add to either list from Tonight, from a case, or from the picker. A title can be moved from My list to Our list.
+1. **Deciding** (default). Headline: "What are we watching?" (or "It's Sunday night." when today matches your Usual's ritual). Below the room:
+   - **How this works**: a collapsible three-step explainer (remembers when closed).
+   - **Pick for us**: *Both said yes* (on both of your private lists, or both added to the shared one), *Roulette* (random from the shared list), *Mood match* (mood + length, searches both lists plus suggestions). Each mode is explained in a sentence. The result shows the **blurb** and why it was picked.
+   - Result actions: **Watch tonight** (sets the pick), **Add to / Save to** a list, **Veto** (once each per round), **Another**.
+   - **Up next**: the wrapped cases, with tabs **Ours** (shared) and **Mine** (private; titles your partner also wants are marked). Click a case to watch it, move it or remove it. **Add to Ours/Mine** opens search.
+   - **Currently watching together**: an "up to S1 E4" marker for shows.
+2. **Tonight's pick is set** ("Lights down when you're ready."). The lamp pulses. **Lights down** or click the lamp.
+3. **Now showing**. Lights down, the room dims, a timer runs. Nothing else competes for attention. **Lights up** or click the lamp when it is over. *Not this one* cancels.
+4. **That's a wrap** ("How was it?"). The log sheet opens with the title filled in, your partner pre-selected and the watch time shown. Saving unwraps the case, applies the Rewatch rule, and creates your **Sealed Take**. Your partner's (simulated in the prototype) appears on Home as a card to break the seal.
 
-**Picker** (one screen, three modes, each explained in a sentence under the switch)
-1. **Both said yes**: titles on both My lists, or that you both added to Our list.
-2. **Roulette**: a random title from Our list.
-3. **Mood match**: choose a mood and how long you have; searches both lists plus a few suggestions.
+**The lamp with nothing chosen** opens a quick "What are you watching?" chooser: Up next first, then watch-again, then something new.
 
-**What you see when it picks:** cover, title, year, director, runtime, genres, **the blurb**, and why it was chosen.
-
-**What each button does** (shown under the result, with a one-line explainer)
-- **Watch this tonight**: makes it tonight's pick. A banner appears ("Tonight: Parasite"); **We finished it** opens the log sheet with it filled in; **Not this one** clears it.
-- **Add to Our list** / **Save to My list**: keeps it for later without choosing it.
-- **Veto**: skips it and picks again. One veto each per round; **Start a new round** resets.
-- **Another**: picks again with no veto spent.
-
-**Other**
-- **How Tonight works** is a collapsible panel (a chevron button, not a hidden disclosure). Open by default for new users; remembers when you close it.
-- **Currently watching together** keeps a simple "up to S1 E4" marker for shows.
-- No calendar integration in v1.
+**Lists** are not a separate screen: "making a list" means adding titles to **Ours** or **Mine**; they appear wrapped on the shelf (§6.15).
 
 ### 6.8 Title page [LOCKED]
 - Poster, backdrop, synopsis, cast and crew, runtime, genres (TMDB).
@@ -269,15 +276,23 @@ Drafts autosave locally.
 - **Import:** Letterboxd `diary.csv` / `ratings.csv`. Imported rows become cases (movies only, "Just me"); user can later bulk-tag who they watched with. Repeat entries in the diary import as Rewatches.
 - **Export:** everything as JSON and CSV.
 
-### 6.12 Notifications [LOCKED]
-- In-app, email, and push when installed.
-- Only these: invite received, Sealed Take request, reveal ready, someone added to Tonight.
-- Never: "log your movie", streak nudges, marketing without opt-in. Each type individually toggleable.
+### 6.12 Notifications [LATER, out of v1]
+No push, email nudges or in-app alerts in the first build. The only prompts are visible on Home itself (a waiting Sealed Take, tonight's pick). Candidate later notifications, kept for planning: invite received, Sealed Take ready, a Sunday-afternoon "tonight's pick?" for your Usual, and "a year ago tonight".
 
 ### 6.13 Privacy and safety [LOCKED]
 - Private by default; sharing is an explicit action per person.
 - Block and report. Minimum age 13. Terms and privacy policy reviewed before public launch.
 - Guest names visible only to their creator.
+
+### 6.15 One shelf: wrapped and unwrapped cases [TRIAL, switchable]
+One object model: a **case** is either **wrapped** (you want to see it) or **unwrapped** (you have watched it).
+
+- A wrapped case looks like a case in shrink-wrap: a glossy film over the cover, a "New" sticker, a "New" mark on the spine.
+- Wrapped cases belong to **Ours** (shared) or **Mine** (private) and sort to the front of the shelf.
+- Logging a watch of a wrapped case **unwraps** it (it lands on the shelf with the usual animation) and removes it from the list.
+- Shelf scope: **All / Ours / Mine**. Status filters: *To watch*, *Watched*, *Rewatches*, *Films*, *Shows*.
+- **Switch back:** *Me → Shelf layout*, or the Layout control on the Shelf, toggles **One shelf** and **Shelf + lists**. In "Shelf + lists" the shelf shows only what you have watched, and Our list / My list appear as ordinary lists on Home and beneath the shelf. The two layouts share the same data, so switching loses nothing.
+- **Decision gate:** keep whichever feels better after real use, then delete the other path.
 
 ### 6.14 TV shows [LOCKED, new]
 
@@ -296,44 +311,48 @@ Shows are in v1. The DVD metaphor is a natural fit: **a season is a case, like a
 
 ## 7. Information architecture, site map and architecture
 
-### 7.1 Navigation [LOCKED]
-Goal: fewest taps to the two things people do most, which are **log something** and **look at the shelf**, with the intimate part (Together) always one tap away.
+### 7.1 Navigation [LOCKED in v0.7]
+Four places and one button: **Room**, **Shelf**, **Diary**, **Me** (avatar), and **(+)**.
 
-- **Mobile:** bottom bar `Shelf · Together · (+) · Tonight`. Search and the profile avatar live in the top bar.
-- **Desktop:** left rail with the same four items; a persistent search field; the open case docks on the right.
-- Maximum two taps to any main screen; one tap to start a log.
+- **Room (Home)**: the whole app in one scene. The lamp starts and ends a film; the TV opens the picker; the shelf opens the full shelf; the diary opens the diary.
+- **Diary**: your nights together, newest first, with both ratings.
+- **Home (older description)**: the room. It changes with the moment: *deciding*, *tonight's pick is set*, *now showing*, *that's a wrap*.
+- **Shelf**: everything you have watched and everything you want to watch, in one cabinet. Switch between **All / Ours / Mine**.
+- **Me** (avatar, top right): Rotation stats, settings, import, export.
+- **(+)**: log something you already watched. (During a film, the lamp does this for you.)
+- **Search** (top bar, `/`): your shelf, what is in the wrapper, and titles you have not met yet.
+
+Mobile: bottom bar `Home · (+) · Shelf`. Desktop: left rail with the same three, and the open case docks on the right.
 
 ### 7.2 Site map
 
 ```
 SIGNED OUT
 /                       Welcome: the TV, centre stage
- ├─ sign in
- ├─ forgot password
- └─ create account (on the TV, 3 steps)
-      details → spine colour → invite your partner
+ ├─ sign in · forgot password
+ └─ create account (on the TV, 3 steps): details → spine colour → invite your partner
 
 SIGNED IN
-/shelf                  Shelf (cabinet view · grid view; filter, sort)
- └─ /shelf/:caseId      Case dock (front · open · back · disc · watch history)
-/together               Together: you and your partner (sofa, our shelf in miniature, Sealed Take, highlights)
- └─ /together/shelf      Our shelf: the full Shared Shelf (cabinet or grid)
-/tonight                Tonight: Our list · My list · picker (Both said yes / Roulette / Mood match) · tonight's pick · currently watching
-/me                     Me: Rotation (stats) · settings · import · export · sign out
-/title/:type/:id        Title page (movie or show, all seasons you own) [production route]
+/home                   The room: lamp, sofa, our shelf in miniature, then the moment's panel
+ ├─ deciding            Pick for us (Both said yes / Roulette / Mood match) · Up next (Ours | Mine)
+ ├─ tonight's pick set  "Lights down when you're ready"
+ ├─ now showing         timer · "Lights up"
+ └─ that's a wrap       "How was it?" → log sheet (rating = Sealed Take)
+/diary                  Our diary: entries by month · highlights · Sealed Take waiting
+/shelf                  One shelf (posters by default; Spines view): watched + wrapped · scope All/Ours/Mine · filters · cabinet/grid
+ └─ case dock           front · open · back · disc · history · actions (Watch tonight, I've watched it, move, remove)
+/me                     Rotation · settings (incl. shelf layout) · import · export · sign out
 
-GLOBAL (available everywhere)
-(+)  Log a Watch        sheet; includes the Rewatch prompt
-/    Search             overlay: your shelf · elsewhere (TMDB) · Companions
-     Toasts, notifications
+GLOBAL
+(+) Log a watch (sheet, with the Rewatch prompt)
+/   Search overlay (modes: open, add to a list, "what are you watching?")
+
+ALIASES (old links keep working)
+/tonight, /together, /us → /home        /together/shelf → /shelf (Ours)
 
 LATER
-/boxsets · /boxsets/:id        Boxsets
-/rotation/:year                 Rotation share card
-/u/:handle                      Opt-in public profile
+Streaming availability · Rotation share card · Boxsets · opt-in public profile · notifications
 ```
-
-In the prototype the case dock and sheets are overlays on one page; in production each gets a real URL so back/forward and shareable links work.
 
 ### 7.3 Application architecture [DEFAULT]
 

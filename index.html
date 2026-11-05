@@ -1037,14 +1037,14 @@ const SORTFN={
   watched:(a,b)=>lastDate(b).localeCompare(lastDate(a)),
   rating:(a,b)=>(latestR(b)||0)-(latestR(a)||0)
 };
-const passFilter=it=>S.filter==='all'||(S.filter==='film'&&it.type==='film')||(S.filter==='series'&&it.type==='series')||(S.filter==='waiting'&&it.status==='waiting');
+const passFilter=it=>S.filter==='all'||(S.filter==='film'&&it.type==='film')||(S.filter==='series'&&it.type==='series')||(S.filter==='waiting'&&it.status==='waiting')||(S.filter==='archive'&&it.status==='archive');
 const visible=()=>S.items.filter(it=>passFilter(it)&&matches(it,S.q.trim()));
 function arranged(){
   const list=visible(), f=SORTFN[S.sort];
   const order=l=>f?l.slice().sort(f):l.slice().reverse();
-  return {seen:order(list.filter(i=>i.status==='seen')),wait:order(list.filter(i=>i.status==='waiting'))};
+  return {seen:order(list.filter(i=>i.status==='seen'||i.status==='archive')),wait:order(list.filter(i=>i.status==='waiting'))};
 }
-function counts(){return {all:S.items.length,film:S.items.filter(i=>i.type==='film').length,series:S.items.filter(i=>i.type==='series').length,waiting:S.items.filter(i=>i.status==='waiting').length}}
+function counts(){return {all:S.items.length,film:S.items.filter(i=>i.type==='film').length,series:S.items.filter(i=>i.type==='series').length,waiting:S.items.filter(i=>i.status==='waiting').length,archive:S.items.filter(i=>i.status==='archive').length}}
 
 /* ---------- icons ---------- */
 const ic=(p,w=22,sw=1.7)=>`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -1146,7 +1146,7 @@ function shelfSwitchHTML(){
   return `<div class="seg" role="group" aria-label="Which shelf"><button type="button" data-act="shelf" data-v="together" aria-pressed="${S.shelf==='together'}">Us</button><button type="button" data-act="shelf" data-v="mine" aria-pressed="${S.shelf==='mine'}">Just me</button></div>`;
 }
 function chipsHTML(){
-  const c=counts(), tabs=[['all','All'],['film','Films'],['series','Series'],['waiting','To watch']];
+  const c=counts(), tabs=[['all','All'],['film','Films'],['series','Series'],['waiting','To watch'],['archive','Undated']];
   return tabs.map(([k,l])=>`<button type="button" class="chip" data-filter="${k}" aria-pressed="${S.filter===k}">${l}<i>${c[k]}</i></button>`).join('');
 }
 function fillChips(){const el=$('#chips');if(el)el.innerHTML=chipsHTML()}
@@ -1176,8 +1176,8 @@ function viewShelf(){
 }
 function fillStats(){
   const el=$('#stats');if(!el)return;
-  const seen=S.items.filter(i=>i.status==='seen'), all=seen.flatMap(i=>i.watches);
-  const mins=seen.reduce((a,i)=>a+i.watches.length*minsOf(i),0), re=seen.reduce((a,i)=>a+rewatches(i),0);
+  const seen=S.items.filter(i=>i.status==='seen'||i.status==='archive'), all=seen.flatMap(i=>i.watches);
+  const mins=seen.reduce((a,i)=>a+Math.max(1,i.watches.length)*minsOf(i),0), re=seen.reduce((a,i)=>a+rewatches(i),0);
   el.innerHTML=`<b>${seen.length}</b> watched<i>·</i><b>${Math.round(mins/60)}</b> hours${re?`<i>·</i><b>${re}</b> ${re===1?'rewatch':'rewatches'}`:''}`;
   const s=$('#sub');if(s)s.textContent=sinceText();
   const ag=$('#ago');if(ag)ag.innerHTML=agoHTML();
@@ -1199,12 +1199,12 @@ function agoHTML(){
 }
 const cols=()=>innerWidth>=720?4:3;
 function tileHTML(it){
-  const r=latestR(it), wait=it.status==='waiting', n=rewatches(it);
+  const r=latestR(it), wait=it.status==='waiting', arch=it.status==='archive', n=rewatches(it);
   const badges=(it.type==='series'?`<span class="bd">S${it.s}</span>`:'')+(n?`<span class="bd r">×${n+1}</span>`:'')+`<span class="chk">${ICON.check}</span>`;
-  return `<button type="button" class="tile ${wait?'wait':''}" data-act="open" data-id="${esc(it.id)}" aria-label="${esc(heading(it))}, ${it.y||''}${wait?', to watch':r?', rated '+r:''}">
+  return `<button type="button" class="tile ${wait?'wait':''}" data-act="open" data-id="${esc(it.id)}" aria-label="${esc(heading(it))}, ${it.y||''}${wait?', to watch':arch?', undated':r?', rated '+r:''}">
     <div class="cw">${coverHTML(it,badges)}</div>
     <span class="tl-t">${esc(it.t)}</span>
-    <span class="tl-m">${wait?'To watch':(r?starsHTML(r).replace('class="stars"','class="stars"')+rtxt(r):'Watched')} · ${it.y||''}</span></button>`;
+    <span class="tl-m">${wait?'To watch':arch?'Undated':(r?starsHTML(r).replace('class="stars"','class="stars"')+rtxt(r):'Watched')} · ${it.y||''}</span></button>`;
 }
 function fillGrid(){
   const el=$('#grid');if(!el)return;
@@ -1234,11 +1234,11 @@ function fillList(el){
   const k=key[S.isort.k]||key.title;
   const list=visible().sort((a,b)=>{const x=k(a),y=k(b);return (x<y?-1:x>y?1:0)*S.isort.d||sortKey(a.t).localeCompare(sortKey(b.t))});
   el.innerHTML=list.length?`<div class="list">${list.map(i=>{
-    const w=lastW(i),r=latestR(i),wait=i.status==='waiting';
+    const w=lastW(i),r=latestR(i),wait=i.status==='waiting',arch=i.status==='archive';
     return `<button type="button" class="row ${wait?'wait':''}" data-act="open" data-id="${esc(i.id)}"><span class="chk">${ICON.check}</span>
       <span class="thumb">${coverHTML(smallPoster(i))}</span>
       <span class="rw-m"><b>${esc(i.t)}</b><small>${i.y||''} · ${i.type==='series'?'Series · S'+i.s:'Film'}${i.dir?' · '+esc(i.dir):''}</small></span>
-      <span class="rw-r">${wait?'<small>To watch</small>':(r?starsHTML(r):'')}${w?`<small>${fmtShort(w.d)}</small>`:''}</span></button>`}).join('')}</div>`
+      <span class="rw-r">${wait?'<small>To watch</small>':arch?'<small>Undated</small>':(r?starsHTML(r):'')}${w?`<small>${fmtShort(w.d)}</small>`:''}</span></button>`}).join('')}</div>`
     :`<div class="hollow"><h2>Nothing here</h2><p>Try another filter, or add something new.</p><button class="btn accent" type="button" data-act="add">Add a title</button></div>`;
   if(S.sel)paintSel();
 }
@@ -1452,6 +1452,10 @@ function renderDetail(id,keep){
       <h3>On the list since ${fmt(it.added)}</h3>
       ${it.note?`<p class="lg-note" style="margin:-4px 0 18px">“${esc(it.note)}”</p>`:''}
       <button class="btn accent block" type="button" data-act="log" data-id="${esc(it.id)}">We watched it</button>`
+    :it.status==='archive'?`
+      <h3>Watched, date unknown</h3>
+      <p class="lg-note" style="margin:-4px 0 18px">Marked as watched without a date. Add one if you remember, or log it again next time you see it.</p>
+      <button class="btn accent block" type="button" data-act="log" data-id="${esc(it.id)}">Add a date</button>`
     :`
       <div class="stats three" style="margin-top:0"><div><b>${ev}</b><span>${ev===1?'Evening':'Evenings'}</span></div><div><b>${r?rtxt(r):'—'}</b><span>Latest rating</span></div><div><b>${hrs}</b><span>Hours</span></div></div>
       <ol class="ledger">${ws.map((w,i)=>{const gi=it.watches.indexOf(w);return `<li>
@@ -1550,7 +1554,7 @@ function openAdd(tab){
   paintAdd();
 }
 function statusSegHTML(a){
-  return `<div class="seg" role="group" aria-label="Add as"><button type="button" data-act="addstatus" data-v="seen" aria-pressed="${a.status==='seen'}">Watched</button><button type="button" data-act="addstatus" data-v="waiting" aria-pressed="${a.status==='waiting'}">To watch</button></div>`;
+  return `<div class="seg" role="group" aria-label="Add as"><button type="button" data-act="addstatus" data-v="seen" aria-pressed="${a.status==='seen'}">Watched</button><button type="button" data-act="addstatus" data-v="waiting" aria-pressed="${a.status==='waiting'}">To watch</button><button type="button" data-act="addstatus" data-v="archive" aria-pressed="${a.status==='archive'}">Undated</button></div>`;
 }
 function paintAdd(){
   const a=S.add; if(!a)return;
@@ -1579,7 +1583,7 @@ function paintAdd(){
         const m=r.item||{id:'x'+k,t:r.e.t,y:r.e.y,type:'film',col:hash(r.e.t)%SP.length,watches:[]};
         const note=r.dup?'Already on your shelf':r.item?kindText(m)+' · '+(m.y||'')+(r.exact?'':' · check this one'):'No match, added by title';
         return `<label class="imp-row ${r.dup?'dup':''}"><input type="checkbox" data-k="${k}" ${r.on&&!r.dup?'checked':''} ${r.dup?'disabled':''}>${coverHTML(smallPoster(norm(m)))}<span><b>${esc(m.t)}</b><small>${esc(note)}</small></span></label>`}).join('')}</div>
-      <div class="formfoot"><button type="button" class="btn accent block" id="imp-confirm" data-act="imp-confirm" ${n?'':'disabled'}>Add ${n} to the ${a.status==='seen'?'shelf':'list'}</button><button type="button" class="tlink" data-act="imp-back">Back</button></div>`;
+      <div class="formfoot"><button type="button" class="btn accent block" id="imp-confirm" data-act="imp-confirm" ${n?'':'disabled'}>Add ${n} to the ${a.status==='seen'?'shelf':a.status==='archive'?'shelf':'list'}</button><button type="button" class="tlink" data-act="imp-back">Back</button></div>`;
     }
   }
   openLayer(`<div class="sheet tall" role="dialog" aria-modal="true" aria-labelledby="sh-h"><div class="grab"></div>${xbtn()}<h2 id="sh-h">Add</h2>${tabs}${pane}</div>`);
@@ -1594,13 +1598,13 @@ function resultsHTML(q){
   const a=S.add||{}; q=q.trim().toLowerCase();
   const live=TMDB.on()&&!a.offline;
   const handRow=()=>{const nm=q.replace(/\b\w/g,c=>c.toUpperCase());return `<li><button type="button" class="res hand" data-act="manual" data-q="${esc(nm)}"><span class="cov" style="display:grid;place-items:center">+</span><span><b>Add “${esc(nm)}” by hand</b><small>${live?'Not on TMDB':'Not in the starter catalogue'}</small></span><em></em></button></li>`};
-  const doneRow=(r,k)=>`<li><div class="res done">${coverHTML(smallPoster(norm(r)))}<span><b>${esc(r.t)}</b><small>${a.status==='waiting'?'Saved for later':'Added'} · ${r.y||''}</small></span>
+  const doneRow=(r,k)=>`<li><div class="res done">${coverHTML(smallPoster(norm(r)))}<span><b>${esc(r.t)}</b><small>${a.status==='waiting'?'Saved for later':a.status==='archive'?'Added, undated':'Added'} ·${r.y||''}</small></span>
     <em>${a.status==='seen'?`<button type="button" class="tlink" data-act="add-details" data-k="${esc(k)}">Rate</button>`:''}<button type="button" class="tlink" data-act="undo-add" data-k="${esc(k)}">Undo</button></em></div></li>`;
   let h='';
   if(live){
     const doneIds=Object.values(a.done||{}).map(d=>d.id);
     const mine=q?S.items.filter(i=>(i.t+' '+(i.dir||'')+' '+i.y).toLowerCase().includes(q)&&!doneIds.includes(i.id)).slice(0,4):[];
-    h+=mine.map(i=>resultRow(i,`data-act="pick" data-cid="${esc(i.id)}"`,i.status==='waiting'?'To watch':'On your shelf')).join('');
+    h+=mine.map(i=>resultRow(i,`data-act="pick" data-cid="${esc(i.id)}"`,i.status==='waiting'?'To watch':i.status==='archive'?'On your shelf, undated':'On your shelf')).join('');
     (a.tres||[]).forEach((r,i)=>{
       if(a.done&&a.done[r.tmdb]){h+=doneRow(r,r.tmdb);return}
       if(owned(r))return;
@@ -1615,7 +1619,7 @@ function resultsHTML(q){
   const cat=catalogue();
   let hits=q?cat.filter(t=>(t.t+' '+(t.dir||'')+' '+t.y).toLowerCase().includes(q)):cat.filter(t=>!byId(t.id)).slice(0,6);
   hits=hits.slice(0,8);
-  h=hits.map(t=>{const have=byId(t.id);return resultRow(have||t,`data-act="pick" data-cid="${esc(t.id)}"`,have?(have.status==='waiting'?'To watch':'On your shelf'):'')}).join('');
+  h=hits.map(t=>{const have=byId(t.id);return resultRow(have||t,`data-act="pick" data-cid="${esc(t.id)}"`,have?(have.status==='waiting'?'To watch':have.status==='archive'?'On your shelf, undated':'On your shelf'):'')}).join('');
   if(a.msg)h=`<li class="fine" style="padding:8px">${esc(a.msg)}</li>`+h;
   if(q)h+=handRow();
   return h;
@@ -1684,7 +1688,7 @@ function openManual(q){
       <div class="field"><span class="lab">Format</span><div class="seg wide" role="group"><button type="button" data-act="mfmt" data-v="film" aria-pressed="true">Film</button><button type="button" data-act="mfmt" data-v="series" aria-pressed="false">Series</button></div></div></div>
     <div class="two"><div class="field" id="m-sw" hidden><label class="lab" for="m-s">Season</label><input id="m-s" type="number" inputmode="numeric" min="1" max="60" value="1"></div>
       <div class="field"><label class="lab" for="m-d">Director or creator</label><input id="m-d" type="text" placeholder="optional"></div></div>
-    <div class="field"><span class="lab">Where does it go?</span><div class="seg wide" role="group"><button type="button" data-act="mstatus" data-v="seen" aria-pressed="${S.add.status==='seen'}">Watched</button><button type="button" data-act="mstatus" data-v="waiting" aria-pressed="${S.add.status==='waiting'}">To watch</button></div></div>
+    <div class="field"><span class="lab">Where does it go?</span><div class="seg wide" role="group"><button type="button" data-act="mstatus" data-v="seen" aria-pressed="${S.add.status==='seen'}">Watched</button><button type="button" data-act="mstatus" data-v="waiting" aria-pressed="${S.add.status==='waiting'}">To watch</button><button type="button" data-act="mstatus" data-v="archive" aria-pressed="${S.add.status==='archive'}">Undated</button></div></div>
     <div class="formfoot"><button type="submit" class="btn accent block">Add it</button><button type="button" class="tlink" data-act="manual-back">Back to search</button></div></form>`);
   setTimeout(()=>{const f=$('#m-t');f&&f.focus({preventScroll:true})},60);
 }
@@ -1700,7 +1704,7 @@ function submitManual(){
   if(a.status==='seen'){
     const ba=back||{step:'find',tab:'search',status:a.status,q:'',tres:[],msg:'',offline:false,done:{},busy:{},imp:{stage:'input',text:'',date:TODAY,rows:[],msg:''}};
     ba.done['m:'+id]={id,meta:res.item};openRate(id,{wi:0,back:ba});
-  }else{toast(`${res.item.t} is on the list.`);if(back){S.add=back;paintAdd()}else closeLayer()}
+  }else{toast(`${res.item.t} is ${a.status==='archive'?'on the shelf, undated':'on the list'}.`);if(back){S.add=back;paintAdd()}else closeLayer()}
 }
 
 /* paste a list */
@@ -2073,7 +2077,7 @@ document.addEventListener('click',e=>{
     case 'addtab': if(S.add){S.add.tab=b.dataset.v;S.add.step='find';paintAdd()}break;
     case 'addstatus': if(S.add){S.add.status=b.dataset.v;$$('[data-act=addstatus]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
       const dw=$('#imp-date-wrap');if(dw)dw.hidden=b.dataset.v!=='seen';
-      const icn=$('#imp-confirm');if(icn)icn.textContent=icn.textContent.replace(/to the \w+/,'to the '+(b.dataset.v==='seen'?'shelf':'list'))}break;
+      const icn=$('#imp-confirm');if(icn)icn.textContent=icn.textContent.replace(/to the \w+/,'to the '+(b.dataset.v==='seen'?'shelf':b.dataset.v==='archive'?'shelf':'list'))}break;
     case 'addshelf': if(S.add){const to=S.shelf==='together'?'mine':'together';useShelf(to);S.add.done={};S.add.busy={};renderBase();paintAdd()}break;
     case 'pick-tmdb': pickTmdb(+b.dataset.i);break;
     case 'pick': {const c=byId(b.dataset.cid)||catalogue().find(x=>x.id===b.dataset.cid);if(!c)break;const have=byId(c.id);

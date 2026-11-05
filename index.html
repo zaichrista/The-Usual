@@ -636,6 +636,11 @@ details.more>summary{min-height:44px;display:flex;align-items:center}
 .pv.bob b{letter-spacing:.04em}
 .pv.bob small{font:400 14px/1.4 var(--sans);color:var(--soft)}
 .pv-credit{margin-top:12px}
+.pv.ours{background:var(--ink);color:var(--bg);box-shadow:none}
+.pv.ours:hover{background:var(--ink);opacity:.9}
+.tick{font-style:normal;color:var(--gold)}
+.pv-none{font:italic 400 18px/1.35 var(--serif);color:var(--soft);margin:6px 0 4px}
+.avail details.more{margin-top:8px}
 </style>
 </head>
 <body>
@@ -768,15 +773,32 @@ async function providersFor(it){
   return v;
 }
 const regionName=rg=>(REGIONS.find(x=>x[0]===rg)||[rg,rg])[1];
+const SERVICES_GB=['Netflix','Amazon Prime Video','Disney Plus','Apple TV','Now TV','Sky Go','Paramount Plus','BBC iPlayer','ITVX','Channel 4','My5','MUBI','BFI Player','Shudder','Curzon Home Cinema','Crunchyroll'];
+const SERVICES_ALL=['Netflix','Amazon Prime Video','Disney Plus','Apple TV','Max','Hulu','Paramount Plus','Peacock','MUBI','Criterion Channel','Shudder','Crunchyroll'];
+const serviceChoices=()=>region()==='GB'?SERVICES_GB:SERVICES_ALL;
+const isOurs=n=>(S.services||[]).some(sv=>{const a=n.toLowerCase(),b=sv.toLowerCase();return a===b||a.startsWith(b+' ')});
+const onOurs=v=>!!v&&!v.none&&!v.err&&[...(v.stream||[]),...(v.free||[])].some(x=>isOurs(x.n));
 function availHTML(v,compact){
-  const chip=x=>`<a class="pv" href="${esc(v.link||'https://www.justwatch.com')}" target="_blank" rel="noopener">${x.l?`<img src="https://image.tmdb.org/t/p/w92${esc(x.l)}" alt="" width="30" height="30" loading="lazy">`:''}<span>${esc(x.n)}</span></a>`;
-  const group=(label,arr)=>arr&&arr.length?`<p class="pv-l">${label}</p><div class="pvs">${arr.map(chip).join('')}</div>`:'';
+  const link=esc((v&&v.link)||'https://www.justwatch.com');
+  const chip=(x,mine)=>`<a class="pv${mine?' ours':''}" href="${link}" target="_blank" rel="noopener">${x.l?`<img src="https://image.tmdb.org/t/p/w92${esc(x.l)}" alt="" width="30" height="30" loading="lazy">`:''}<span>${mine?'<i class="tick" aria-hidden="true">✓</i> ':''}${esc(x.n)}</span></a>`;
+  const group=(label,arr,mine)=>arr&&arr.length?`<p class="pv-l">${label}</p><div class="pvs">${arr.map(x=>chip(x,mine)).join('')}</div>`:'';
+  const rg=regionName(v&&v.rg||region());
+  const none=!v||v.none||(!v.stream.length&&!v.free.length&&!v.rent.length);
   let h='';
   if(v&&v.err)h+=`<p class="fine">Couldn’t check streaming just now.</p>`;
-  else if(!v||v.none||(!v.stream.length&&!v.free.length&&!v.rent.length))h+=`<p class="fine">Not on any streaming service in the ${esc(regionName(v&&v.rg||region()))} right now.</p>`;
+  else if(none)h+=`<p class="fine">Not on any streaming service in ${esc(rg)} right now.</p>`;
   else{
-    h+=group('Streaming',v.stream)+group('Free',v.free);
-    if(v.rent.length)h+=`<p class="pv-l">Rent or buy</p><p class="fine">${esc(v.rent.map(x=>x.n).join(', '))}</p>`;
+    const all=[...v.stream,...v.free], haveOurs=(S.services||[]).length>0;
+    if(haveOurs){
+      const mine=all.filter(x=>isOurs(x.n)), rest=all.filter(x=>!isOurs(x.n));
+      h+=mine.length?group('On your services',mine,true):`<p class="pv-none">Not on any of your services right now.</p>`;
+      const more=(rest.length?group('Streaming elsewhere',rest):'')+(v.rent.length?`<p class="pv-l">Rent or buy</p><p class="fine">${esc(v.rent.map(x=>x.n).join(', '))}</p>`:'');
+      if(more)h+=compact?more:`<details class="more"><summary>Everywhere else</summary>${more}</details>`;
+    }else{
+      h+=group('Streaming',v.stream)+group('Free',v.free);
+      if(v.rent.length)h+=`<p class="pv-l">Rent or buy</p><p class="fine">${esc(v.rent.map(x=>x.n).join(', '))}</p>`;
+      if(!compact)h+=`<p class="fine">Tell us which services you have in Settings and we’ll highlight them.</p>`;
+    }
   }
   if(region()==='GB')h+=`<a class="pv bob" href="https://learningonscreen.ac.uk/ondemand/" target="_blank" rel="noopener"><span><b>BoB</b> · Box of Broadcasts</span><small>Free with a UK university login. Search for it there.</small></a>`;
   return h+(compact?'':`<p class="fine pv-credit">Streaming data from JustWatch, via TMDB.</p>`);
@@ -936,7 +958,7 @@ const CATALOGUE=()=>{const m=new Map();[...seedItems(),...CAT_EXTRA.map(norm)].f
 const KEY='the-usual-v4';
 const S={
   items:[],
-  people:{},store:{mine:[],together:[]},shelf:'together',
+  people:{},services:[],store:{mine:[],together:[]},shelf:'together',
   theme:document.documentElement.dataset.theme||'light',
   view:'shelf',filter:'all',sort:'added',q:'',isort:{k:'title',d:1},
   cs:{ry:-24,rx:5,open:false},open:null,add:null,landed:null,order:[],cat:null,sel:null
@@ -944,7 +966,7 @@ const S={
 function syncStore(){S.store[S.shelf]=S.items}
 function persistLocal(){
   syncStore();
-  tryLS.set(KEY,JSON.stringify({v:5,mine:S.store.mine,together:S.store.together,shelf:S.shelf,people:S.people,filter:S.filter,sort:S.sort,isort:S.isort}));
+  tryLS.set(KEY,JSON.stringify({v:5,mine:S.store.mine,together:S.store.together,shelf:S.shelf,people:S.people,services:S.services,filter:S.filter,sort:S.sort,isort:S.isort}));
 }
 function save(){persistLocal();queueCloudSave();queueMineSave()}
 /* The seeded guests (Tim, Jess, Mum) are gone from every account. People are added by hand now. */
@@ -967,6 +989,7 @@ function load(){
     S.store.mine=Array.isArray(d.mine)?d.mine.map(norm):[];
     if(d.shelf==='mine'||d.shelf==='together')S.shelf=d.shelf;
     if(d.people&&typeof d.people==='object')S.people=d.people;
+    if(Array.isArray(d.services))S.services=d.services;
     if(d.filter)S.filter=d.filter;
     if(d.sort)S.sort=d.sort;
     if(d.isort)S.isort=d.isort;
@@ -980,11 +1003,12 @@ function useShelf(k){
   S.open=null;S.sel=null;S.q='';
   persistLocal();
 }
-function cloudContent(){syncStore();return {items:S.store.together,people:S.people}}
+function cloudContent(){syncStore();return {items:S.store.together,people:S.people,services:S.services}}
 function applyCloudContent(d){
   if(!d||typeof d!=='object')return;
   if(Array.isArray(d.items)){S.store.together=d.items.map(norm);if(S.shelf==='together')S.items=S.store.together}
   if(d.people&&typeof d.people==='object')S.people={...S.people,...d.people};
+  if(Array.isArray(d.services))S.services=d.services;
   scrubGuests();
   persistLocal();
 }
@@ -1918,17 +1942,28 @@ async function impConfirm(){
   toast(`Added ${added} ${added===1?'title':'titles'}${skipped?`, skipped ${skipped} already there`:''}.`);
 }
 let tonightIv=0;
-function openTonight(){
+async function openTonight(){
   if(S.open)closeEntry();
-  const pool=S.items.filter(i=>i.status==='waiting').map(i=>i.id);
-  S.tonight={pool,cur:null};
-  if(!pool.length){
+  const all=S.items.filter(i=>i.status==='waiting');
+  S.tonight={pool:all.map(i=>i.id),cur:null,note:''};
+  if(!all.length){
     openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
       <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
       <p class="kicker">Tonight</p><h2 id="sh-h">Nothing on ${S.shelf==='together'?'our':'my'} list yet.</h2>
       <p class="byline">Add a few you keep meaning to watch and this will choose for you.</p>
       <div class="setrow"><button type="button" class="btn accent" data-act="add">Add something</button></div></div>`);
     return;
+  }
+  const t=S.tonight;
+  if((S.services||[]).length&&TMDB.on()){
+    openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+      <p class="kicker">Tonight</p><h2 id="sh-h">Looking through your list…</h2><p class="fine">Checking what’s on your services.</p></div>`);
+    const ok=new Set(), queue=all.slice(0,40);
+    const worker=async()=>{while(queue.length){const it=queue.shift();try{if(onOurs(await providersFor(it)))ok.add(it.id)}catch(e){}}};
+    await Promise.all([worker(),worker(),worker(),worker(),worker()]);
+    if(S.tonight!==t)return;
+    if(ok.size){t.pool=all.filter(i=>ok.has(i.id)).map(i=>i.id);t.note='Picked from what’s on your services.'}
+    else t.note='Nothing on your list is on your services right now, so this is any pick.';
   }
   paintTonight(true);
 }
@@ -1940,7 +1975,7 @@ function paintTonight(spin){
   const syn=(it.syn||'').length>230?it.syn.slice(0,227).replace(/\s+\S*$/,'')+'…':(it.syn||'');
   openLayer(`<div class="sheet tonight" role="dialog" aria-modal="true" aria-labelledby="sh-h">
     <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
-    <p class="kicker">Tonight’s pick</p>
+    <p class="kicker">Tonight’s pick</p>${t.note?`<p class="fine" style="margin-top:-4px">${esc(t.note)}</p>`:''}
     <h2 id="sh-h" aria-live="polite">${esc(heading(it))}</h2>
     <div class="metaline"><div id="f-cover" class="${spin&&!reduceMotion()?'pop':''}">${coverHTML(smallPoster(it))}</div>
       <div><p class="byline">${esc(kindText(it))}${it.y?' · '+it.y:''}${it.min?' · '+it.min+' min':''}${it.dir?' · '+esc(it.dir):''}</p>
@@ -2189,6 +2224,9 @@ function openSettings(){
     <div class="field"><label for="s-region">Where you watch</label>
       <select id="s-region">${REGIONS.map(([c,n])=>`<option value="${c}" ${region()===c?'selected':''}>${n}</option>`).join('')}</select>
       <p class="fine">Decides which streaming services are shown on each title.</p></div>
+    <div class="field"><span class="lab">Our services</span>
+      <div class="chips" id="svc" role="group" aria-label="Streaming services you have">${serviceChoices().map(n=>`<button type="button" class="chip" data-act="svc" data-v="${esc(n)}" aria-pressed="${S.services.includes(n)}">${esc(n)}</button>`).join('')}</div>
+      <p class="fine">Tick the ones you both have. Titles you can watch right now get highlighted, and Tonight picks from them first.</p></div>
     <div class="field"><span class="lab">Your shelf</span><div class="setrow">
       <button type="button" class="btn line" data-act="open-import">Import a list</button>
       <button type="button" class="btn line" data-act="art">Find missing posters</button>
@@ -2230,6 +2268,7 @@ document.addEventListener('click',e=>{
   switch(act){
     case 'add': openAdd();break;
     case 'tonight': openTonight();break;
+    case 'svc': {const v=b.dataset.v;const i=S.services.indexOf(v);if(i>=0)S.services.splice(i,1);else S.services.push(v);b.setAttribute('aria-pressed',String(i<0));save();break}
     case 'tonight-again': paintTonight(true);break;
     case 'tonight-yes': {const id=b.dataset.id;closeLayer();openRate(id,{wi:null});break}
     case 'editwatch': {const it=byId(S.open);if(it)openRate(it.id,{wi:+b.dataset.i})}break;

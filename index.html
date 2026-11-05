@@ -420,6 +420,7 @@ img,svg{display:block;max-width:100%}
 .formfoot{display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:sticky;bottom:calc(-1*clamp(22px,4vw,34px));margin-bottom:calc(-1*clamp(22px,4vw,34px));padding:16px 0 clamp(22px,4vw,34px);background:linear-gradient(0deg,var(--bg) 78%,transparent);z-index:3}
 .preview{display:flex;gap:18px;align-items:flex-end}
 .metaline{display:flex;gap:14px;align-items:flex-start}
+#f-cover{width:78px;flex:none}
 .metaline .cover{width:78px;flex:none;box-shadow:0 8px 16px -6px rgba(0,0,0,.5)}
 .setrow{display:flex;gap:10px;flex-wrap:wrap}
 @media (max-width:600px){
@@ -495,6 +496,54 @@ const words=n=>n<20?W20[n]:n<100?TENS[Math.floor(n/10)]+(n%10?'-'+W20[n%10]:''):
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 const reduceMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 const sortKey=t=>t.replace(/^(the|a|an)\s+/i,'').toLowerCase();
+
+/* ============================================================
+   TMDB — film and series data, posters
+   Put a key in TMDB_BAKED to ship one key to everyone who opens the site.
+   Leave it empty and each person pastes their own in Settings (kept in their browser).
+   Accepts a v3 API key or a v4 read access token.
+   ============================================================ */
+const TMDB_BAKED='';
+const TMDB={
+  base:'https://api.themoviedb.org/3', img:'https://image.tmdb.org/t/p/',
+  key(){return (TMDB_BAKED||tryLS.get('the-usual-tmdb')||'').trim()},
+  on(){return !!this.key()},
+  async get(path,params={}){
+    const k=this.key(), u=new URL(this.base+path), h={Accept:'application/json'};
+    Object.entries(params).forEach(([a,b])=>u.searchParams.set(a,b));
+    if(k.length>40)h.Authorization='Bearer '+k; else u.searchParams.set('api_key',k);
+    const r=await fetch(u,{headers:h});
+    if(r.status===401)throw new Error('key');
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.json();
+  },
+  poster(p,size='w500'){return p?this.img+size+p:''}
+};
+function tmdbToItem(r){
+  const tv=r.media_type==='tv', date=tv?r.first_air_date:r.release_date;
+  return {id:`tmdb-${tv?'tv':'movie'}-${r.id}`,tmdb:`${tv?'tv':'movie'}-${r.id}`,t:(tv?r.name:r.title)||'Untitled',y:date?+date.slice(0,4):0,
+    type:tv?'series':'film',s:tv?1:undefined,min:0,dir:'',gen:[],syn:r.overview||'',poster:TMDB.poster(r.poster_path),watches:[]};
+}
+async function tmdbSearch(q){
+  const d=await TMDB.get('/search/multi',{query:q,include_adult:'false',language:'en-GB'});
+  return d.results.filter(r=>(r.media_type==='movie'||r.media_type==='tv')).slice(0,8).map(tmdbToItem);
+}
+async function tmdbDetails(it){
+  const tid=it.tmdb.split('-')[1];
+  if(it.type==='film'){
+    const d=await TMDB.get(`/movie/${tid}`,{append_to_response:'credits',language:'en-GB'});
+    const dirs=((d.credits&&d.credits.crew)||[]).filter(c=>c.job==='Director').map(c=>c.name).slice(0,2);
+    return {...it,min:d.runtime||0,gen:(d.genres||[]).map(g=>g.name),dir:dirs.join(' & '),syn:d.overview||it.syn,poster:TMDB.poster(d.poster_path)||it.poster,
+      y:d.release_date?+d.release_date.slice(0,4):it.y};
+  }
+  const d=await TMDB.get(`/tv/${tid}`,{language:'en-GB'});
+  const seasons=(d.seasons||[]).filter(x=>x.season_number>0).map(x=>({n:x.season_number,eps:x.episode_count||0,poster:TMDB.poster(x.poster_path),y:x.air_date?+x.air_date.slice(0,4):0}));
+  const first=seasons[0]||{n:1,eps:0,poster:'',y:it.y};
+  const showPoster=TMDB.poster(d.poster_path)||it.poster;
+  return {...it,seasons:seasons.length?seasons:[first],s:first.n,eps:first.eps,showPoster,poster:first.poster||showPoster,y:first.y||it.y,
+    min:(d.last_episode_to_air&&d.last_episode_to_air.runtime)||(d.episode_run_time&&d.episode_run_time[0])||0,
+    gen:(d.genres||[]).map(g=>g.name),dir:(d.created_by||[]).map(c=>c.name).slice(0,2).join(' & '),syn:d.overview||it.syn};
+}
 
 /* ============================================================
    SPINE COLOURS — the eight a spine can be
@@ -697,7 +746,7 @@ const rtxt=r=>r?(r%1?r:r+'.0'):'';
 
 function coverHTML(it){
   const p=SP[it.col%SP.length], t=hash(it.id)%5, n=it.t.length;
-  if(it.poster)return `<div class="cover cvp" style="--cb:var(${p.bg});--ci:var(${p.ink});--ca:var(${p.band})"><img src="${esc(it.poster)}" alt="Poster for ${esc(heading(it))}" loading="lazy"><div class="cv-sheen"></div></div>`;
+  if(it.poster)return `<div class="cover cvp" style="--cb:var(${p.bg});--ci:var(${p.ink});--ca:var(${p.band})"><img src="${esc(it.poster)}" alt="Poster for ${esc(heading(it))}" loading="lazy" onerror="this.remove()"><div class="cv-sheen"></div></div>`;
   const sz=n<=13?'':n<=24?'m':'l';
   return `<div class="cover cv${t}" style="--cb:var(${p.bg});--ci:var(${p.ink});--ca:var(${p.band})"><div class="cv-art"></div>
     <div class="cv-top"><span>${it.type==='series'?'Series · S'+it.s:'Film'}</span><span>${it.y||''}</span></div>
@@ -886,7 +935,7 @@ function fillBelow(){
     (pick.length?`<section class="margins" aria-label="Lines you wrote"><div class="quotes">
       ${pick.map(({i,w})=>`<button type="button" class="quote" data-id="${esc(i.id)}"><q>${esc(w.note)}</q><cite>${esc(heading(i))} · ${w.who.length?'with '+esc(w.who.map(nm).join(' & '))+' · ':''}${fmtMonth(w.d)}</cite></button>`).join('')}
     </div></section>`:'')+
-    `<div class="foot"><span>The Usual is kept in this browser. Nothing leaves your device.</span><span>Starter catalogue only · film data will come from TMDB.</span></div>`;
+    `<div class="foot"><span>The Usual is kept in this browser. Nothing leaves your device.</span><span>Film and series data and images from TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></div>`;
 }
 function refreshHeader(){
   const h=$('#deck-h'); if(h)h.innerHTML=deckText();
@@ -1119,32 +1168,71 @@ function closeLayer(){
 function catalogue(){ if(!S.cat)S.cat=CATALOGUE(); return S.cat }
 
 function openAdd(){
-  S.add={step:'find',q:''};
+  S.add={step:'find',q:'',tres:[],msg:'',offline:false};
   openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
     <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
     <h2 id="sh-h">What are we keeping?</h2>
     <div class="field"><label class="sr" for="sh-q">Title</label>
       <input id="sh-q" class="bigfield" type="text" autocomplete="off" placeholder="Start typing a title" aria-controls="sh-res"></div>
     <ul id="sh-res" class="results" role="listbox" aria-label="Results"></ul>
-    <p class="fine">Search covers a small starter catalogue for now. Anything it doesn’t know, you can add by hand.</p>
+    <p class="fine">${TMDB.on()?'Searching all of TMDB. Anything it doesn’t know, you can add by hand.':'Searching a small starter catalogue. Add a TMDB key in settings to search every film and series.'}</p>
   </div>`);
   $('#sh-res').innerHTML=resultsHTML('');
   setTimeout(()=>$('#sh-q')&&$('#sh-q').focus(),30);
 }
+const owned=r=>S.items.find(i=>i.tmdb===r.tmdb&&r.type==='film')||(r.type==='film'&&S.items.find(i=>i.type==='film'&&sortKey(i.t)===sortKey(r.t)&&Math.abs((i.y||0)-(r.y||0))<=1))||null;
+const smallPoster=t=>t.poster&&t.poster.includes('/w500/')?{...t,poster:t.poster.replace('/w500/','/w185/')}:t;
+function resultRow(t,attr,tag,kind){
+  return `<li><button type="button" class="res" role="option" ${attr}>${coverHTML(smallPoster(norm(t)))}
+    <span><b>${esc(t.t)}</b><small>${esc(kind||kindText(t))} · ${t.y||''}${t.dir?' · '+esc(t.dir):''}</small></span><em>${tag||''}</em></button></li>`;
+}
 function resultsHTML(q){
-  q=q.trim().toLowerCase();
+  const a=S.add||{}; q=q.trim().toLowerCase();
+  const live=TMDB.on()&&!a.offline;
+  const handRow=()=>{const nm=q.replace(/\b\w/g,c=>c.toUpperCase());return `<li><button type="button" class="res hand" data-act="manual" data-q="${esc(nm)}">
+    <span class="cover" style="--cb:var(--bg2);--ci:var(--ink);display:grid;place-items:center;font:400 26px var(--serif);border:1px dashed var(--rule)">+</span>
+    <span><b>Add “${esc(nm)}” by hand</b><small>${live?'Not on TMDB':'Not in the starter catalogue'}</small></span><em></em></button></li>`};
+  let h='';
+  if(live){
+    const mine=q?S.items.filter(i=>(i.t+' '+(i.dir||'')+' '+i.y).toLowerCase().includes(q)).slice(0,4):[];
+    h+=mine.map(i=>resultRow(i,`data-act="pick" data-cid="${esc(i.id)}"`,i.status==='waiting'?'Waiting':'On your shelf')).join('');
+    (a.tres||[]).forEach((r,i)=>{
+      if(owned(r))return;
+      const tvHave=r.type==='series'&&S.items.some(x=>x.tmdb===r.tmdb);
+      h+=resultRow(r,`data-act="pick-tmdb" data-i="${i}"`,tvHave?'Some seasons shelved':'',r.type==='series'?'Series':'Film');
+    });
+    if(a.msg)h+=`<li class="fine" style="padding:8px">${esc(a.msg)}</li>`;
+    if(q)h+=handRow();
+    return h;
+  }
   const cat=catalogue();
   let hits=q?cat.filter(t=>(t.t+' '+(t.dir||'')+' '+t.y).toLowerCase().includes(q)):cat.filter(t=>!byId(t.id)).slice(0,6);
   hits=hits.slice(0,8);
-  const row=t=>{const have=byId(t.id);
-    return `<li><button type="button" class="res" role="option" data-act="pick" data-cid="${esc(t.id)}">${coverHTML(have||norm(t))}
-      <span><b>${esc(t.t)}</b><small>${esc(kindText(t))} · ${t.y||''}${t.dir?' · '+esc(t.dir):''}</small></span>
-      <em>${have?(have.status==='waiting'?'Waiting':'On your shelf'):''}</em></button></li>`};
-  let h=hits.map(row).join('');
-  if(q)h+=`<li><button type="button" class="res hand" data-act="manual" data-q="${esc(q.replace(/\b\w/g,c=>c.toUpperCase()))}">
-    <span class="cover" style="--cb:var(--bg2);--ci:var(--ink);display:grid;place-items:center;font:400 26px var(--serif);border:1px dashed var(--rule)">+</span>
-    <span><b>Add “${esc(q.replace(/\b\w/g,c=>c.toUpperCase()))}” by hand</b><small>Not in the starter catalogue</small></span><em></em></button></li>`;
+  h=hits.map(t=>{const have=byId(t.id);return resultRow(have||t,`data-act="pick" data-cid="${esc(t.id)}"`,have?(have.status==='waiting'?'Waiting':'On your shelf'):'')}).join('');
+  if(a.msg)h=`<li class="fine" style="padding:8px">${esc(a.msg)}</li>`+h;
+  if(q)h+=handRow();
   return h;
+}
+let sT=0;
+function paintResults(){const el=$('#sh-res');if(el&&S.add&&S.add.step==='find')el.innerHTML=resultsHTML(S.add.q)}
+function queueSearch(){
+  clearTimeout(sT); const a=S.add; if(!a||a.step!=='find'||!TMDB.on())return;
+  const q=a.q.trim();
+  if(q.length<2){a.tres=[];a.msg='';a.offline=false;paintResults();return}
+  a.msg='Searching…';paintResults();
+  sT=setTimeout(async()=>{
+    try{const r=await tmdbSearch(q);if(!S.add||S.add.q.trim()!==q)return;S.add.tres=r;S.add.offline=false;S.add.msg=r.length?'':'Nothing on TMDB by that name.'}
+    catch(e){if(!S.add||S.add.q.trim()!==q)return;S.add.tres=[];
+      if(e.message==='key'){S.add.msg='TMDB didn’t accept that key. Check it in settings.'}
+      else{S.add.offline=true;S.add.msg='Couldn’t reach TMDB, so this is the starter catalogue.'}}
+    paintResults();
+  },280);
+}
+async function pickTmdb(i){
+  const r=S.add&&S.add.tres[i]; if(!r)return;
+  const have=owned(r); if(have){startForm(have,have.id);return}
+  const btn=$(`[data-act="pick-tmdb"][data-i="${i}"]`);if(btn)btn.style.opacity='.5';
+  try{startForm(await tmdbDetails(r),null)}catch(e){toast('Couldn’t fetch the details. Saving what we have.');startForm(r,null)}
 }
 function startForm(meta,existingId){
   const ex=existingId?byId(existingId):null;
@@ -1172,7 +1260,8 @@ function renderForm(){
         <div class="field"><label for="f-d">Director or creator <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="f-d" type="text" value="${esc(m.dir||'')}"></div>
       </div>
       <div class="field" id="f-dir" ${m.type==='series'?'hidden':''}><label for="f-d2">Director <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="f-d2" type="text" value="${esc(m.dir||'')}"></div>`
-    :`<div class="metaline">${coverHTML(m)}<div><b class="serif" style="font-size:30px;font-weight:400;line-height:1">${esc(m.t)}</b><p class="byline" style="margin-top:6px">${esc(kindText(m))} · ${m.y||''}${m.dir?' · '+esc(m.dir):''}</p>${ex&&m.status==='seen'?`<p class="byline">Already on your shelf, ${m.watches.length===1?'once':words(m.watches.length)+' times'}. This will be a rewatch.</p>`:''}</div></div>`}
+    :`<div class="metaline"><div id="f-cover">${coverHTML(m)}</div><div><b class="serif" style="font-size:30px;font-weight:400;line-height:1">${esc(m.t)}</b><p class="byline" id="f-by" style="margin-top:6px">${esc(kindText(m))} · ${m.y||''}${m.dir?' · '+esc(m.dir):''}</p>
+      ${m.seasons&&m.seasons.length>0&&!ex?`<div class="field" style="margin-top:12px"><label class="sr" for="f-season">Season</label><select id="f-season">${m.seasons.map(x=>`<option value="${x.n}" ${x.n===m.s?'selected':''}>Season ${x.n}${x.y?' · '+x.y:''}${x.eps?' · '+x.eps+' episodes':''}</option>`).join('')}</select></div>`:''}${ex&&m.status==='seen'?`<p class="byline">Already on your shelf, ${m.watches.length===1?'once':words(m.watches.length)+' times'}. This will be a rewatch.</p>`:''}</div></div>`}
 
     ${ex?'':`<div class="field"><span class="lab">Where does it go?</span>
       <div class="seg" role="group" aria-label="Status"><button type="button" data-act="status" data-v="seen" aria-pressed="${d.status==='seen'}">We’ve watched it</button><button type="button" data-act="status" data-v="waiting" aria-pressed="${d.status==='waiting'}">Saving it for later</button></div></div>`}
@@ -1223,16 +1312,23 @@ function submitForm(){
   if(a.manual&&!(m.t||'').trim()){const t=$('#f-t');t&&t.focus();toast('Give it a title first.');return}
   const watch=Wt(d.date||TODAY,d.who.slice(),d.r||null,(d.note||'').trim(),(d.ate||'').trim());
   let id;
+  if(!a.exist&&m.tmdb){
+    const tid='tmdb-'+m.tmdb+(m.type==='series'?'-s'+(m.s||1):'');
+    if(byId(tid)){
+      if(d.status==='seen')a.exist=tid;
+      else{save();closeLayer();toast(`${m.t} is already on your shelf.`);return}
+    }
+  }
   if(a.exist){
     const it=byId(a.exist); it.watches.push(watch); it.status='seen'; id=it.id;
     toast(it.watches.length>1?`Logged. That’s ${words(it.watches.length)} evenings with ${it.t}.`:`${it.t} is on the shelf.`);
     if(S.open===it.id){save();closeLayer();renderPanel();refreshView(true);return}
   }else{
     m.t=(m.t||'').trim();
-    let nid=m.manual||a.manual?'m-'+m.t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+(m.type==='series'?'-s'+(m.s||1):'')+'-'+Math.random().toString(36).slice(2,6):m.id;
+    let nid=m.manual||a.manual?'m-'+m.t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+(m.type==='series'?'-s'+(m.s||1):'')+'-'+Math.random().toString(36).slice(2,6):(m.tmdb?'tmdb-'+m.tmdb+(m.type==='series'?'-s'+(m.s||1):''):m.id);
     if(byId(nid))nid+='-'+Math.random().toString(36).slice(2,5);
     const it=norm({id:nid,t:m.t,y:m.y||0,type:m.type,s:m.s,eps:m.eps,min:m.min||0,dir:m.dir||'',gen:m.gen||[],syn:m.syn||'',short:m.short,
-      status:d.status,watches:d.status==='seen'?[watch]:[],col:d.col,added:TODAY,poster:m.poster||'',note:d.status==='waiting'?(d.why||'').trim():''});
+      status:d.status,watches:d.status==='seen'?[watch]:[],col:d.col,added:TODAY,poster:m.poster||'',tmdb:m.tmdb||'',note:d.status==='waiting'?(d.why||'').trim():''});
     S.items.push(it); id=it.id;
     toast(d.status==='seen'?`${it.t} is on the shelf.`:`${it.t} is waiting in the wrapper.`);
   }
@@ -1253,6 +1349,34 @@ function setRate(v){
 /* ============================================================
    SETTINGS
    ============================================================ */
+async function saveKey(){
+  const v=($('#s-key').value||'').trim(), msg=$('#s-msg'); tryLS.set('the-usual-tmdb',v);
+  if(!v){msg.textContent='Key removed. Search is back to the starter catalogue.';return}
+  msg.textContent='Checking…';
+  try{await TMDB.get('/configuration');msg.textContent='Connected. Search now covers all of TMDB.'}
+  catch(e){msg.textContent=e.message==='key'?'TMDB didn’t accept that key.':'Couldn’t reach TMDB just now. The key is saved.'}
+}
+async function fetchArt(){
+  const msg=$('#s-msg'); if(!TMDB.on()){msg.textContent='Add a TMDB key first.';return}
+  const todo=S.items.filter(i=>!i.poster); if(!todo.length){msg.textContent='Every title already has its art.';return}
+  let got=0,stop=false;
+  for(let n=0;n<todo.length&&!stop;n++){
+    const it=todo[n]; msg.textContent=`Finding art… ${n+1} of ${todo.length}`;
+    try{
+      const tv=it.type==='series', params={query:it.t,include_adult:'false',language:'en-GB'}; if(!tv&&it.y)params.year=it.y;
+      const d=await TMDB.get(tv?'/search/tv':'/search/movie',params), nt=sortKey(it.t);
+      const hit=d.results.find(r=>sortKey((tv?r.name:r.title)||'')===nt&&r.poster_path)||d.results.find(r=>r.poster_path);
+      if(hit){
+        it.poster=TMDB.poster(hit.poster_path);it.tmdb=(tv?'tv-':'movie-')+hit.id;
+        if(tv&&it.s){try{const sd=await TMDB.get(`/tv/${hit.id}/season/${it.s}`);if(sd.poster_path)it.poster=TMDB.poster(sd.poster_path)}catch(_){}}
+        got++;
+      }
+    }catch(e){if(e.message==='key'){msg.textContent='TMDB didn’t accept that key.';stop=true}}
+  }
+  save(); if(!stop)msg.textContent=`Found art for ${got} of ${todo.length}.`;
+  if(S.view==='shelf')fillShelf(true);else fillIndex();
+  if(S.open&&byId(S.open))renderPanel();
+}
 function openSettings(){
   openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
     <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
@@ -1261,6 +1385,10 @@ function openSettings(){
       <div class="field"><label for="s-a">Your name</label><input id="s-a" type="text" value="${esc(S.lib.a)}"></div>
       <div class="field"><label for="s-b">Who you watch with</label><input id="s-b" type="text" value="${esc(S.lib.b)}" placeholder="optional"></div>
     </div>
+    <div class="field"><label for="s-key">TMDB key</label>
+      ${TMDB_BAKED?`<p class="fine">Connected to TMDB for everyone who opens this site.</p>`:`<input id="s-key" type="password" autocomplete="off" spellcheck="false" placeholder="paste an API key or a read access token" value="${esc(TMDB.key())}">`}
+      <div class="setrow">${TMDB_BAKED?'':`<button type="button" class="btn line" data-act="key-save">Save and test</button>`}<button type="button" class="btn line" data-act="art">Find posters for my shelf</button></div>
+      <p class="fine" id="s-msg" aria-live="polite">${TMDB.on()?'Connected.':'Free from themoviedb.org: Settings, then API. Kept in this browser only.'}</p></div>
     <div class="field"><span class="lab">Your library</span><div class="setrow">
       <button type="button" class="btn line" data-act="export">Take a copy (JSON)</button>
       <button type="button" class="btn line" data-act="example">Restore the example library</button>
@@ -1302,7 +1430,8 @@ document.addEventListener('click',e=>{
     case 'log': {const it=byId(b.dataset.id);if(it){S.add=null;startForm(it,it.id)}break}
     case 'scrim': if(t===b)closeLayer();break;
     case 'sheet-close': case 'settings-done': closeLayer();break;
-    case 'pick': {const c=catalogue().find(x=>x.id===b.dataset.cid);if(!c)break;const have=byId(c.id);startForm(have||c,have?have.id:null);break}
+    case 'pick-tmdb': pickTmdb(+b.dataset.i);break;
+    case 'pick': {const c=byId(b.dataset.cid)||catalogue().find(x=>x.id===b.dataset.cid);if(!c)break;const have=byId(c.id);startForm(have||c,have?have.id:null);break}
     case 'manual': startForm({id:'manual',t:b.dataset.q,y:0,type:'film',min:0,dir:'',gen:[],syn:'',col:hash(b.dataset.q)%SP.length,manual:true,watches:[]},null);break;
     case 'back': if(S.add&&S.add.exist){closeLayer()}else{closeLayer();openAdd()}break;
     case 'fmt': {syncForm();S.add.meta.type=b.dataset.v;$$('[data-act=fmt]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
@@ -1319,6 +1448,8 @@ document.addEventListener('click',e=>{
     case 'norate': setRate(0);break;
     case 'fcol': {const i=+b.dataset.c;syncForm();S.add.d.col=i;$$('[data-act=fcol]').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.c===i)));
       $('#f-prev').innerHTML=spineHTML({...S.add.meta,col:i},{static:true});break}
+    case 'key-save': saveKey();break;
+    case 'art': fetchArt();break;
     case 'export': {const blob=new Blob([JSON.stringify({exported:TODAY,lib:S.lib,people:S.people,items:S.items},null,2)],{type:'application/json'});
       const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`the-usual-${TODAY}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);break}
     case 'example': if(confirm('Replace your library with the example one? Your current shelf will be lost unless you took a copy.')){S.items=seedItems();save();closeLayer();closeEntry();route();toast('The example library is back.')}break;
@@ -1328,13 +1459,22 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('input',e=>{
   const t=e.target;
-  if(t.id==='sh-q'){S.add.q=t.value;$('#sh-res').innerHTML=resultsHTML(t.value)}
+  if(t.id==='sh-q'){S.add.q=t.value;$('#sh-res').innerHTML=resultsHTML(t.value);queueSearch()}
   else if(t.id==='find'){S.q=t.value;applyFind()}
   else if(t.id==='s-a'){S.lib.a=t.value.trim()||'You';save();paintMast();const b=$('.deck p:last-child');if(b&&S.view==='shelf')b.innerHTML=sinceText()}
   else if(t.id==='s-b'){S.lib.b=t.value.trim();if(S.lib.b&&S.people[S.partner])S.people[S.partner].n=S.lib.b;save();paintMast();const b=$('.deck p:last-child');if(b&&S.view==='shelf')b.innerHTML=sinceText()}
   else if(t.closest('#addform')){syncForm(); if(t.id==='f-t'||t.id==='f-y'||t.id==='f-s'){const p=$('#f-prev');if(p)p.innerHTML=spineHTML({...S.add.meta,col:S.add.d.col},{static:true})}}
 });
+function applySeason(n){
+  const a=S.add,m=a&&a.meta,x=m&&(m.seasons||[]).find(y=>y.n===n); if(!x)return;
+  m.s=n;m.eps=x.eps||m.eps;m.poster=x.poster||m.showPoster||'';if(x.y)m.y=x.y;
+  const c=$('#f-cover'),by=$('#f-by'),pv=$('#f-prev');
+  if(c)c.innerHTML=coverHTML(m);
+  if(by)by.textContent=`${kindText(m)} · ${m.y||''}${m.dir?' · '+m.dir:''}`;
+  if(pv)pv.innerHTML=spineHTML({...m,col:a.d.col},{static:true});
+}
 document.addEventListener('change',e=>{
+  if(e.target.id==='f-season'){applySeason(+e.target.value);return}
   if(e.target.id==='sort'){S.sort=e.target.value;save();fillShelf()}
 });
 document.addEventListener('submit',e=>{if(e.target.id==='addform'){e.preventDefault();submitForm()}});

@@ -8,6 +8,15 @@
 
 ---
 
+## What changed in v1.2 (TMDB)
+
+- **Live search** across all of TMDB (films and series; people are filtered out). Your own shelf matches appear first, so "log another evening" is one tap. Falls back to the starter catalogue if there is no key or TMDB can't be reached, and says so.
+- **Real metadata on pick:** poster, director (or creator), runtime, genres, synopsis. **Series ask which season**; each season is its own case with that season's poster and year. Picking a season you already keep logs a rewatch instead of making a duplicate.
+- **Settings → TMDB key** (v3 key or v4 read token), with *Save and test*. **Find posters for my shelf** fetches art for everything already shelved (season posters for series).
+- A cover that fails to load falls back to the typographic one. Spines stay typographic.
+- TMDB attribution is in the footer, as their terms require.
+- **Key handling:** by default each person pastes their own key (stays in their browser). `TMDB_BAKED` at the top of the script ships one key to every visitor. A key in a public page is visible to anyone who views source, so it's only suitable for a private deployment.
+
 ## What changed in v1.1 (more intimate, more playful)
 
 - **Type:** *Fraunces* (soft, warm serif, light weights) with *DM Sans* for small controls. Replaces Instrument Serif and Schibsted Grotesk.

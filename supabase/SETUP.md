@@ -29,3 +29,15 @@ Run `accounts.sql` once in the SQL Editor, after `schema.sql`. It adds usernames
 Search matches the start of a username and needs at least three characters. Once both of you are in, you can switch off **Allow new users to sign up** under Authentication → Sign In / Providers so nobody else can create an account.
 
 Until `accounts.sql` has been run, the app falls back to the older invite-code flow.
+
+## Making it private to the two of you
+
+Sign-in is by **username and password**. Supabase still wants an email-shaped identifier, so the app turns `zai` into `zai@example.com` behind the scenes. `example.com` is reserved: nobody can own it or receive mail there, so nothing is ever sent. There is no "forgot password". If someone forgets theirs, reset it by hand in Supabase under Authentication → Users.
+
+1. **Authentication → Sign In / Providers → Email**: switch **Confirm email** off (there is no real inbox to confirm from).
+2. Each of you opens the site and chooses **Create account** with a username and a password of at least 8 characters.
+3. Zai invites Tim from Settings; Tim accepts.
+4. **Authentication → Sign In / Providers**: switch **Allow new users to sign up** off. From then on nobody else can make an account, and the sign-in screen says the shelf is private.
+5. Run `accounts.sql` again (it is safe to repeat). Section 5 stops strangers from calling the database functions at all.
+
+What is public: the website's code and the two keys in it (the Supabase *publishable* key and a TMDB read key). Both are designed to be visible. Your shelves are protected by row level security, not by hiding the code. Never put a `service_role` key in this repository.

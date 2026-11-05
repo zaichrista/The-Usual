@@ -173,3 +173,18 @@ drop policy if exists "Update own shelf" on public.user_state;
 create policy "Update own shelf" on public.user_state
   for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 grant select, insert, update on public.user_state to authenticated;
+
+-- 5. Lock the door -----------------------------------------------------------
+-- Supabase gives the "anon" role (anyone with the public key, signed in or not) execute rights on new
+-- functions by default. Every function above already refuses callers who aren't signed in, but there is
+-- no reason to let strangers reach them at all.
+revoke execute on function public.set_username(text) from anon;
+revoke execute on function public.search_users(text) from anon;
+revoke execute on function public.send_invite(uuid) from anon;
+revoke execute on function public.my_invites() from anon;
+revoke execute on function public.respond_invite(uuid, boolean) from anon;
+revoke execute on function public.list_members() from anon;
+revoke execute on function public.create_library(text) from anon;
+revoke execute on function public.create_library_invite() from anon;
+revoke execute on function public.join_library(text) from anon;
+revoke execute on function public.is_library_member(uuid) from anon;

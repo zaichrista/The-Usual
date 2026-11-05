@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>The Usual</title>
 <meta name="description" content="A private library of the films and series you keep, shelved by hand.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://image.tmdb.org; connect-src 'self' https://cmgiwujrrioppkuobirv.supabase.co wss://cmgiwujrrioppkuobirv.supabase.co https://api.themoviedb.org; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#F9F0E5">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -685,7 +688,7 @@ details.more>summary{min-height:44px;display:flex;align-items:center}
 <div id="selbar" role="region" aria-label="Remove titles" hidden><span id="selcount" aria-live="polite"></span><button type="button" class="rm" id="selrm" data-act="sel-remove" disabled>Remove</button><button type="button" data-act="sel-all">Select all</button><button type="button" class="quiet" data-act="select-toggle">Cancel</button></div>
 <noscript><p style="padding:24px">The Usual needs JavaScript to build your shelf.</p></noscript>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js" integrity="sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O" crossorigin="anonymous"></script>
 <script>
 'use strict';
 const SUPABASE_URL='https://cmgiwujrrioppkuobirv.supabase.co';
@@ -1134,11 +1137,11 @@ function paintUsers(){const el=$('#user-res');if(el)el.innerHTML=userResultsHTML
 function cloudSettingsHTML(){
   if(!SB)return `<section class="field"><p class="fine">Connecting…</p></section>`;
   const msg=esc(cloudMessage||'');
-  if(!cloudUser)return `<form id="cloud-auth" class="field cloud-controls"><label for="cloud-email">Email</label><input id="cloud-email" type="email" autocomplete="email" required><label for="cloud-password">Password</label><input id="cloud-password" type="password" autocomplete="current-password" minlength="8" required><div class="setrow"><button class="btn accent" type="submit" data-mode="signin">Sign in</button><button class="btn line" type="submit" data-mode="signup">Create account</button></div><p class="fine" id="cloud-message" aria-live="polite">${msg||'Passwords need at least 8 characters.'}</p></form>`;
+  if(!cloudUser)return `<form id="cloud-auth" class="field cloud-controls"><label for="cloud-login">Username</label><input id="cloud-login" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required><label for="cloud-password">Password</label><input id="cloud-password" type="password" autocomplete="current-password" minlength="8" required><div class="setrow"><button class="btn accent" type="submit" data-mode="signin">Sign in</button><button class="btn line" type="submit" data-mode="signup">Create account</button></div><p class="fine" id="cloud-message" aria-live="polite">${msg||'Pick a username and a password of at least 8 characters.'}</p></form>`;
   const off=profilesOff();
   if(!cloudProfile)return `<section class="field"><p class="fine">Opening your account…</p></section>`;
   if(!off&&!cloudProfile.username)return `<form id="cloud-username" class="field cloud-controls"><label for="cloud-uname">Choose a username</label><input id="cloud-uname" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" required><p class="fine">This is how the people you share with will find you. Use 3 to 20 letters, numbers or underscores.</p><div class="setrow"><button class="btn accent" type="submit">Continue</button></div><p class="fine" aria-live="polite">${msg}</p><button type="button" class="tlink" data-cloud="signout">Sign out</button></form>`;
-  const me=cloudProfile.username?'@'+esc(cloudProfile.username):esc(cloudUser.email||'your account');
+  const me=cloudProfile.username?'@'+esc(cloudProfile.username):esc(shownName(cloudUser));
   const codeBits=`<details class="joinbox"><summary>I have an invite code</summary><form id="cloud-join"><label for="cloud-invite-code">Invite code</label><input id="cloud-invite-code" type="text" autocomplete="one-time-code" required><div class="setrow"><button class="btn line" type="submit">Join</button></div></form></details>`;
   if(!cloudLibrary){
     const inv=cloudInvites.map(i=>`<li class="invrow"><span><b>@${esc(i.from_username||'someone')}</b> invited you to share <i>${esc(i.library_name)}</i>.</span><span class="setrow"><button type="button" class="btn accent" data-cloud="accept-invite" data-id="${esc(i.id)}">Accept</button><button type="button" class="btn line" data-cloud="decline-invite" data-id="${esc(i.id)}">Decline</button></span></li>`).join('');
@@ -1150,13 +1153,42 @@ function cloudSettingsHTML(){
     :`<label for="user-q" class="lab">Invite someone by username</label><input id="user-q" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Start typing their username" value="${esc(userQ)}"><ul id="user-res" class="results" aria-live="polite">${userResultsHTML()}</ul>`;
   return `<section class="field cloud-controls"><p class="fine">Signed in as ${me}. ${msg||'Your shelf syncs across your devices.'}</p>${people}${invite}<button type="button" class="tlink" data-cloud="signout" style="justify-self:start">Sign out</button></section>`;
 }
+/* Accounts are made from a username. Behind the scenes Supabase still wants an email-shaped
+   identifier, so the username becomes name@example.com. example.com is reserved: nobody can ever
+   own it or receive mail there, so nothing is sent and nothing can be taken over. An address
+   that already has a real email (anything with an @) still signs in as typed. */
+const LOGIN_DOMAIN='example.com';
+const USERNAME_RE=/^[a-z0-9_]{3,20}$/;
+function loginEmail(raw){
+  const v=(raw||'').trim().toLowerCase();
+  if(v.includes('@'))return {email:v,username:null};
+  if(!USERNAME_RE.test(v))return {error:'Usernames are 3 to 20 letters, numbers or underscores.'};
+  return {email:v+'@'+LOGIN_DOMAIN,username:v};
+}
+function friendlyAuthError(msg,mode){
+  const m=(msg||'').toLowerCase();
+  if(m.includes('invalid login'))return 'That username and password don’t match.';
+  if(m.includes('already registered')||m.includes('already been registered'))return 'That username is taken.';
+  if(m.includes('signups not allowed')||m.includes('signup is disabled')||m.includes('signups are disabled'))return 'This shelf is private. Accounts are only made by invitation.';
+  if(m.includes('email not confirmed'))return 'This account still needs confirming. In Supabase, switch off “Confirm email”.';
+  if(m.includes('password')&&m.includes('character'))return 'Passwords need at least 8 characters.';
+  if(m.includes('rate limit')||m.includes('too many'))return 'Too many tries. Wait a minute and try again.';
+  return msg;
+}
+const shownName=u=>{const e=(u&&u.email)||'';return e.toLowerCase().endsWith('@'+LOGIN_DOMAIN)?e.split('@')[0]:e||'your account'};
 async function cloudAuthSubmit(form,mode){
-  const email=$('#cloud-email').value.trim(),password=$('#cloud-password').value;
+  const login=loginEmail($('#cloud-login').value), password=$('#cloud-password').value;
+  if(login.error){cloudMessage=login.error;refreshCloudUI();return}
+  if(mode==='signup'&&password.length<8){cloudMessage='Passwords need at least 8 characters.';refreshCloudUI();return}
+  const {email}=login;
   const result=mode==='signup'?await SB.auth.signUp({email,password}):await SB.auth.signInWithPassword({email,password});
-  if(result.error){cloudMessage=result.error.message;refreshCloudUI();return}
-  if(mode==='signup'&&!result.data.session)cloudMessage='Check your email to confirm your account, then sign in.';
-  else cloudMessage='';
-  cloudUser=result.data.user||cloudUser;refreshCloudUI();if(cloudUser)await findCloudLibrary();
+  if(result.error){cloudMessage=friendlyAuthError(result.error.message,mode);refreshCloudUI();return}
+  if(mode==='signup'&&!result.data.session){cloudMessage='Account made, but it still needs confirming. In Supabase, switch off “Confirm email”, then sign in.';refreshCloudUI();return}
+  cloudMessage='';
+  cloudUser=result.data.user||cloudUser;
+  /* a username sign-up already chose its name, so don't ask twice */
+  if(mode==='signup'&&login.username&&cloudUser){try{await SB.rpc('set_username',{new_name:login.username})}catch(e){}}
+  refreshCloudUI();if(cloudUser)await findCloudLibrary();
 }
 
 /* ============================================================

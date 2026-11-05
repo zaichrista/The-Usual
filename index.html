@@ -520,7 +520,7 @@ const sortKey=t=>t.replace(/^(the|a|an)\s+/i,'').toLowerCase();
    Leave it empty and each person pastes their own in Settings (kept in their browser).
    Accepts a v3 API key or a v4 read access token.
    ============================================================ */
-const TMDB_BAKED='';
+const TMDB_BAKED='8097ad26a71f3a7f5a14db6dcfd8fd98';
 const TMDB={
   base:'https://api.themoviedb.org/3', img:'https://image.tmdb.org/t/p/',
   key(){return (TMDB_BAKED||tryLS.get('the-usual-tmdb')||'').trim()},
@@ -704,17 +704,17 @@ function save(){
 }
 function load(){
   const raw=tryLS.get(KEY);
-  if(!raw){S.items=seedItems();return}
+  if(!raw){S.items=[];return}
   try{
     const d=JSON.parse(raw);
-    S.items=Array.isArray(d.items)?d.items.map(norm):seedItems();
+    S.items=Array.isArray(d.items)?d.items.map(norm):[];
     if(d.people)S.people={...S.people,...d.people};
     if(d.lib)S.lib={...S.lib,...d.lib};
     if(d.partner)S.partner=d.partner;
     if(d.filter)S.filter=d.filter;
     if(d.sort)S.sort=d.sort;
     if(d.isort)S.isort=d.isort;
-  }catch(e){S.items=seedItems()}
+  }catch(e){S.items=[]}
 }
 function cloudContent(){return {items:S.items,people:S.people,lib:S.lib,partner:S.partner,filter:S.filter,sort:S.sort,isort:S.isort}}
 function applyCloudContent(d){

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - github-pages
   workflow_dispatch:
 
 permissions:
@@ -27,8 +26,6 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-        with:
-          ref: github-pages
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Prepare site files

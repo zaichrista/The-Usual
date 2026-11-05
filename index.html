@@ -724,7 +724,7 @@ const CATALOGUE=()=>{const m=new Map();[...seedItems(),...CAT_EXTRA.map(norm)].f
 const KEY='the-usual-v4';
 const S={
   items:[],
-  people:{},services:[],store:{mine:[],together:[]},shelf:'together',
+  people:{},pronouns:{},services:[],store:{mine:[],together:[]},shelf:'together',
   mode:tryLS.get('the-usual-mode')||'auto',accent:tryLS.get('the-usual-accent')==='pink'?'pink':'green',
   view:'shelf',rendered:null,filter:'all',sort:'recent',q:'',isort:{k:'title',d:1},layout:'grid',disc:null,dtaste:'all',dmood:'',
   open:null,pushed:false,add:null,tonight:null,cat:null,sel:null
@@ -732,7 +732,7 @@ const S={
 function syncStore(){S.store[S.shelf]=S.items}
 function persistLocal(){
   syncStore();
-  tryLS.set(KEY,JSON.stringify({v:5,mine:S.store.mine,together:S.store.together,shelf:S.shelf,people:S.people,services:S.services,filter:S.filter,sort:S.sort,isort:S.isort,layout:S.layout}));
+  tryLS.set(KEY,JSON.stringify({v:5,mine:S.store.mine,together:S.store.together,shelf:S.shelf,people:S.people,pronouns:S.pronouns,services:S.services,filter:S.filter,sort:S.sort,isort:S.isort,layout:S.layout}));
 }
 function save(){persistLocal();queueCloudSave();queueMineSave()}
 /* The seeded guests (Tim, Jess, Mum) are gone from every account. People are added by hand now. */
@@ -755,6 +755,7 @@ function load(){
     S.store.mine=Array.isArray(d.mine)?d.mine.map(norm):[];
     if(d.shelf==='mine'||d.shelf==='together')S.shelf=d.shelf;
     if(d.people&&typeof d.people==='object')S.people=d.people;
+    if(d.pronouns&&typeof d.pronouns==='object')S.pronouns=d.pronouns;
     if(Array.isArray(d.services))S.services=d.services;
     if(d.filter)S.filter=d.filter;
     if(d.sort)S.sort=d.sort;
@@ -770,11 +771,12 @@ function useShelf(k){
   S.open=null;S.sel=null;S.q='';
   persistLocal();
 }
-function cloudContent(){syncStore();return {items:S.store.together,people:S.people,services:S.services}}
+function cloudContent(){syncStore();return {items:S.store.together,people:S.people,pronouns:S.pronouns,services:S.services}}
 function applyCloudContent(d){
   if(!d||typeof d!=='object')return;
   if(Array.isArray(d.items)){S.store.together=d.items.map(norm);if(S.shelf==='together')S.items=S.store.together}
   if(d.people&&typeof d.people==='object')S.people={...S.people,...d.people};
+  if(d.pronouns&&typeof d.pronouns==='object'){const own=S.pronouns[myKey()];S.pronouns={...S.pronouns,...d.pronouns};if(own)S.pronouns[myKey()]=own}
   if(Array.isArray(d.services))S.services=d.services;
   scrubGuests();
   persistLocal();
@@ -803,7 +805,7 @@ async function loadMine(){
 }
 function claimLocal(){
   const owner=tryLS.get('the-usual-owner');
-  if(owner&&owner!==cloudUser.id){S.store={mine:[],together:[]};S.people={};S.shelf='together';S.items=S.store.together}
+  if(owner&&owner!==cloudUser.id){S.store={mine:[],together:[]};S.people={};S.pronouns={};S.shelf='together';S.items=S.store.together}
   tryLS.set('the-usual-owner',cloudUser.id);
   persistLocal();
 }
@@ -964,6 +966,20 @@ const lastW=it=>{const w=wsorted(it);return w[w.length-1]};
 const lastDate=it=>{const w=lastW(it);return w?w.d:''};
 const latestR=it=>{const w=wsorted(it).filter(x=>x.r);return w.length?w[w.length-1].r:null};
 const rewatches=it=>Math.max(0,it.watches.length-1);
+/* pronouns: each person sets their own; the app uses them whenever it writes about that person */
+const PRON={
+  she:{l:'she/her',s:'she',o:'her',p:'her',pl:false},
+  he:{l:'he/him',s:'he',o:'him',p:'his',pl:false},
+  they:{l:'they/them',s:'they',o:'them',p:'their',pl:true},
+  name:{l:'name only',n:1,pl:false}
+};
+const pronounsOf=k=>S.pronouns[k]||PRON.they;
+function setPronouns(k,v){S.pronouns[k]=v;save()}
+function parsePronouns(t){
+  const a=t.split('/').map(x=>x.trim().toLowerCase()).filter(Boolean);
+  if(!a.length||a.some(x=>x.length>20||/[^a-zà-ÿ'’-]/.test(x)))return null;
+  return {l:a.join('/'),s:a[0],o:a[1]||a[0],p:a[2]||a[1]||a[0],pl:a[0]==='they'};
+}
 const nm=k=>S.people[k]?S.people[k].n:k;
 function myKey(){return (cloudProfile&&cloudProfile.username)||'me'}
 function partnerOf(){const me=myKey();const m=(cloudMembers||[]).find(x=>x.username&&!x.is_me&&x.username!==me);return m?{key:m.username,name:cap(m.username)}:null}
@@ -1334,28 +1350,30 @@ function profileFor(who){
   else if(!me){buddy={name:'You',line:'Watching together'}}
   else{const c={};pool.forEach(i=>i.watches.forEach(w=>w.who.forEach(k=>c[k]=(c[k]||0)+1)));const t=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];buddy=t?{name:nm(t[0]),line:`${t[1]} ${t[1]===1?'watch':'watches'} together`}:null}
   // taste → a few plain sentences
-  const V=(a,b)=>me?a:b, sub=name, poss=me?'Your':name+'’s';
-  const loved=scored.filter(x=>x.r>=4).map(x=>x.it), rated=pool.flatMap(i=>i.watches.map(w=>rateOf(w,key,me))).filter(v=>v>0);
+  const pn=me?null:pronounsOf(key), pl=me||pn.pl, V=(a,b)=>pl?a:b, nmOnly=!me&&pn.n;
+  // first sentence uses the name, later ones the person's pronouns
+  const SUB=()=>me?'You':(!out.length||nmOnly?name:cap(pn.s)), POSS=()=>me?'Your':(!out.length||nmOnly?name+'’s':cap(pn.p)), subj=me?'you':(nmOnly?name:pn.s);
   const out=[];
+  const loved=scored.filter(x=>x.r>=4).map(x=>x.it), rated=pool.flatMap(i=>i.watches.map(w=>rateOf(w,key,me))).filter(v=>v>0);
   const gw={};scored.forEach(x=>{if(!x.r)return;(x.it.gen||[]).forEach(g=>gw[g]=(gw[g]||0)+(x.r>=4?1:.3))});
   const gs=Object.entries(gw).sort((a,b)=>b[1]-a[1]).slice(0,2).map(e=>e[0].toLowerCase());
-  if(gs.length&&loved.length)out.push(`${sub} ${V('gravitate','gravitates')} to ${joinAnd(gs)}.`);
+  if(gs.length&&loved.length)out.push(`${SUB()} ${V('gravitate','gravitates')} to ${joinAnd(gs)}.`);
   const dc={};loved.forEach(i=>{if(i.y){const d=Math.floor(i.y/10)*10;dc[d]=(dc[d]||0)+1}});
   const td=Object.entries(dc).sort((a,b)=>b[1]-a[1])[0];
   const dr={};loved.forEach(i=>(i.dir||'').split(/\s*&\s*/).filter(Boolean).forEach(d=>dr[d]=(dr[d]||0)+1));
   const tdr=Object.entries(dr).sort((a,b)=>b[1]-a[1])[0];
-  if(td&&td[1]>=2&&td[1]/loved.length>=.4)out.push(`${poss} heart is in the ${td[0]}s.`);
-  else if(tdr&&tdr[1]>=2)out.push(`${sub} ${V('have','has')} a soft spot for ${tdr[0]}.`);
+  if(td&&td[1]>=2&&td[1]/loved.length>=.4)out.push(`${POSS()} heart is in the ${td[0]}s.`);
+  else if(tdr&&tdr[1]>=2)out.push(`${SUB()} ${V('have','has')} a soft spot for ${tdr[0]}.`);
   const avg=rated.length?rated.reduce((a,b)=>a+b,0)/rated.length:0;
   const mc={};loved.forEach(i=>i.watches.forEach(w=>(w.mood||[]).forEach(m=>mc[m]=(mc[m]||0)+1)));
   const tm=Object.entries(mc).sort((a,b)=>b[1]-a[1])[0];
   const rewatch=pool.length>=4&&pool.filter(i=>i.watches.length>1).length/pool.length>=.25;
-  if(rated.length>=5&&avg>=4.1)out.push(`${sub} ${V('are','is')} generous with stars.`);
-  else if(rated.length>=5&&avg<=3.3)out.push(`${sub} ${V('are','is')} hard to impress.`);
-  else if(rewatch)out.push(`${sub} ${V('rewatch','rewatches')} the ones ${V('you','they')} love.`);
+  if(rated.length>=5&&avg>=4.1)out.push(`${SUB()} ${V('are','is')} generous with stars.`);
+  else if(rated.length>=5&&avg<=3.3)out.push(`${SUB()} ${V('are','is')} hard to impress.`);
+  else if(rewatch)out.push(`${SUB()} ${V('rewatch','rewatches')} the ones ${subj} ${V('love','loves')}.`);
   else if(tm)out.push(`Best watched when it’s ${moodLabel(tm[0]).toLowerCase()}.`);
   const last=pool.map(lastDate).filter(Boolean).sort().pop()||'';
-  return {top,hours:Math.round(mins/60),days:Math.round(mins/60/24*10)/10,buddy,about:out.slice(0,3).join(' ')||'Rate a few titles and your taste will take shape here.',last,name:me?(cloudProfile&&cloudProfile.username?cap(cloudProfile.username):'You'):name,handle:me?(cloudProfile&&cloudProfile.username||''):(pr?pr.key:'')};
+  return {top,hours:Math.round(mins/60),days:Math.round(mins/60/24*10)/10,buddy,about:out.slice(0,3).join(' ')||'Rate a few titles and your taste will take shape here.',last,name:me?(cloudProfile&&cloudProfile.username?cap(cloudProfile.username):'You'):name,handle:me?(cloudProfile&&cloudProfile.username||''):(pr?pr.key:''),pron:(S.pronouns[key]||{}).l||''};
 }
 function viewProfile(){
   const pr=partnerOf();if(!pr)S.pperson='me';
@@ -1364,7 +1382,7 @@ function viewProfile(){
   const top=P.top.length?`<div class="top5">${P.top.map((it,n)=>`<button type="button" class="t5" data-act="open" data-id="${esc(it.id)}"><span class="t5c">${coverHTML(smallPoster(it))}<i>${n+1}</i></span><span class="t5t">${esc(it.t)}</span></button>`).join('')}</div>`:'<p class="fine">Nothing rated yet.</p>';
   $('#view').innerHTML=`${topHTML('Profile',null,topBtns())}${seg}
   <section class="pro">
-    <div class="pro-id"><span class="avatar big">${esc((P.name||'?').slice(0,1).toUpperCase())}</span><div><h2>${esc(P.name)}</h2><p class="fine" style="margin:4px 0 0">${P.handle?'@'+esc(P.handle)+' · ':''}${P.last?'Updated '+fmtShort(P.last):'No watches yet'}</p></div></div>
+    <div class="pro-id"><span class="avatar big">${esc((P.name||'?').slice(0,1).toUpperCase())}</span><div><h2>${esc(P.name)}</h2><p class="fine" style="margin:4px 0 0">${P.handle?'@'+esc(P.handle)+' · ':''}${P.pron?esc(P.pron)+' · ':''}${P.last?'Updated '+fmtShort(P.last):'No watches yet'}</p></div></div>
     <p class="about">${esc(P.about)}</p>
     <h3 class="pro-h">Top five</h3>${top}
     <div class="pro-two"><div><span class="pro-k">Time watching</span><b>${P.hours} hours</b><small>${P.hours>=24?'About '+P.days+' days':'And counting'}</small></div>
@@ -1922,6 +1940,10 @@ function viewSettings(){
       <button type="button" class="swa green" data-act="accent" data-v="green" aria-pressed="${S.accent==='green'}"><span></span>Green</button>
       <button type="button" class="swa pink" data-act="accent" data-v="pink" aria-pressed="${S.accent==='pink'}"><span></span>Pink</button></div></div>
   </section>
+  <section class="card"><h3>Pronouns</h3>
+    <div class="chips" role="group" aria-label="Your pronouns">${[['she','She/her'],['he','He/him'],['they','They/them'],['name','Just my name']].map(([k,l])=>`<button type="button" class="chip" data-act="pron" data-v="${k}" aria-pressed="${(S.pronouns[myKey()]||{}).l===PRON[k].l}">${l}</button>`).join('')}</div>
+    <div class="addrow" style="margin-top:18px"><label class="sr" for="s-pron">Something else</label><input id="s-pron" type="text" maxlength="30" placeholder="Something else, like xe/xem/xyr" value="${esc((()=>{const c=S.pronouns[myKey()];return c&&!Object.values(PRON).some(x=>x.l===c.l)?c.l:''})())}" style="flex:1"><button type="button" class="btn line" data-act="pron-custom">Set</button></div>
+    <p class="fine">${S.pronouns[myKey()]?'':'Not set yet, so you’re written about as they/them. '}This is how the app writes about you, on your profile and anywhere it mentions you. ${partnerOf()?'Your partner sees it too. ':''}Only you can change yours.</p></section>
   <section class="card"><h3>Account</h3>${cloudSettingsHTML()}</section>
   <section class="card"><h3>People you watch with</h3>
     ${Object.keys(S.people).length?`<ul class="members" aria-label="People">${Object.entries(S.people).map(([k,p])=>`<li>${esc(p.n)} <button type="button" data-act="rmperson" data-k="${esc(k)}" aria-label="Remove ${esc(p.n)}">×</button></li>`).join('')}</ul>`:''}
@@ -2013,6 +2035,8 @@ document.addEventListener('click',e=>{
     case 'd-mood': S.dmood=S.dmood===b.dataset.v?'':b.dataset.v;fillDiscover();break;
     case 'd-add': discoverAdd(b.dataset.k);break;
     case 'isortdir': S.isort.d=-S.isort.d;save();b.textContent=S.isort.d>0?'↑':'↓';fillGrid();break;
+    case 'pron': setPronouns(myKey(),{...PRON[b.dataset.v]});renderBase();toast('Saved. That’s how the app will write about you.');break;
+    case 'pron-custom': {const v=parsePronouns(($('#s-pron')||{}).value||'');if(!v){toast('Try something like she/her, or xe/xem/xyr.');break}setPronouns(myKey(),v);renderBase();toast('Saved. That’s how the app will write about you.');break}
     case 'select-start': location.hash='#/';setTimeout(startSelect,60);break;
     case 'select-toggle': if(S.sel)endSelect();else startSelect();break;
     case 'sel-all': if(S.sel){$$('.tile[data-id],.row[data-id]').forEach(el=>S.sel.add(el.dataset.id));paintSel()}break;

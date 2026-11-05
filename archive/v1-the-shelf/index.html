@@ -1,0 +1,2509 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Usual</title>
+<meta name="description" content="A private library of the films and series you keep, shelved by hand.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://image.tmdb.org; connect-src 'self' https://cmgiwujrrioppkuobirv.supabase.co wss://cmgiwujrrioppkuobirv.supabase.co https://api.themoviedb.org; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#F9F0E5">
+<link rel="icon" type="image/png" href="../../icon-192.png">
+<link rel="manifest" href="../../manifest.webmanifest">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="The Usual">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..600,100;1,9..144,300..600,100&family=DM+Sans:wght@400..700&display=swap" rel="stylesheet">
+<script>
+/* set the theme before first paint */
+try{var t=localStorage.getItem('the-usual-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}
+</script>
+<style>
+/* ============================================================
+   THE USUAL — v1 (editorial)
+   Palette is the owner's nine colours; everything else is a mix of them.
+   ============================================================ */
+:root{
+  --espresso:#261F1D; --cream:#F5E6D2; --champagne:#D8B596; --copper:#B77D55; --walnut:#78462F;
+  --oxblood:#63352F; --gold:#E4C6A3; --mauve:#6C5A6F; --blue:#9CAFCB;
+  --serif:'Fraunces','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'DM Sans','Helvetica Neue',Arial,sans-serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --wood:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='520'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0032 0.2' numOctaves='5' seed='8'/%3E%3CfeColorMatrix values='0.55 0 0 0 0.17 0.34 0 0 0 0.085 0.22 0 0 0 0.045 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+}
+:root[data-theme="light"]{
+  --bg:color-mix(in srgb,var(--cream) 52%,#fff);
+  --bg2:color-mix(in srgb,var(--cream) 90%,var(--champagne));
+  --ink:var(--espresso);
+  --soft:color-mix(in srgb,var(--espresso) 78%,var(--bg));
+  --danger:#9B2F20;
+  --rule:color-mix(in srgb,var(--espresso) 20%,transparent);
+  --accent:var(--oxblood); --accent-ink:var(--cream);
+  --star:var(--oxblood); --star-off:color-mix(in srgb,var(--espresso) 18%,transparent);
+  --case-shadow:0 46px 60px -34px rgba(38,31,29,.6);
+}
+:root[data-theme="dark"]{
+  --bg:color-mix(in srgb,var(--espresso) 88%,#000);
+  --bg2:var(--espresso);
+  --ink:var(--cream);
+  --soft:color-mix(in srgb,var(--cream) 72%,var(--bg));
+  --danger:#F2A595;
+  --rule:color-mix(in srgb,var(--cream) 20%,transparent);
+  --accent:var(--champagne); --accent-ink:var(--espresso);
+  --star:var(--gold); --star-off:color-mix(in srgb,var(--cream) 20%,transparent);
+  --case-shadow:0 46px 60px -30px rgba(0,0,0,.85);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+.serif,h1,h2,.wordmark,.sp-t,.cv-title,.quote q,.pn-title{font-variation-settings:'SOFT' 100,'WONK' 0}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--sans);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;text-align:inherit}
+a{color:inherit}
+ul,ol{list-style:none}
+img,svg{display:block;max-width:100%}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:var(--bg);padding:8px 12px;z-index:200}
+.skip:focus{left:8px}
+.wrap{max-width:1260px;margin:0 auto;padding:0 clamp(16px,3vw,44px)}
+
+.kicker{font:600 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.serif{font-family:var(--serif)}
+
+/* ---------- buttons ---------- */
+#gate{position:fixed;inset:0;z-index:1000;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
+#gate[hidden]{display:none}
+#gate .gate-card{width:100%;max-width:400px}
+#gate h1{font:italic 300 clamp(40px,9vw,56px)/1 var(--serif);margin:0 0 6px}
+#gate .gate-sub{margin:0 0 28px;color:var(--soft)}
+#gate label{display:block;margin-top:14px}
+#gate input{width:100%}
+#gate .setrow{margin-top:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;padding:.85em 1.35em;border-radius:2px;
+  font:600 13px/1 var(--sans);letter-spacing:.05em;background:var(--ink);color:var(--bg);transition:transform .15s var(--ease),opacity .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn.accent{background:var(--accent);color:var(--accent-ink)}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.btn[disabled]{opacity:.35;pointer-events:none}
+.tlink{font:600 12px/1 var(--sans);letter-spacing:.06em;text-decoration:underline;text-underline-offset:4px;color:var(--soft)}
+.tlink:hover{color:var(--ink)}
+.tlink.danger:hover{color:#a3402f}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:1px solid var(--ink);background:var(--bg);position:relative;z-index:20}
+.mast-main{display:flex;align-items:center;gap:16px 30px;padding:16px 0 14px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:6px 16px;margin-right:auto;flex-wrap:wrap}
+.iconbtn{position:relative;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--soft);transition:background .2s,color .2s;padding:0}
+.iconbtn:hover{background:var(--bg2);color:var(--ink)}
+.iconbtn svg{grid-area:1/1;transition:transform .55s var(--ease),opacity .3s}
+.themebtn .ic-moon{opacity:0;transform:rotate(-80deg) scale(.4)}
+:root[data-theme="dark"] .themebtn .ic-sun{opacity:0;transform:rotate(80deg) scale(.4)}
+:root[data-theme="dark"] .themebtn .ic-moon{opacity:1;transform:none}
+.wordmark{font:300 clamp(34px,4.6vw,50px)/.9 var(--serif);letter-spacing:-.03em;text-decoration:none;margin-right:auto}
+.wordmark em{font-style:italic}
+.mainnav{display:flex;gap:26px;align-items:center}
+.navicons{display:flex;gap:4px;align-items:center;margin-left:-6px}
+.mainnav .iconbtn{padding:0;border:0;width:44px;height:44px;color:var(--soft)}
+.mainnav .iconbtn:hover{color:var(--ink)}
+.mainnav a,.mainnav button{font:600 13px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:var(--soft);padding:13px 0;border-bottom:1.5px solid transparent}
+.mainnav a:hover,.mainnav button:hover{color:var(--ink)}
+.mainnav [aria-current="page"]{color:var(--ink);border-color:var(--ink)}
+@media (max-width:640px){
+  .mast-main{padding:12px 0 10px}
+  .mainnav{order:3;width:100%;gap:22px;border-top:1px solid var(--rule);padding-top:8px}
+}
+
+/* ---------- shelf page ---------- */
+#view{outline:none;transition:margin-right .35s var(--ease)}
+.deck{padding:clamp(22px,3.4vw,40px) 0 clamp(14px,2vw,22px);display:grid;gap:10px}
+.deck h1{font:300 clamp(28px,4vw,46px)/1.08 var(--serif);letter-spacing:-.025em;max-width:22ch;text-wrap:balance}
+.deck h1 em{font-style:italic;color:var(--soft)}
+.deck p{color:var(--soft);font-size:15px}
+
+.controls{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 34px;padding:12px 0 18px;border-top:1px solid var(--rule)}
+.tabs{display:flex;gap:6px 24px;flex-wrap:wrap;margin-right:auto}
+.tabs button{font:600 14px/1 var(--sans);letter-spacing:.03em;padding:14px 0;color:var(--soft);border-bottom:1.5px solid transparent}
+.tabs button sup{font-size:10px;margin-left:3px;opacity:.7}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.ctl{display:flex;flex-direction:column;gap:4px}
+.ctl label{font:600 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.ctl select,.ctl input{appearance:none;-webkit-appearance:none;background:transparent;border:0;border-bottom:1px solid var(--soft);
+  padding:3px 18px 4px 0;font:italic 400 19px/1.25 var(--serif);min-width:150px;border-radius:0}
+.ctl input{width:min(300px,78vw)}
+.ctl select{background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.3'/%3E%3C/svg%3E") right 2px center no-repeat}
+.ctl input::placeholder{color:var(--soft);opacity:1}
+input::placeholder,textarea::placeholder{color:var(--soft);opacity:1}
+.ctl select:focus-visible,.ctl input:focus-visible{outline-offset:2px}
+.ctl option{font:16px var(--sans);color:#261F1D}
+
+/* ---------- stage: editorial column + bookcase ---------- */
+.stage{display:block}
+.rail{position:relative}
+@media (min-width:1100px){
+  .stage{display:grid;grid-template-columns:clamp(330px,29vw,420px) minmax(0,1fr);gap:clamp(28px,3.4vw,56px);align-items:start;padding-top:clamp(22px,3vw,38px)}
+  .rail{position:sticky;top:16px;max-height:calc(100dvh - 32px);overflow-y:auto;overflow-x:hidden;padding:2px 6px 24px 2px;margin:-2px -6px 0 -2px;scrollbar-width:thin}
+  .rail .deck{padding-top:0}
+  .rail .deck h1{font-size:clamp(30px,2.7vw,40px);max-width:none}
+  .rail .controls{flex-direction:column;align-items:stretch;gap:18px;padding-top:14px}
+  .rail .controls .tabs{margin-right:0}
+  .rail .ctl input,.rail .ctl select{width:100%}
+  body.v-shelf.panel-open .rail-main{display:none}
+  body.v-shelf .scrim.for-panel{display:none}
+  .stage .panel{position:static;width:auto;border:0;box-shadow:none;animation:none;overflow:visible;background:none;z-index:auto}
+  .stage .pn-bar{position:sticky;top:0;padding:0 0 12px;background:var(--bg);border-bottom:1px solid var(--ink)}
+  .stage .pn-body{padding:20px 0 32px;gap:20px}
+  .stage .pn-title{font-size:clamp(32px,2.8vw,40px)}
+  .stage .pn-cover{width:min(210px,60%)}
+  .stage .ledger li{grid-template-columns:1fr}
+  .stage .ledger .lg-x{grid-column:1}
+}
+
+/* ---------- the bookcase ---------- */
+.bookcase{--u:1;--sh:190;position:relative;margin:4px 0 0;border-radius:3px 3px 0 0;
+  background:var(--wood);background-size:100% 520px;
+  padding:0 calc(22px*var(--u));box-shadow:var(--case-shadow),inset 0 0 0 1px rgba(228,198,163,.16)}
+.crown{height:calc(30px*var(--u));margin:0 calc(-22px*var(--u));background:var(--wood);background-size:100% 520px;
+  border-radius:3px 3px 0 0;position:relative;box-shadow:0 6px 12px rgba(0,0,0,.4)}
+.crown::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(228,198,163,.3),transparent 38%,rgba(0,0,0,.22))}
+.plinth{height:calc(34px*var(--u));margin:0 calc(-22px*var(--u));background:var(--wood);background-size:100% 520px;position:relative;box-shadow:inset 0 3px 0 rgba(0,0,0,.35)}
+.plinth::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),transparent 40%,rgba(0,0,0,.3))}
+.cavity{--wall:calc(24px*var(--u));position:relative;min-height:200px;overflow:hidden;
+  background:
+    radial-gradient(90% 55% at 50% 0%,rgba(255,214,160,.17),transparent 72%),
+    linear-gradient(90deg,rgba(0,0,0,.5),transparent 14%,transparent 86%,rgba(0,0,0,.5)),
+    linear-gradient(180deg,rgba(14,8,6,.5),rgba(14,8,6,.88)),
+    var(--wood);
+  background-size:auto,auto,auto,100% 520px;
+  box-shadow:inset 0 22px 30px -4px rgba(0,0,0,.85)}
+.cavity::before,.cavity::after{content:"";position:absolute;top:0;bottom:0;width:var(--wall);z-index:4;pointer-events:none;
+  background:linear-gradient(90deg,rgba(255,214,160,.14),rgba(0,0,0,.72)),var(--wood);background-size:auto,100% 520px}
+.cavity::before{left:0;clip-path:polygon(0 0,100% calc(18px*var(--u)),100% calc(100% - 18px*var(--u)),0 100%);box-shadow:inset -10px 0 14px -6px rgba(0,0,0,.6)}
+.cavity::after{right:0;transform:scaleX(-1);clip-path:polygon(0 0,100% calc(18px*var(--u)),100% calc(100% - 18px*var(--u)),0 100%)}
+.row{position:relative}
+.row::before{content:"";position:absolute;inset:0 0 calc(17px*var(--u)) 0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.62),rgba(0,0,0,.22) 38%,rgba(0,0,0,0) 70%)}
+.slots{display:flex;align-items:flex-end;gap:calc(2px*var(--u));padding:0 calc(24px*var(--u)) calc(9px*var(--u));
+  height:calc((var(--sh) + 40)*var(--u)*1px)}
+.board{height:calc(17px*var(--u));background:var(--wood);background-size:100% 520px;position:relative;
+  box-shadow:0 14px 16px -2px rgba(0,0,0,.62),inset 0 -5px 7px rgba(0,0,0,.45)}
+.board::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:calc(16px*var(--u));pointer-events:none;
+  background:linear-gradient(0deg,rgba(255,226,184,.34),rgba(0,0,0,.6)),var(--wood);background-size:auto,100% 520px;
+  clip-path:polygon(var(--wall) 0,calc(100% - var(--wall)) 0,100% 100%,0 100%)}
+.board::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,226,184,.42) 0,rgba(255,226,184,.07) 22%,transparent 50%,rgba(0,0,0,.34))}
+.tag{position:absolute;left:calc(26px*var(--u));top:calc(12px*var(--u));z-index:1;font:600 12px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(245,230,210,.88);pointer-events:none}
+.tag i{font:italic 400 15px/1 var(--serif);letter-spacing:0;text-transform:none;margin-left:8px;color:rgba(245,230,210,.8)}
+.row.bare .slots{opacity:1}
+.hollow{position:absolute;inset:0 0 auto 0;height:calc((var(--sh) + 40)*var(--u)*1px);display:grid;place-items:center;text-align:center;padding:0 24px;pointer-events:none;z-index:2}
+.hollow>div{pointer-events:auto;max-width:34ch;color:var(--cream)}
+.hollow h2{font:italic 300 clamp(26px,3vw,36px)/1.1 var(--serif);margin-bottom:10px}
+.hollow p{font-size:14px;color:rgba(245,230,210,.7);margin-bottom:18px}
+.hollow .btn{background:var(--cream);color:var(--espresso)}
+
+/* ---------- spines: one height, always ---------- */
+.sp{position:relative;flex:none;display:block;width:calc(var(--w)*var(--u)*1px);height:calc(var(--sh)*var(--u)*1px);
+  transform-origin:50% 100%;transition:transform .38s var(--ease),opacity .3s,filter .3s;z-index:1}
+.sp::after{content:"";position:absolute;left:-1px;right:-5px;bottom:calc(-4px*var(--u));height:calc(6px*var(--u));background:rgba(0,0,0,.6);filter:blur(3px);z-index:-1;pointer-events:none}
+.sp:hover,.sp:focus-visible,.sp.pulled{transform:translateY(calc(-17px*var(--u)));z-index:6}
+.sp:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.sp-body{position:absolute;inset:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;
+  background:var(--sb);color:var(--si);border-radius:2px 2px 0 0;
+  box-shadow:inset 1px 0 0 rgba(255,255,255,.2),inset -1px 0 0 rgba(0,0,0,.4),2px 0 5px rgba(0,0,0,.55)}
+.sp-body::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:linear-gradient(90deg,rgba(0,0,0,.34),rgba(0,0,0,0) 22%,rgba(255,255,255,.15) 48%,rgba(0,0,0,0) 66%,rgba(0,0,0,.4))}
+.sp-cap{width:100%;flex:none;height:calc(8px*var(--u));background:var(--sa);display:grid;place-items:center;
+  font:700 calc(10px*var(--u))/1 var(--sans);letter-spacing:.04em;color:var(--sb)}
+.sp.series .sp-cap{height:calc(21px*var(--u))}
+.sp-t{flex:1;min-height:0;max-height:100%;writing-mode:vertical-rl;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font:400 calc(var(--fs)*var(--u)*1px)/1 var(--serif);letter-spacing:0;padding:calc(9px*var(--u)) 0 calc(6px*var(--u))}
+.sp-foot{flex:none;display:flex;flex-direction:column;align-items:center;gap:calc(4px*var(--u));padding-bottom:calc(9px*var(--u))}
+.sp-y{display:flex;flex-direction:column;align-items:center;font:600 calc(9.5px*var(--u))/1.05 var(--sans);letter-spacing:.02em;opacity:.85}
+.sp-dot{width:calc(6px*var(--u));height:calc(6px*var(--u));border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+.sp-pip{position:absolute;top:calc(2px*var(--u));right:calc(2px*var(--u));width:calc(5px*var(--u));height:calc(5px*var(--u));border-radius:50%;background:var(--gold);z-index:3;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+.sp.wrapped .sp-body{filter:saturate(.72) brightness(.97);box-shadow:inset 0 0 0 1px rgba(255,255,255,.4),2px 0 5px rgba(0,0,0,.55)}
+.sp.wrapped .sp-body::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:linear-gradient(115deg,rgba(255,255,255,.42) 0,rgba(255,255,255,.04) 26%,rgba(255,255,255,.2) 52%,rgba(255,255,255,0) 72%)}
+.sp.dim{opacity:.2;filter:grayscale(1)}
+.sp.dim:hover{opacity:.9;filter:none}
+.sp.static{display:inline-block;pointer-events:none;transform:none}
+.sp-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translate(-50%,4px);opacity:0;pointer-events:none;
+  background:var(--cream);color:var(--espresso);padding:7px 11px 8px;border-radius:2px;white-space:nowrap;
+  box-shadow:0 8px 18px rgba(0,0,0,.5);transition:opacity .15s,transform .2s var(--ease);display:grid;gap:2px;text-align:left}
+.sp-tip b{font:400 15px/1.15 var(--serif)}
+.sp-tip i{font:600 12px/1 var(--sans);font-style:normal;letter-spacing:.1em;text-transform:uppercase;opacity:.65}
+.sp:hover .sp-tip,.sp:focus-visible .sp-tip{opacity:1;transform:translate(-50%,0)}
+.sp.tl .sp-tip{left:0;transform:translate(0,4px)}.sp.tl:hover .sp-tip,.sp.tl:focus-visible .sp-tip{transform:none}
+.sp.tr .sp-tip{left:auto;right:0;transform:translate(0,4px)}.sp.tr:hover .sp-tip,.sp.tr:focus-visible .sp-tip{transform:none}
+.sp.landing{animation:land 1s var(--ease) both}
+@keyframes land{0%{transform:translateY(-120px) rotate(-5deg);opacity:0}50%{opacity:1}78%{transform:translateY(5px)}100%{transform:none}}
+
+/* stars */
+.stars{display:inline-block;font:400 15px/1 var(--sans);letter-spacing:2px;--p:0%;
+  background:linear-gradient(90deg,var(--star) var(--p),var(--star-off) var(--p));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;vertical-align:-1px}
+
+/* ---------- under the shelf ---------- */
+.below{display:grid;gap:clamp(30px,4vw,54px);padding:clamp(34px,5vw,64px) 0 70px}
+.figures{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.fig{padding:18px 0 16px;border-right:1px solid var(--rule);padding-left:18px}
+.fig:first-child{padding-left:0}.fig:last-child{border-right:0}
+.fig b{display:block;font:300 clamp(38px,4.6vw,60px)/1 var(--serif);letter-spacing:-.04em}
+.fig span{font:600 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.margins h2{font:600 12px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--soft);margin-bottom:22px}
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,56px)}
+.quote{display:grid;gap:14px;align-content:start;text-align:left}
+.quote q{font:italic 300 clamp(20px,2.1vw,26px)/1.22 var(--serif);quotes:"“" "”";text-wrap:pretty}
+.quote cite{font:600 12px/1.4 var(--sans);font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.quote:hover q{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+.foot{padding:20px 0 40px;border-top:1px solid var(--rule);font-size:12px;color:var(--soft);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media (max-width:760px){
+  .figures{grid-template-columns:1fr 1fr}
+  .fig:nth-child(2){border-right:0}
+  .fig:nth-child(3){padding-left:0;border-top:1px solid var(--rule)}.fig:nth-child(4){border-top:1px solid var(--rule)}
+  .quotes{grid-template-columns:1fr}
+}
+
+/* ---------- index ---------- */
+.idx{width:100%;border-collapse:collapse}
+.idx th{font:600 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--soft);text-align:left;padding:0 12px 12px 0;border-bottom:1px solid var(--ink)}
+.idx th button{font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;display:inline-flex;gap:6px}
+.idx th button:hover,.idx th[aria-sort] button{color:var(--ink)}
+.idx td{padding:12px 12px 12px 0;border-bottom:1px solid var(--rule);vertical-align:baseline;font-size:14px}
+.idx tbody tr{cursor:pointer}
+.idx tbody tr:hover td{background:var(--bg2)}
+.idx td.t{font:300 clamp(20px,2.1vw,27px)/1.12 var(--serif);letter-spacing:-.015em;padding-left:6px}
+.idx td.t small{display:block;font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-top:5px}
+.idx td.n{font-variant-numeric:tabular-nums}
+.idx tr.dim{opacity:.25}
+.idx tr:focus-visible{outline-offset:-2px}
+@media (max-width:760px){.idx .hide-s{display:none}}
+
+/* ---------- covers ---------- */
+.cover{container-type:inline-size;position:relative;aspect-ratio:135/190;overflow:hidden;background:var(--cb);color:var(--ci);border-radius:2px 3px 3px 2px}
+.cv-art{position:absolute;inset:0;pointer-events:none}
+.cv-sheen{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,0,0,.4) 0,rgba(255,255,255,.16) 2.2%,rgba(0,0,0,.12) 4.2%,transparent 7%),linear-gradient(112deg,rgba(255,255,255,.22) 0,rgba(255,255,255,0) 28%,rgba(255,255,255,0) 64%,rgba(255,255,255,.08))}
+.cv-top{position:absolute;left:9cqw;right:7cqw;top:6.5cqw;padding-bottom:3.2cqw;border-bottom:.5cqw solid currentColor;display:flex;justify-content:space-between;
+  font:600 4.3cqw/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}
+.cv-title{position:absolute;left:9cqw;right:7cqw;bottom:17cqw;font:300 13cqw/.96 var(--serif);letter-spacing:-.025em;text-wrap:balance}
+.cv-title.m{font-size:10.2cqw}.cv-title.l{font-size:8cqw}
+.cv-by{position:absolute;left:9cqw;right:7cqw;bottom:7cqw;font:600 3.8cqw/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cv0 .cv-art::before{content:"";position:absolute;right:-15cqw;top:15cqw;width:72cqw;aspect-ratio:1;border-radius:50%;background:var(--ca)}
+.cv1 .cv-art::before{content:"";position:absolute;left:0;right:0;top:30cqw;height:38cqw;background:repeating-linear-gradient(0deg,var(--ca) 0 3.2cqw,transparent 3.2cqw 7.4cqw)}
+.cv2 .cv-art::before{content:"";position:absolute;left:9cqw;top:20cqw;width:54cqw;height:66cqw;border-radius:27cqw 27cqw 0 0;background:var(--ca)}
+.cv3 .cv-art::before,.cv3 .cv-art::after{content:"";position:absolute;top:24cqw;width:52cqw;aspect-ratio:1;border-radius:50%;border:1.3cqw solid var(--ca)}
+.cv3 .cv-art::before{left:5cqw}.cv3 .cv-art::after{right:-4cqw;top:38cqw}
+.cv4 .cv-art::before{content:"";position:absolute;left:0;right:0;top:17cqw;height:70cqw;background:linear-gradient(158deg,transparent 50%,var(--ca) 50%)}
+
+/* ---------- entry panel ---------- */
+.panel{position:fixed;z-index:60;top:0;right:0;bottom:0;width:min(540px,100vw);overflow-y:auto;overscroll-behavior:contain;
+  background:var(--bg);border-left:1px solid var(--ink);box-shadow:-30px 0 60px rgba(0,0,0,.28);animation:panelIn .45s var(--ease)}
+@keyframes panelIn{from{transform:translateX(40px);opacity:0}}
+.scrim{position:fixed;inset:0;z-index:55;background:rgba(20,12,10,.45);animation:fade .3s}
+@keyframes fade{from{opacity:0}}
+.pn-bar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:6px;padding:12px 22px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.pn-bar .step{width:38px;height:34px;display:grid;place-items:center;border-radius:2px;font:500 18px/1 var(--sans);color:var(--soft)}
+.pn-bar .step:hover{background:var(--bg2);color:var(--ink)}
+.pn-pos{font:600 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-left:6px}
+.pn-bar .tlink{margin-left:auto}
+.pn-body{padding:26px 28px 56px;display:grid;gap:22px}
+.pn-cover{width:min(240px,62%);perspective:900px;margin-bottom:6px}
+.pn-cover .cover{box-shadow:0 22px 34px -12px rgba(0,0,0,.6),0 3px 5px rgba(0,0,0,.35);transform:rotateY(-9deg) rotateX(2deg);transform-origin:left center;transition:transform .6s var(--ease)}
+.pn-cover:hover .cover{transform:rotateY(0) rotateX(0)}
+.pn-title{font:300 clamp(36px,5vw,50px)/1 var(--serif);letter-spacing:-.03em;text-wrap:balance}
+.pn-title small{display:block;font:italic 400 .5em/1.1 var(--serif);color:var(--soft);margin-top:.2em;letter-spacing:0}
+.byline{font-size:14px;color:var(--soft)}
+.syn{font:italic 300 18px/1.4 var(--serif);max-width:34ch;text-wrap:pretty}
+.pn-sec{display:grid;gap:14px;padding-top:18px;border-top:1px solid var(--ink)}
+.pn-sec>h3{font:600 12px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+.facts{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:8px 34px}
+.facts div b{display:block;font:300 30px/1 var(--serif)}
+.facts div span{font:600 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.ledger{display:grid}
+.ledger li{display:grid;grid-template-columns:118px 1fr;gap:4px 18px;padding:15px 0;border-bottom:1px solid var(--rule)}
+.ledger li:first-child{padding-top:4px}
+.lg-d{display:grid;gap:5px;align-content:start}
+.lg-k{font:600 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.lg-d time{font:400 16px/1.15 var(--serif)}
+.lg-b{display:grid;gap:7px;align-content:start}
+.lg-who{font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lg-note{font:italic 300 18px/1.3 var(--serif);text-wrap:pretty}
+.lg-ate{font-size:13px;color:var(--soft)}
+.lg-x{grid-column:2;justify-self:start;font:600 12px/1 var(--sans);letter-spacing:.06em;color:var(--soft);text-decoration:underline;text-underline-offset:3px;opacity:.7}
+.lg-x:hover{opacity:1;color:#a3402f}
+.wrapnote{font:italic 300 22px/1.25 var(--serif)}
+.pn-acts{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.swatches{display:flex;gap:9px;flex-wrap:wrap}
+.sw{width:26px;height:26px;border-radius:50%;background:var(--sb);box-shadow:0 0 0 1px var(--rule),inset 0 0 0 3px var(--bg);transition:transform .15s}
+.sw:hover{transform:scale(1.12)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink),inset 0 0 0 3px var(--bg)}
+.remove-row{padding-top:6px}
+
+/* ---------- the case: open it, turn it over ---------- */
+.case-wrap{display:grid;justify-items:center;gap:6px;margin-bottom:4px}
+.case-stage{position:relative;width:100%;container-type:inline-size;perspective:1400px;padding:36px 0 30px;touch-action:pan-y;cursor:grab;outline-offset:-4px}
+.case-stage:active{cursor:grabbing}
+.case-stage::after{content:"";position:absolute;left:24%;right:24%;bottom:14px;height:18px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.42),transparent 70%);filter:blur(5px);pointer-events:none}
+.case3d{--cw:min(230px,45cqw);--cd:calc(var(--cw)*.12);--ry:-24deg;--rx:5deg;--open:0deg;--tx:0;--z:1.16;
+  position:relative;margin:0 auto;width:var(--cw);height:calc(var(--cw)*1.407);transform-style:preserve-3d;
+  transform:translateX(calc(var(--tx)*var(--cw))) scale(var(--z)) rotateX(var(--rx)) rotateY(var(--ry));
+  transition:transform .95s var(--ease)}
+.case3d.open{--tx:.5;--z:1;--open:-158deg}
+.case3d.dragging{transition:none}
+.case3d>*{position:absolute}
+.c-base{inset:0;transform:translateZ(calc(var(--cd)/-2));transform-style:preserve-3d}
+.c-base>div{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:2px}
+.c-base .out{transform:rotateY(180deg)}
+.c-front{inset:0;transform-origin:left center;transform:translateZ(calc(var(--cd)/2)) rotateY(var(--open));transform-style:preserve-3d;transition:transform 1.05s var(--ease)}
+.c-front>div{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:2px 3px 3px 2px;overflow:hidden}
+.c-front .f-in{transform:rotateY(180deg)}
+.f-out .cover{width:100%;height:100%;aspect-ratio:auto;border-radius:0}
+.gloss{position:absolute;inset:0;pointer-events:none;background:linear-gradient(118deg,rgba(255,255,255,.28),rgba(255,255,255,0) 34%,rgba(255,255,255,0) 70%,rgba(255,255,255,.12))}
+.c-spine,.c-edge-r,.c-top,.c-bot{backface-visibility:hidden;-webkit-backface-visibility:hidden;background:color-mix(in srgb,var(--sb) 62%,#0c0807)}
+.c-spine{top:0;left:0;width:var(--cd);height:100%;transform:translateX(calc(var(--cd)/-2)) rotateY(-90deg);background:var(--sb);color:var(--si);display:flex;justify-content:center;overflow:hidden}
+.c-spine span{writing-mode:vertical-rl;font:400 calc(var(--cd)*.52)/1 var(--serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:8% 0;align-self:center;max-height:100%}
+.c-edge-r{top:0;right:0;width:var(--cd);height:100%;transform:translateX(calc(var(--cd)/2)) rotateY(90deg)}
+.c-top{top:0;left:0;width:100%;height:var(--cd);transform:translateY(calc(var(--cd)/-2)) rotateX(90deg)}
+.c-bot{bottom:0;left:0;width:100%;height:var(--cd);transform:translateY(calc(var(--cd)/2)) rotateX(-90deg)}
+/* inside left: the insert */
+.insert{position:absolute;inset:0;background:var(--cream);color:var(--espresso);padding:10% 9%;display:flex;flex-direction:column;gap:6%;
+  background-image:linear-gradient(90deg,rgba(0,0,0,.16),transparent 9%)}
+.in-h{font:300 calc(var(--cw)*8.6/100)/1.05 var(--serif);letter-spacing:-.02em}
+.in-q{font:italic 300 calc(var(--cw)*7.4/100)/1.28 var(--serif);text-wrap:pretty;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
+.in-m{margin-top:auto;font:600 calc(var(--cw)*3.7/100)/1.4 var(--sans);letter-spacing:.1em;text-transform:uppercase;opacity:.6}
+/* inside right: the tray and disc */
+.tray{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#2a211e,#171110 75%);box-shadow:inset 0 0 0 calc(var(--cw)*2.2/100) #0f0a09,inset 0 0 20px rgba(0,0,0,.6)}
+.disc{position:absolute;left:50%;top:46%;width:82%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+  background:conic-gradient(from 30deg,#efeae3,#b7b0a8,#f6f2ec,#9f978f,#e7e1d9,#c9c1b8,#f6f2ec,#efeae3);
+  box-shadow:0 2px 10px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.3);cursor:pointer;transition:transform .3s var(--ease)}
+.disc::before{content:"";position:absolute;inset:11%;border-radius:50%;background:radial-gradient(circle,transparent 0 21%,var(--sb) 22% 100%);box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.15)}
+.disc::after{content:"";position:absolute;left:50%;top:50%;width:16%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:#171110;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.disc i{position:absolute;inset:0;border-radius:50%;z-index:2;display:grid;place-items:end center;padding-bottom:17%;font:italic 300 calc(var(--cw)*5/100)/1 var(--serif);color:var(--si)}
+.disc:hover{transform:translate(-50%,-50%) scale(1.03)}
+.disc.spin{animation:spin 2.6s cubic-bezier(.12,.7,.2,1)}
+@keyframes spin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(900deg)}}
+.tray-n{position:absolute;left:0;right:0;bottom:5%;text-align:center;font:italic 300 calc(var(--cw)*5.4/100)/1 var(--serif);color:rgba(245,230,210,.5)}
+/* outside back */
+.back{position:absolute;inset:0;background:var(--sb);color:var(--si);padding:9% 8%;display:flex;flex-direction:column;gap:5%;
+  background-image:linear-gradient(270deg,rgba(0,0,0,.18),transparent 8%)}
+.b-t{font:300 calc(var(--cw)*8/100)/1 var(--serif);letter-spacing:-.025em}
+.b-s{font:italic 300 calc(var(--cw)*5.2/100)/1.32 var(--serif);text-wrap:pretty;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
+.b-m{font:600 calc(var(--cw)*3.5/100)/1.5 var(--sans);letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.b-bar{margin-top:auto;height:calc(var(--cw)*12/100);width:46%;background:repeating-linear-gradient(90deg,currentColor 0 .calc(var(--cw)*6/100),transparent .calc(var(--cw)*6/100) calc(var(--cw)*1.5/100),currentColor calc(var(--cw)*1.5/100) calc(var(--cw)*2.8/100),transparent calc(var(--cw)*2.8/100) calc(var(--cw)*3.4/100));opacity:.75}
+.case-stage.locked{cursor:default}
+.wrapfx{position:absolute;inset:0;pointer-events:none;background:linear-gradient(112deg,rgba(255,255,255,.5) 0,rgba(255,255,255,.06) 26%,rgba(255,255,255,.28) 52%,rgba(255,255,255,0) 74%);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.45)}
+.sealed{font:italic 300 15px/1 var(--serif);color:var(--soft)}
+.case-ctl{display:flex;gap:26px;justify-content:center;margin-top:6px}
+.case-ctl .tlink{font-size:13px}
+.hl{display:inline;font:inherit;color:inherit;text-align:inherit;letter-spacing:inherit;text-decoration:underline dotted 1px;text-decoration-color:var(--rule);text-underline-offset:.16em;transition:text-decoration-color .2s}
+.hl:hover{text-decoration-color:currentColor}
+.pull{margin-top:6px;font-size:13px}
+.sp[draggable="true"]{cursor:grab}
+.sp.dragging{opacity:.25}
+.sp.over .sp-body{box-shadow:0 0 0 2px var(--gold),2px 0 5px rgba(0,0,0,.55)}
+.cvp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sp:hover+.sp,.sp.pulled+.sp{transform:translateX(calc(5px*var(--u)))}
+.sp:has(+ .sp:hover),.sp:has(+ .sp.pulled){transform:translateX(calc(-5px*var(--u)))}
+
+/* ---------- sheets (add / settings) ---------- */
+.layer-scrim{position:fixed;inset:0;z-index:80;background:rgba(20,12,10,.55);display:grid;place-items:center;padding:20px;animation:fade .25s}
+.sheet{position:relative;width:min(660px,100%);max-height:calc(100dvh - 40px);overflow-y:auto;background:var(--bg);border-radius:3px;padding:30px clamp(22px,4vw,40px) 34px;
+  box-shadow:0 40px 80px rgba(0,0,0,.5);display:grid;gap:20px;animation:sheetIn .4s var(--ease)}
+@keyframes sheetIn{from{transform:translateY(24px);opacity:0}}
+.sheet h2{font:300 clamp(30px,4.4vw,40px)/1.05 var(--serif);letter-spacing:-.03em}
+.sh-x{position:absolute;right:14px;top:12px;width:36px;height:36px;font-size:24px;line-height:1;color:var(--soft);display:grid;place-items:center}
+.sh-x:hover{color:var(--ink)}
+.field{display:grid;gap:7px}
+.field>label,.field>.lab{font:600 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.field input[type=text],.field input[type=email],.field input[type=password],.field input[type=number],.field input[type=date],.field textarea,.field select{
+  width:100%;background:transparent;border:0;border-bottom:1px solid var(--soft);border-radius:0;padding:6px 0 7px;font:400 21px/1.2 var(--serif)}
+.field input[type=date]{font:400 17px var(--sans)}
+.field textarea{resize:vertical;min-height:2.6em;font-style:italic}
+.field input:focus,.field textarea:focus,.field select:focus{outline:0;border-bottom-color:var(--ink)}
+.bigfield{width:100%;background:transparent;border:0;border-bottom:1.5px solid var(--ink);border-radius:0;padding:8px 0 10px;font:italic 400 clamp(24px,3.6vw,30px)/1.15 var(--serif)}
+.bigfield:focus{outline:0}
+.results{display:grid;max-height:min(42dvh,360px);overflow-y:auto;margin:0 -8px}
+.res{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:8px;width:100%;border-radius:2px}
+.res:hover,.res:focus-visible{background:var(--bg2)}
+.res .cover{width:44px}
+.res b{display:block;font:400 19px/1.15 var(--serif)}
+.res small{font:600 12px/1.3 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.res em{font:600 12px/1 var(--sans);font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.res.hand b{font-style:italic}
+.addtabs{display:flex;gap:24px;border-bottom:1px solid var(--rule);margin-top:-6px}
+.addtabs button{font:600 13px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:14px 0;border-bottom:1.5px solid transparent;margin-bottom:-1px}
+.addtabs button:hover{color:var(--ink)}
+.addtabs button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.addrow{display:flex;gap:14px 20px;align-items:center;flex-wrap:wrap}
+.res.done{cursor:default;background:var(--bg2)}
+.res.done em{display:flex;gap:14px;align-items:center}
+.res.done .tlink{font-size:12px}
+.res.busy{opacity:.55}
+.imp-text{width:100%;min-height:190px;background:var(--bg2);border:1px solid var(--soft);border-radius:2px;padding:14px;font:400 16px/1.55 var(--sans);resize:vertical}
+.imp-text:focus{outline:0;border-color:var(--ink)}
+.imp-list{display:grid;max-height:min(44dvh,380px);overflow-y:auto;margin:0 -8px}
+.imp-row{display:grid;grid-template-columns:20px 40px 1fr;gap:12px;align-items:center;padding:8px;border-radius:2px;cursor:pointer}
+.imp-row:hover{background:var(--bg2)}
+.imp-row .cover{width:40px}
+.imp-row input{width:18px;height:18px;accent-color:var(--accent)}
+.imp-row b{display:block;font:400 18px/1.15 var(--serif)}
+.imp-row small{font:600 12px/1.4 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+.imp-row.miss b{font-style:italic}
+.imp-row.dup{opacity:.5;cursor:default}
+.filebtn{position:relative;overflow:hidden}
+.joinbox{margin-top:14px}
+.joinbox summary{cursor:pointer;font:600 14px/1 var(--sans);padding:12px 0;letter-spacing:.06em;color:var(--soft);padding:6px 0}
+.joinbox summary:hover{color:var(--ink)}
+.tlink.danger{color:var(--soft)}
+.fine{font-size:14px;line-height:1.5;color:var(--soft);max-width:60ch}
+.seg{display:inline-flex;border-radius:2px;box-shadow:inset 0 0 0 1px var(--ink);overflow:hidden;width:max-content;max-width:100%}
+.seg button{padding:15px 18px;font:600 13px/1 var(--sans);letter-spacing:.04em}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:12px 16px;border-radius:999px;font:600 13px/1 var(--sans);box-shadow:inset 0 0 0 1px var(--soft);color:var(--soft)}
+.chip:hover{color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);box-shadow:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rate{display:flex;align-items:center;gap:14px}
+.rate .stars{font-size:30px;letter-spacing:5px;cursor:pointer;touch-action:none;padding:2px 0}
+.rate output{font:italic 400 20px/1 var(--serif);min-width:3ch;color:var(--soft)}
+.formfoot{display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:sticky;bottom:calc(-1*clamp(22px,4vw,34px));margin-bottom:calc(-1*clamp(22px,4vw,34px));padding:16px 0 clamp(22px,4vw,34px);background:linear-gradient(0deg,var(--bg) 78%,transparent);z-index:3}
+.preview{display:flex;gap:18px;align-items:flex-end}
+.metaline{display:flex;gap:14px;align-items:flex-start}
+#f-cover{width:78px;flex:none}
+.metaline .cover{width:78px;flex:none;box-shadow:0 8px 16px -6px rgba(0,0,0,.5)}
+.setrow{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:600px){
+  .layer-scrim{padding:0;align-items:end}
+  .sheet{max-height:94dvh;border-radius:10px 10px 0 0}
+  .two{grid-template-columns:1fr}
+}
+
+#toast{position:fixed;z-index:120;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:2px;font:italic 400 19px/1.1 var(--serif);transition:all .35s var(--ease);max-width:calc(100vw - 32px)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:640px){
+  .deck{padding:18px 0 10px;gap:6px}
+  .deck p:last-child{display:none}
+  .deck h1{font-size:28px}
+  .deck{padding:14px 0 8px}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;padding:10px 0 14px}
+  .controls .tabs{grid-column:1/-1}
+  .ctl input,.ctl select{min-width:0;width:100%}
+  .idx td.t{font-size:21px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+@media print{.masthead,.controls,.panel,#layer{display:none}}
+.btn.danger{color:var(--danger);box-shadow:inset 0 0 0 1.5px var(--danger);background:transparent}
+.btn.danger:hover{background:var(--danger);color:var(--bg)}
+.tlink.danger:hover{color:var(--danger)}
+#toast.on{pointer-events:auto}
+#toast .toast-act{margin-left:14px;font:600 14px/1 var(--sans);text-decoration:underline;text-underline-offset:4px;color:inherit;padding:8px 4px}
+#selbar{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:90;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;justify-content:center;
+  background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:6px;box-shadow:0 14px 40px rgba(0,0,0,.45);max-width:calc(100vw - 24px)}
+#selbar[hidden]{display:none}
+#selbar button{font:600 14px/1 var(--sans);padding:13px 16px;min-height:44px;border-radius:3px;color:var(--bg)}
+#selbar .rm{background:#B3402F;color:#fff}
+#selbar .rm:disabled{opacity:.45;cursor:not-allowed}
+#selbar .quiet{text-decoration:underline;text-underline-offset:4px}
+#selcount{font:600 14px/1 var(--sans)}
+body.selecting .sp{cursor:pointer}
+.sp.sel{transform:translateY(calc(-14px*var(--u)));z-index:6}
+.sp.sel .sp-body{box-shadow:0 0 0 2px var(--gold),0 0 0 4px #B3402F,2px 0 5px rgba(0,0,0,.55)}
+.sp.sel::before{content:"\2713";position:absolute;left:50%;top:calc(-14px*var(--u));transform:translateX(-50%);width:22px;height:22px;border-radius:50%;background:#B3402F;color:#fff;font:700 13px/22px var(--sans);text-align:center;z-index:8}
+.idx tbody tr.sel{background:var(--bg2);box-shadow:inset 4px 0 0 var(--danger)}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--bg);font:400 20px/1 var(--serif)}
+.res.person{cursor:default}
+.res.person small{display:block}
+.invlist{display:grid;gap:12px;margin:4px 0}
+.invrow{display:grid;gap:10px;padding:14px;background:var(--bg2);border-radius:3px;font-size:16px}
+.members{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}
+.members li{padding:8px 14px;border-radius:999px;background:var(--bg2);font:600 14px/1 var(--sans)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+.shelfsw{display:flex;gap:28px;margin:0 0 6px}
+.shelfsw button{font:600 14px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:14px 0;border-bottom:2px solid transparent}
+.shelfsw button:hover{color:var(--ink)}
+.shelfsw button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.opt{text-transform:none;letter-spacing:0;font-weight:400}
+.sits{display:grid;gap:8px}
+.sitrow{display:flex;gap:14px;align-items:center}
+.sitn{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:600 13px/1 var(--sans);flex:none}
+.sitrow input{width:auto;min-width:11em}
+.lg-sit{display:block;font:400 13px/1.4 var(--sans);color:var(--soft);margin-top:2px}
+details.more>summary{cursor:pointer;font:600 14px/1 var(--sans);color:var(--soft);padding:12px 0;list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"+ "}
+details.more[open]>summary::before{content:"\2212 "}
+details.more>summary:hover{color:var(--ink)}
+details.more>.field{margin-top:14px}
+.members li button{margin-left:6px;font-size:16px;line-height:1;color:var(--soft);padding:2px 4px}
+.members li button:hover{color:var(--danger)}
+.remove-row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- couple + rating ---------- */
+.heart{color:var(--accent);margin-left:6px;font-size:15px}
+.rbox{display:grid;gap:2px}
+.rrow{display:flex;align-items:center;gap:10px}
+.rwho{font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--soft);min-width:3.6em}
+.ragree{font:italic 400 15px/1.2 var(--serif);color:var(--accent);margin-top:2px}
+.ragree.split{color:var(--danger)}
+.lg-acts{grid-column:2;display:flex;gap:18px}
+.lg-acts .lg-x{min-height:44px}
+.kicker{margin-bottom:2px}
+.tonightbtn{justify-self:start}
+.deskonly{display:inline-flex}
+.tabbar{display:none}
+.only-s{display:none}
+#f-cover.pop{animation:pop .7s var(--ease) .85s both}
+@keyframes pop{from{transform:scale(.7) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+.sheet.tonight h2{font-style:italic}
+
+/* ---------- touch targets, everywhere ---------- */
+.btn{min-height:44px}
+.tlink{display:inline-flex;align-items:center;min-height:44px}
+.fine .tlink,p .tlink{display:inline;min-height:0}
+.chip{min-height:44px;display:inline-flex;align-items:center}
+.sh-x{width:44px;height:44px;top:8px;right:8px}
+.iconbtn{width:44px;height:44px}
+.sw{width:32px;height:32px}
+.res{min-height:56px}
+.mainnav a{display:inline-flex;align-items:center}
+.rate .stars{padding:6px 0}
+
+.shelfsw button{padding-left:4px;padding-right:4px;min-height:44px}
+.tabs button{padding-left:4px;padding-right:4px}
+.tabs button sup,sup{font-size:12px}
+.idx th button{padding:14px 0;min-height:44px;align-items:center}
+.field input[type=date],.field input[type=text],.field input[type=email],.field input[type=password]{min-height:44px}
+details.more>summary{min-height:44px;display:flex;align-items:center}
+.tlink{padding:0 6px}
+.fine .tlink,p .tlink{padding:0}
+
+/* ---------- phones ---------- */
+@media (max-width:700px){
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .mast-main{padding:10px 0 8px;flex-wrap:nowrap}
+  .mainnav{order:0;width:auto;border:0;padding:0;gap:0}
+  .mainnav a[data-nav],.mainnav .deskonly,.mast-main>.btn.accent,.navicons .iconbtn:nth-child(2){display:none}
+  .navicons{margin-left:0}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:55;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
+    background:var(--bg);border-top:1px solid var(--rule);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;
+    font:600 12px/1 var(--sans);letter-spacing:.02em;color:var(--soft);text-decoration:none}
+  .tabbar a[aria-current="page"]{color:var(--ink)}
+  .tabbar a[aria-current="page"] svg{stroke-width:2.3}
+  .tabbar .plus{width:56px;height:56px;min-height:56px;margin:-22px auto 4px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+    box-shadow:0 8px 18px -6px rgba(0,0,0,.5);justify-content:center}
+  #toast{bottom:calc(92px + env(safe-area-inset-bottom))}
+  #selbar{bottom:calc(88px + env(safe-area-inset-bottom))}
+  .tonightbtn{display:none}
+  /* controls: search first, filters scroll sideways, nothing wraps awkwardly */
+  .controls{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 16px;padding:6px 0 12px}
+  .controls .ctl{order:1;grid-column:1/-1;width:100%}
+  .controls .ctl input,.controls .ctl select{width:100%;min-height:44px;font-size:18px}
+  .controls .tabs{order:2;flex-wrap:nowrap;overflow-x:auto;margin-right:0;gap:22px;scrollbar-width:none;padding-bottom:2px}
+  .controls .tabs::-webkit-scrollbar{display:none}
+  .controls .tabs button{white-space:nowrap;flex:none}
+  .controls .tabs{grid-column:1/-1}
+  .controls .ctl:has(select){order:3;grid-column:1;grid-row:auto}
+  #seltoggle{order:4;grid-column:2;justify-self:end}
+  .deck h1{font-size:28px}
+  .deck{padding:14px 0 8px}
+  .figures{grid-template-columns:1fr 1fr}
+  .idx td.t{font-size:22px}
+  .idx td.t small .only-s,.only-s{display:inline}
+  #gate{align-items:flex-start;padding-top:max(14vh,28px)}
+  .rate .stars{font-size:40px;letter-spacing:6px}
+  .sheet h2{font-size:32px}
+}
+
+/* ---------- where to watch ---------- */
+.avail .pv-l{font:600 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:12px 0 8px}
+.pvs{display:flex;flex-wrap:wrap;gap:8px}
+.pv{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 7px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--soft);
+  font:600 14px/1.2 var(--sans);color:var(--ink);text-decoration:none}
+.pv:hover{background:var(--bg2)}
+.pv img{width:30px;height:30px;border-radius:7px;flex:none}
+.pv.bob{display:grid;gap:2px;margin-top:14px;padding:10px 14px;border-radius:12px;background:var(--bg2);box-shadow:none;max-width:34em}
+.pv.bob b{letter-spacing:.04em}
+.pv.bob small{font:400 14px/1.4 var(--sans);color:var(--soft)}
+.pv-credit{margin-top:12px}
+.pv.ours{background:var(--ink);color:var(--bg);box-shadow:none}
+.pv.ours:hover{background:var(--ink);opacity:.9}
+.tick{font-style:normal;color:var(--gold)}
+.pv-none{font:italic 400 18px/1.35 var(--serif);color:var(--soft);margin:6px 0 4px}
+.avail details.more{margin-top:8px}
+</style>
+</head>
+<body>
+<a class="skip" href="#view">Skip to the shelf</a>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="mast-main">
+      <div class="brand"><a class="wordmark" href="#/" aria-label="The Usual — home">The <em>Usual</em></a>
+</div>
+      <nav class="mainnav" aria-label="Primary">
+        <a href="#/" data-nav="shelf">Shelf</a>
+        <a href="#/index" data-nav="index">Index</a>
+        <button type="button" class="deskonly" data-act="tonight">Tonight</button>
+        <span class="navicons">
+          <button type="button" id="btn-theme" class="iconbtn themebtn" data-act="theme">
+            <svg class="ic-sun" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor" fill-opacity=".18"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>
+            <svg class="ic-moon" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 14.4A8.5 8.5 0 0 1 9.6 3.8a8.5 8.5 0 1 0 10.6 10.6z" fill="currentColor" fill-opacity=".18"/><path d="M17.5 3.5v3M16 5h3" stroke-width="1.4"/></svg></button>
+          <button type="button" class="iconbtn" data-act="settings" aria-label="Settings">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20.2c.9-3.7 3.7-5.6 7.2-5.6s6.3 1.9 7.2 5.6"/></svg></button>
+        </span>
+      </nav>
+      <button type="button" class="btn accent" data-act="add">+ Add</button>
+    </div>
+  </div>
+</header>
+
+<main id="view" tabindex="-1"></main>
+
+<nav class="tabbar" aria-label="Main">
+  <a href="#/" data-nav="shelf"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V5M4 20h16M8 20V9M12 20V6M16 20V11M20 20v-6"/></svg><span>Shelf</span></a>
+  <a href="#/index" data-nav="index"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>Index</span></a>
+  <button type="button" class="plus" data-act="add" aria-label="Add a film or series"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button type="button" data-act="tonight"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg><span>Tonight</span></button>
+  <button type="button" data-act="settings"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20.2c.9-3.7 3.7-5.6 7.2-5.6s6.3 1.9 7.2 5.6"/></svg><span>Settings</span></button>
+</nav>
+
+<div class="scrim for-panel" id="scrim" hidden data-act="close-panel"></div>
+<div id="gate" role="dialog" aria-modal="true" aria-label="Sign in" hidden></div>
+<div id="layer"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="selbar" role="region" aria-label="Remove titles" hidden><span id="selcount" aria-live="polite"></span><button type="button" class="rm" id="selrm" data-act="sel-remove" disabled>Remove</button><button type="button" data-act="sel-all">Select all</button><button type="button" class="quiet" data-act="select-toggle">Cancel</button></div>
+<noscript><p style="padding:24px">The Usual needs JavaScript to build your shelf.</p></noscript>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js" integrity="sha384-uteMfOloLDGt042uDz+xHGF3ym63/WQ6rFq7murQRG8Ih7QrXGEGNtWd8688sb4O" crossorigin="anonymous"></script>
+<script>
+'use strict';
+const SUPABASE_URL='https://cmgiwujrrioppkuobirv.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_JvXHK8qQYQqp7-hpjRUhDQ_7XPmqxKe';
+let SB=null, cloudUser=null, cloudLibrary=null, cloudReady=false, cloudTimer=null, cloudChannel=null;
+let cloudMessage='', cloudInvite='';
+let cloudProfile=null, cloudInvites=[], cloudMembers=[], userHits=[], userQ='', userT=0, userBusy=false, invPoll=0;
+/* ============================================================
+   UTIL
+   ============================================================ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const hash=s=>{let h=7;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))>>>0;return h};
+const tryLS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+const TODAY=iso(new Date());
+const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)};
+const fmt=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+const fmtMonth=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+const W20=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+const words=n=>n<20?W20[n]:n<100?TENS[Math.floor(n/10)]+(n%10?'-'+W20[n%10]:''):String(n);
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const reduceMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sortKey=t=>t.replace(/^(the|a|an)\s+/i,'').toLowerCase();
+
+/* ============================================================
+   TMDB — film and series data, posters
+   Put a key in TMDB_BAKED to ship one key to everyone who opens the site.
+   Leave it empty and each person pastes their own in Settings (kept in their browser).
+   Accepts a v3 API key or a v4 read access token.
+   ============================================================ */
+const TMDB_BAKED='8097ad26a71f3a7f5a14db6dcfd8fd98';
+const TMDB={
+  base:'https://api.themoviedb.org/3', img:'https://image.tmdb.org/t/p/',
+  key(){return (TMDB_BAKED||tryLS.get('the-usual-tmdb')||'').trim()},
+  on(){return !!this.key()},
+  async get(path,params={}){
+    const k=this.key(), u=new URL(this.base+path), h={Accept:'application/json'};
+    Object.entries(params).forEach(([a,b])=>u.searchParams.set(a,b));
+    if(k.length>40)h.Authorization='Bearer '+k; else u.searchParams.set('api_key',k);
+    const r=await fetch(u,{headers:h});
+    if(r.status===401)throw new Error('key');
+    if(!r.ok)throw new Error('http '+r.status);
+    return r.json();
+  },
+  poster(p,size='w500'){return p?this.img+size+p:''}
+};
+function tmdbToItem(r){
+  const tv=r.media_type==='tv', date=tv?r.first_air_date:r.release_date;
+  return {id:`tmdb-${tv?'tv':'movie'}-${r.id}`,tmdb:`${tv?'tv':'movie'}-${r.id}`,t:(tv?r.name:r.title)||'Untitled',y:date?+date.slice(0,4):0,
+    type:tv?'series':'film',s:tv?1:undefined,min:0,dir:'',gen:[],syn:r.overview||'',poster:TMDB.poster(r.poster_path),watches:[]};
+}
+async function tmdbSearch(q){
+  const d=await TMDB.get('/search/multi',{query:q,include_adult:'false',language:'en-GB'});
+  const nq=sortKey(q).replace(/[^a-z0-9]/g,'');
+  const rank=r=>{const t=sortKey((r.media_type==='tv'?r.name:r.title)||'').replace(/[^a-z0-9]/g,'');
+    return (t===nq?100:t.startsWith(nq)?30:0)+Math.min(r.popularity||0,150)*.4+((r.vote_count||0)>300?25:0)};
+  return d.results.filter(r=>(r.media_type==='movie'||r.media_type==='tv')).sort((a,b)=>rank(b)-rank(a)).slice(0,10).map(tmdbToItem);
+}
+/* ---------- where to watch (TMDB / JustWatch) ---------- */
+const REGIONS=[['GB','United Kingdom'],['IE','Ireland'],['US','United States'],['CA','Canada'],['AU','Australia'],['NZ','New Zealand'],['DE','Germany'],['FR','France'],['ES','Spain'],['IT','Italy'],['NL','Netherlands'],['SE','Sweden']];
+const region=()=>tryLS.get('the-usual-region')||'GB';
+const provMem={};
+async function providersFor(it){
+  const rg=region();
+  let tid=it.tmdb;
+  if(!tid){const m=await matchEntry({t:it.t,y:it.y||0});if(!m||!m.item)return {none:true,rg};tid=m.item.tmdb}
+  const key=tid+'|'+rg;
+  if(provMem[key])return provMem[key];
+  let cache={};try{cache=JSON.parse(tryLS.get('the-usual-prov2')||'{}')}catch(e){}
+  if(cache[key]&&Date.now()-cache[key].t<864e5){provMem[key]=cache[key].v;return cache[key].v}
+  const [kind,id]=tid.split('-');
+  const d=await TMDB.get(`/${kind}/${id}/watch/providers`);
+  const r=(d.results||{})[rg];
+  const base=n=>n.replace(/ (Amazon|Apple TV) Channel$/,'');
+  const slim=a=>{const seen=new Set(),out=[];
+    [...(a||[])].sort((x,y)=>(base(x.provider_name)!==x.provider_name)-(base(y.provider_name)!==y.provider_name)).forEach(x=>{
+      const b=base(x.provider_name);if(seen.has(b))return;seen.add(b);
+      const via=b!==x.provider_name;out.push({n:via?b+' (via '+(/Amazon/.test(x.provider_name)?'Amazon':'Apple TV')+')':x.provider_name,l:x.logo_path||''})});
+    return out};
+  const v=r?{rg,link:r.link,stream:slim(r.flatrate),free:slim([...(r.free||[]),...(r.ads||[])]),rent:slim([...(r.rent||[]),...(r.buy||[])])}:{rg,none:true};
+  provMem[key]=v;cache[key]={t:Date.now(),v};
+  try{tryLS.set('the-usual-prov2',JSON.stringify(cache))}catch(e){}
+  return v;
+}
+const regionName=rg=>(REGIONS.find(x=>x[0]===rg)||[rg,rg])[1];
+const SERVICES_GB=['Netflix','Amazon Prime Video','Disney Plus','Apple TV','Now TV','Sky Go','Paramount Plus','BBC iPlayer','ITVX','Channel 4','My5','MUBI','BFI Player','Shudder','Curzon Home Cinema','Crunchyroll'];
+const SERVICES_ALL=['Netflix','Amazon Prime Video','Disney Plus','Apple TV','Max','Hulu','Paramount Plus','Peacock','MUBI','Criterion Channel','Shudder','Crunchyroll'];
+const serviceChoices=()=>region()==='GB'?SERVICES_GB:SERVICES_ALL;
+const isOurs=n=>(S.services||[]).some(sv=>{const a=n.toLowerCase(),b=sv.toLowerCase();return a===b||a.startsWith(b+' ')});
+const onOurs=v=>!!v&&!v.none&&!v.err&&[...(v.stream||[]),...(v.free||[])].some(x=>isOurs(x.n));
+function availHTML(v,compact){
+  const link=esc((v&&v.link)||'https://www.justwatch.com');
+  const chip=(x,mine)=>`<a class="pv${mine?' ours':''}" href="${link}" target="_blank" rel="noopener">${x.l?`<img src="https://image.tmdb.org/t/p/w92${esc(x.l)}" alt="" width="30" height="30" loading="lazy">`:''}<span>${mine?'<i class="tick" aria-hidden="true">✓</i> ':''}${esc(x.n)}</span></a>`;
+  const group=(label,arr,mine)=>arr&&arr.length?`<p class="pv-l">${label}</p><div class="pvs">${arr.map(x=>chip(x,mine)).join('')}</div>`:'';
+  const rg=regionName(v&&v.rg||region());
+  const none=!v||v.none||(!v.stream.length&&!v.free.length&&!v.rent.length);
+  let h='';
+  if(v&&v.err)h+=`<p class="fine">Couldn’t check streaming just now.</p>`;
+  else if(none)h+=`<p class="fine">Not on any streaming service in ${esc(rg)} right now.</p>`;
+  else{
+    const all=[...v.stream,...v.free], haveOurs=(S.services||[]).length>0;
+    if(haveOurs){
+      const mine=all.filter(x=>isOurs(x.n)), rest=all.filter(x=>!isOurs(x.n));
+      h+=mine.length?group('On your services',mine,true):`<p class="pv-none">Not on any of your services right now.</p>`;
+      const more=(rest.length?group('Streaming elsewhere',rest):'')+(v.rent.length?`<p class="pv-l">Rent or buy</p><p class="fine">${esc(v.rent.map(x=>x.n).join(', '))}</p>`:'');
+      if(more)h+=compact?more:`<details class="more"><summary>Everywhere else</summary>${more}</details>`;
+    }else{
+      h+=group('Streaming',v.stream)+group('Free',v.free);
+      if(v.rent.length)h+=`<p class="pv-l">Rent or buy</p><p class="fine">${esc(v.rent.map(x=>x.n).join(', '))}</p>`;
+      if(!compact)h+=`<p class="fine">Tell us which services you have in Settings and we’ll highlight them.</p>`;
+    }
+  }
+  if(region()==='GB')h+=`<a class="pv bob" href="https://learningonscreen.ac.uk/ondemand/" target="_blank" rel="noopener"><span><b>BoB</b> · Box of Broadcasts</span><small>Free with a UK university login. Search for it there.</small></a>`;
+  return h+(compact?'':`<p class="fine pv-credit">Streaming data from JustWatch, via TMDB.</p>`);
+}
+async function fillAvail(it,sel,compact){
+  const el=$(sel); if(!el)return;
+  el.innerHTML=`<p class="fine">Checking where to watch…</p>`;
+  let v;
+  try{v=TMDB.on()?await providersFor(it):{none:true,rg:region()}}catch(e){v={err:true,rg:region()}}
+  const el2=$(sel); if(!el2||el2.dataset.for!==it.id)return;
+  el2.innerHTML=availHTML(v,compact);
+}
+async function tmdbDetails(it){
+  const tid=it.tmdb.split('-')[1];
+  if(it.type==='film'){
+    const d=await TMDB.get(`/movie/${tid}`,{append_to_response:'credits',language:'en-GB'});
+    const dirs=((d.credits&&d.credits.crew)||[]).filter(c=>c.job==='Director').map(c=>c.name).slice(0,2);
+    return {...it,min:d.runtime||0,gen:(d.genres||[]).map(g=>g.name),dir:dirs.join(' & '),syn:d.overview||it.syn,poster:TMDB.poster(d.poster_path)||it.poster,
+      y:d.release_date?+d.release_date.slice(0,4):it.y};
+  }
+  const d=await TMDB.get(`/tv/${tid}`,{language:'en-GB'});
+  const seasons=(d.seasons||[]).filter(x=>x.season_number>0).map(x=>({n:x.season_number,eps:x.episode_count||0,poster:TMDB.poster(x.poster_path),y:x.air_date?+x.air_date.slice(0,4):0}));
+  const first=seasons[0]||{n:1,eps:0,poster:'',y:it.y};
+  const showPoster=TMDB.poster(d.poster_path)||it.poster;
+  return {...it,seasons:seasons.length?seasons:[first],s:first.n,eps:first.eps,showPoster,poster:first.poster||showPoster,y:first.y||it.y,
+    min:(d.last_episode_to_air&&d.last_episode_to_air.runtime)||(d.episode_run_time&&d.episode_run_time[0])||0,
+    gen:(d.genres||[]).map(g=>g.name),dir:(d.created_by||[]).map(c=>c.name).slice(0,2).join(' & '),syn:d.overview||it.syn};
+}
+
+/* ============================================================
+   SPINE COLOURS — the eight a spine can be
+   ============================================================ */
+const SP=[
+  {n:'Oxblood',  bg:'--oxblood',  ink:'--cream',     band:'--gold'},
+  {n:'Cream',    bg:'--cream',    ink:'--oxblood',   band:'--copper'},
+  {n:'Copper',   bg:'--copper',   ink:'--espresso',  band:'--cream'},
+  {n:'Walnut',   bg:'--walnut',   ink:'--gold',      band:'--cream'},
+  {n:'Mauve',    bg:'--mauve',    ink:'--cream',     band:'--blue'},
+  {n:'Blue',     bg:'--blue',     ink:'--espresso',  band:'--oxblood'},
+  {n:'Champagne',bg:'--champagne',ink:'--espresso',  band:'--oxblood'},
+  {n:'Espresso', bg:'--espresso', ink:'--champagne', band:'--copper'}
+];
+
+/* ============================================================
+   DATA — a starter library (TMDB search comes later)
+   ============================================================ */
+const Wt=(d,who,r,note='',ate='')=>({d,who,r,note,ate});
+const F=(id,t,y,min,dir,gen,syn,watches,o={})=>({id,t,y,type:'film',min,dir,gen,syn,status:'seen',watches,...o});
+const SR=(id,t,y,s,eps,min,dir,gen,syn,watches,o={})=>({id,t,y,type:'series',s,eps,min,dir,gen,syn,status:'seen',watches,...o});
+const WAIT=(it,note,added)=>({...it,status:'waiting',watches:[],note,added});
+
+const CAT_EXTRA=[
+  F('parasite','Parasite',2019,132,'Bong Joon-ho',['Thriller','Drama'],'A poor family schemes its way into the lives of a wealthy household.',[]),
+  F('arrival','Arrival',2016,116,'Denis Villeneuve',['Sci-Fi','Drama'],'A linguist is recruited to communicate with visitors from another world.',[]),
+  F('aftersun','Aftersun',2022,102,'Charlotte Wells',['Drama'],'A woman remembers a holiday with her father in the 1990s.',[]),
+  F('about-time','About Time',2013,123,'Richard Curtis',['Romance','Comedy'],'A young man discovers he can travel back in time, and uses it to find love.',[]),
+  F('holdovers','The Holdovers',2023,133,'Alexander Payne',['Comedy','Drama'],'A teacher, a student and a cook stay behind at a boarding school over Christmas, 1970.',[]),
+  F('pride','Pride',2014,119,'Matthew Warchus',['Comedy','Drama'],'London activists raise money for striking Welsh miners in 1984.',[]),
+  F('columbus','Columbus',2017,104,'Kogonada',['Drama'],'A young woman and a visiting stranger bond over the modernist buildings of an Indiana town.',[]),
+  F('the-apartment','The Apartment',1960,125,'Billy Wilder',['Comedy','Romance'],'An insurance clerk lends out his flat to senior colleagues, and falls for the lift operator.',[]),
+  F('perfect-days','Perfect Days',2023,124,'Wim Wenders',['Drama'],'A Tokyo toilet cleaner finds quiet joy in the repetition of his days.',[]),
+  SR('hacks-s1','Hacks',2021,1,10,45,'Lucia Aniello et al.',['Comedy'],'A veteran Las Vegas comic and a young writer are forced to work together.',[]),
+  SR('ted-lasso-s1','Ted Lasso',2020,1,10,30,'Jason Sudeikis et al.',['Comedy'],'An American football coach is hired to manage an English football club.',[]),
+  SR('the-bear-s2','The Bear',2023,2,10,35,'Christopher Storer',['Drama','Comedy'],'The restaurant gets a new name, a new kitchen and a new set of problems.',[])
+];
+
+function seedItems(){
+  const ys=addDays(TODAY,-1);
+  const A=[
+  F('mood-for-love','In the Mood for Love',2000,98,'Wong Kar-wai',['Romance','Drama'],'Two neighbours in 1960s Hong Kong discover their spouses are having an affair, and slowly drift toward each other.',[
+    Wt('2025-03-14',['tim'],5,'Our first one. Neither of us spoke for ten minutes after.','jasmine tea, prawn crackers')],{short:'In the Mood for Love'}),
+  F('past-lives','Past Lives',2023,106,'Celine Song',['Romance','Drama'],'Two childhood friends from Seoul reunite over twenty-four years, and one night in New York asks what might have been.',[
+    Wt('2025-04-19',['tim'],4.5,'Tim went quiet at the ferry scene.','kimchi crisps'),
+    Wt('2026-02-14',['tim'],5,'Valentine’s. Worse idea than it sounds, better night.','dumplings, red wine')]),
+  F('godfather','The Godfather',1972,175,'Francis Ford Coppola',['Crime','Drama'],'The ageing patriarch of a crime dynasty hands the family business to his reluctant youngest son.',[
+    Wt('2025-05-03',['tim'],4.5,'Three hours. Zero regrets.','popcorn')]),
+  F('before-sunset','Before Sunset',2004,80,'Richard Linklater',['Romance','Drama'],'Nine years after one night in Vienna, two strangers meet again in Paris with one afternoon before a flight.',[
+    Wt('2025-06-21',['jess'],4,'Short. Perfect weeknight length.','tea'),
+    Wt('2026-06-21',['tim'],4.5,'Exactly a year on. Tim now owns the Julie Delpy waltz.','tea, shortbread')]),
+  F('amelie','Amélie',2001,122,'Jean-Pierre Jeunet',['Comedy','Romance'],'A shy Parisian waitress secretly sets out to improve the lives of those around her, and then her own.',[
+    Wt('2025-07-12',['mum'],4,'Mum knew every scene. I knew none. Lovely.','pain au chocolat')]),
+  F('spirited-away','Spirited Away',2001,125,'Hayao Miyazaki',['Animation','Family'],'A girl wanders into a spirit-world bathhouse where her parents have been turned into pigs.',[
+    Wt('2025-08-09',['tim'],5,'','mochi'),
+    Wt('2026-03-28',['tim'],5,'Rainy Saturday. Same mochi.','mochi'),
+    Wt('2026-10-10',['jess'],5,'Jess had never seen it. Fixed that.','rice crackers')]),
+  F('lost-in-translation','Lost in Translation',2003,102,'Sofia Coppola',['Drama','Comedy'],'A faded actor and a young newlywed strike up an unlikely friendship in Tokyo.',[
+    Wt('2025-09-06',['tim'],4,'','whisky')],{short:'Lost in Translation'}),
+  F('moonlight','Moonlight',2016,111,'Barry Jenkins',['Drama'],'Three chapters in the life of a young man growing up in Miami.',[
+    Wt('2025-09-20',['tim'],5,'We walked home without talking.','')]),
+  SR('fleabag-s2','Fleabag',2019,2,6,27,'Phoebe Waller-Bridge',['Comedy','Drama'],'A sharp, sad comedy about a woman in London. The second season brings a new priest to the family dinner.',[
+    Wt('2025-10-05',['tim'],5,'Two nights. Tim said “it’s not even funny” and was crying.','crisps, tea')]),
+  F('princess-bride','The Princess Bride',1987,98,'Rob Reiner',['Family','Comedy'],'A grandfather reads a fairy tale of true love, pirates and giants to his sick grandson.',[
+    Wt('2025-10-31',['jess'],4.5,'Halloween alternative. Worked.','candy corn'),
+    Wt('2026-05-02',['tim'],4,'Tim quotes it constantly now.','popcorn')]),
+  F('eternal-sunshine','Eternal Sunshine of the Spotless Mind',2004,108,'Michel Gondry',['Romance','Drama'],'After a painful breakup, a couple undergo a procedure to erase each other from their memories.',[
+    Wt('2025-11-15',['tim'],5,'A year ago this week, almost to the day.','takeaway noodles'),
+    Wt('2026-04-03',['tim'],4.5,'','takeaway noodles'),
+    Wt(ys,['tim'],null,'Third time. Still worth it.','popcorn, two Cokes')],{short:'Eternal Sunshine'}),
+  SR('the-bear-s1','The Bear',2022,1,8,34,'Christopher Storer',['Drama','Comedy'],'A young chef returns to run his late brother’s Chicago sandwich shop.',[
+    Wt('2025-11-30',['tim'],4.5,'We watched the whole thing in a weekend. Hungry throughout.','sandwiches')]),
+  SR('twin-peaks-s1','Twin Peaks',1990,1,8,48,'Lynch & Frost',['Mystery','Drama'],'An FBI agent arrives in a small town to investigate the murder of a homecoming queen.',[
+    Wt('2025-12-06',['tim'],4,'Cherry pie, obviously.','cherry pie, black coffee'),
+    Wt('2026-10-24',['tim'],4.5,'Halloween week. It lands differently now.','cherry pie')]),
+  F('paddington-2','Paddington 2',2017,103,'Paul King',['Comedy','Family'],'Paddington is framed for a theft and sent to prison, where he wins over the inmates with marmalade.',[
+    Wt('2025-12-20',['tim'],5,'Prison marmalade. Fight me.','marmalade sandwiches, hot chocolate'),
+    Wt('2025-12-28',['mum'],5,'Mum cried at the pop-up book. So did I.','marmalade sandwiches')]),
+  F('portrait','Portrait of a Lady on Fire',2019,122,'Céline Sciamma',['Romance','Drama'],'A painter is commissioned to secretly paint a reluctant bride on a remote island in eighteenth-century Brittany.',[
+    Wt('2026-01-10',['tim'],5,'The last shot. We rewound it.','red wine')],{short:'Lady on Fire'}),
+  SR('severance-s1','Severance',2022,1,9,50,'Dan Erickson',['Sci-Fi','Thriller'],'Office workers have their memories surgically split between work and home.',[
+    Wt('2026-01-25',['tim'],5,'Nine nights. We’re not discussing the finale.','crisps')]),
+  F('notting-hill','Notting Hill',1999,124,'Roger Michell',['Romance','Comedy'],'A bookshop owner’s life changes when a famous actress walks in.',[
+    Wt('2026-02-01',['mum'],3.5,'Mum’s pick. Tolerated, then enjoyed.','shortbread')]),
+  F('heat','Heat',1995,170,'Michael Mann',['Crime','Thriller'],'A detective and a master thief circle each other across Los Angeles.',[
+    Wt('2026-02-22',['tim'],4,'The diner scene. Just the diner scene, on repeat.','takeaway pizza')]),
+  F('roma','Roma',2018,135,'Alfonso Cuarón',['Drama'],'A year in the life of a domestic worker in 1970s Mexico City.',[
+    Wt('2026-03-14',['tim'],4.5,'','tortilla chips')]),
+  F('call-me-by-your-name','Call Me by Your Name',2017,132,'Luca Guadagnino',['Romance','Drama'],'A summer romance between a teenager and his father’s research assistant in 1983 Italy.',[
+    Wt('2026-04-25',['jess'],4,'We ate peaches. Obviously.','peaches')],{short:'Call Me by Your Name'}),
+  SR('normal-people-s1','Normal People',2020,1,12,28,'Lenny Abrahamson',['Drama','Romance'],'Two teenagers in the west of Ireland drift together and apart over several years.',[
+    Wt('2026-05-17',['jess'],4.5,'Jess had read the book. I had not. Sorry.','tea')]),
+  SR('succession-s3','Succession',2021,3,9,60,'Jesse Armstrong',['Drama','Comedy'],'The Roy family fights over who inherits control of a media empire.',[
+    Wt('2026-06-13',['tim'],4.5,'','red wine')]),
+  F('jaws','Jaws',1975,124,'Steven Spielberg',['Thriller','Adventure'],'A police chief, a marine biologist and a fisherman hunt a great white shark off a summer resort town.',[
+    Wt('2026-07-04',['tim'],4,'Projector in the garden. A bat flew through the beam.','burgers, lemonade')]),
+  F('eeaao','Everything Everywhere All at Once',2022,139,'Daniels',['Sci-Fi','Comedy'],'A laundromat owner is pulled into a multiverse to save everything, including her family.',[
+    Wt('2026-08-15',['tim'],5,'Biggest disagreement of the year. Tim did not get the hot dog fingers.','noodles')],{short:'Everything Everywhere'}),
+  SR('chernobyl-s1','Chernobyl',2019,1,5,65,'Craig Mazin',['Drama','History'],'The story of the 1986 nuclear disaster and the people who contained it.',[
+    Wt('2026-08-29',['tim'],4.5,'Heavy. Worth it. No snacks, it felt wrong.','')]),
+  F('whiplash','Whiplash',2014,107,'Damien Chazelle',['Drama','Music'],'A young drummer enters a ferocious conservatory where a teacher pushes him to the edge.',[
+    Wt('2026-09-12',[],4.5,'Solo. Drummed on the sofa arm afterwards.','cheese on toast')]),
+  F('fury-road','Mad Max: Fury Road',2015,120,'George Miller',['Action','Adventure'],'In a desert wasteland, a drifter and a rebel soldier flee a warlord across the sand.',[
+    Wt('2026-09-26',['tim'],4,'Cinema. Loud. Slushies.','cinema popcorn, slushie')],{short:'Fury Road'})
+  ];
+  const find=id=>CAT_EXTRA.find(x=>x.id===id);
+  const W=[
+    WAIT(find('parasite'),'Tim says it’s the one we’ve been avoiding.','2026-09-30'),
+    WAIT(find('aftersun'),'Everyone says to bring tissues.','2026-10-04'),
+    WAIT(find('the-apartment'),'For a rainy Sunday.','2026-10-12'),
+    WAIT(find('hacks-s1'),'Jess’s recommendation.','2026-10-19'),
+    WAIT(find('arrival'),'','2026-10-26'),
+    WAIT(find('perfect-days'),'Saved after seeing the poster in the cinema window.','2026-11-01')
+  ];
+  return [...A,...W].map(norm);
+}
+function norm(it){
+  it=JSON.parse(JSON.stringify(it));
+  it.watches=it.watches||[];
+  if(it.col==null||isNaN(it.col))it.col=hash(it.id)%SP.length;
+  if(!it.added)it.added=it.watches.length?it.watches.map(w=>w.d).sort()[0]:TODAY;
+  return it;
+}
+const CATALOGUE=()=>{const m=new Map();[...seedItems(),...CAT_EXTRA.map(norm)].forEach(i=>{if(!m.has(i.id))m.set(i.id,norm({...i,watches:[],note:''}))});return [...m.values()]};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const KEY='the-usual-v4';
+const S={
+  items:[],
+  people:{},services:[],store:{mine:[],together:[]},shelf:'together',
+  theme:document.documentElement.dataset.theme||'light',
+  view:'shelf',filter:'all',sort:'added',q:'',isort:{k:'title',d:1},
+  cs:{ry:-24,rx:5,open:false},open:null,add:null,landed:null,order:[],cat:null,sel:null
+};
+function syncStore(){S.store[S.shelf]=S.items}
+function persistLocal(){
+  syncStore();
+  tryLS.set(KEY,JSON.stringify({v:5,mine:S.store.mine,together:S.store.together,shelf:S.shelf,people:S.people,services:S.services,filter:S.filter,sort:S.sort,isort:S.isort}));
+}
+function save(){persistLocal();queueCloudSave();queueMineSave()}
+/* The seeded guests (Tim, Jess, Mum) are gone from every account. People are added by hand now. */
+const SEEDED_GUESTS=['tim','jess','mum'];
+function scrubGuests(){
+  let changed=false;
+  SEEDED_GUESTS.forEach(k=>{if(S.people[k]){delete S.people[k];changed=true}});
+  [S.store.mine,S.store.together].forEach(arr=>arr.forEach(it=>(it.watches||[]).forEach(w=>{
+    if((w.who||[]).some(k=>SEEDED_GUESTS.includes(k))){w.who=w.who.filter(k=>!SEEDED_GUESTS.includes(k));changed=true}})));
+  if(changed)S.dirty=true;
+  return changed;
+}
+function load(){
+  S.store={mine:[],together:[]};
+  const raw=tryLS.get(KEY);
+  if(raw){try{
+    const d=JSON.parse(raw);
+    const tog=Array.isArray(d.together)?d.together:(Array.isArray(d.items)?d.items:[]);
+    S.store.together=tog.map(norm);
+    S.store.mine=Array.isArray(d.mine)?d.mine.map(norm):[];
+    if(d.shelf==='mine'||d.shelf==='together')S.shelf=d.shelf;
+    if(d.people&&typeof d.people==='object')S.people=d.people;
+    if(Array.isArray(d.services))S.services=d.services;
+    if(d.filter)S.filter=d.filter;
+    if(d.sort)S.sort=d.sort;
+    if(d.isort)S.isort=d.isort;
+  }catch(e){}}
+  S.items=S.store[S.shelf];
+  if(scrubGuests())persistLocal();
+}
+function useShelf(k){
+  if(k===S.shelf)return;
+  syncStore();S.shelf=k;S.items=S.store[k];
+  S.open=null;S.sel=null;S.q='';
+  persistLocal();
+}
+function cloudContent(){syncStore();return {items:S.store.together,people:S.people,services:S.services}}
+function applyCloudContent(d){
+  if(!d||typeof d!=='object')return;
+  if(Array.isArray(d.items)){S.store.together=d.items.map(norm);if(S.shelf==='together')S.items=S.store.together}
+  if(d.people&&typeof d.people==='object')S.people={...S.people,...d.people};
+  if(Array.isArray(d.services))S.services=d.services;
+  scrubGuests();
+  persistLocal();
+}
+/* the private shelf: one row per account, readable only by its owner */
+let mineReady=false, mineOff=false, mineTimer=null;
+function queueMineSave(){
+  if(!SB||!cloudUser||!mineReady)return;
+  clearTimeout(mineTimer);
+  mineTimer=setTimeout(async()=>{
+    syncStore();
+    const {error}=await SB.from('user_state').upsert({user_id:cloudUser.id,content:{items:S.store.mine},updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    if(error)mineOff=true;
+  },700);
+}
+async function loadMine(){
+  if(!SB||!cloudUser)return;
+  const {data,error}=await SB.from('user_state').select('content').eq('user_id',cloudUser.id).maybeSingle();
+  if(error){mineOff=true;mineReady=false;return}
+  mineOff=false;
+  const remote=data&&data.content&&Array.isArray(data.content.items)?data.content.items:[];
+  if(remote.length){S.store.mine=remote.map(norm);if(S.shelf==='mine')S.items=S.store.mine}
+  mineReady=true;
+  scrubGuests();persistLocal();
+  if(!remote.length&&S.store.mine.length||S.dirty){S.dirty=false;queueMineSave()}
+}
+function claimLocal(){
+  const owner=tryLS.get('the-usual-owner');
+  if(owner&&owner!==cloudUser.id){S.store={mine:[],together:[]};S.people={};S.shelf='together';S.items=S.store.together}
+  tryLS.set('the-usual-owner',cloudUser.id);
+  persistLocal();
+}
+function queueCloudSave(){
+  if(!SB||!cloudReady||!cloudLibrary||!cloudUser)return;
+  clearTimeout(cloudTimer);
+  cloudTimer=setTimeout(async()=>{
+    const {error}=await SB.from('library_state').upsert({library_id:cloudLibrary,content:cloudContent(),updated_by:cloudUser.id,updated_at:new Date().toISOString()},{onConflict:'library_id'});
+    if(error){cloudMessage='Cloud save failed: '+error.message;}
+  },500);
+}
+async function activateCloudLibrary(id,preferRemote=true){
+  cloudReady=false; cloudLibrary=id;
+  const {data,error}=await SB.from('library_state').select('content').eq('library_id',id).maybeSingle();
+  if(error){cloudMessage='Could not load your shared library: '+error.message;return}
+  if(preferRemote&&data&&data.content&&Object.keys(data.content).length)applyCloudContent(data.content);
+  cloudReady=true; await loadMembers();
+  if(S.dirty){S.dirty=false;queueCloudSave()}
+  if(!preferRemote||!data||!data.content||!Object.keys(data.content).length)queueCloudSave();
+  if(cloudChannel)SB.removeChannel(cloudChannel);
+  cloudChannel=SB.channel('library-'+id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'library_state',filter:'library_id=eq.'+id},payload=>{
+    if(payload.new.updated_by===cloudUser?.id)return;
+    applyCloudContent(payload.new.content);applyTheme();route();
+  }).subscribe();
+  cloudMessage='Synced across devices.';
+}
+function gateOpen(){return !(SB&&cloudUser&&cloudLibrary&&cloudReady)}
+function renderGate(){
+  const g=$('#gate');if(!g)return;
+  if(!gateOpen()){g.hidden=true;g.innerHTML='';document.body.style.overflow='';return}
+  document.body.style.overflow='hidden';
+  const inner=SB?cloudSettingsHTML():`<section class="field"><p class="fine">${esc(cloudMessage||'Connecting…')}</p></section>`;
+  const active=document.activeElement;
+  if(g.contains(active)&&active.tagName==='INPUT'&&g.dataset.sig===inner)return;
+  g.dataset.sig=inner;
+  g.innerHTML=`<div class="gate-card"><h1>The Usual</h1><p class="gate-sub">A shelf for two. Everything you’ve watched together, and what’s next.</p>${inner}</div>`;
+  g.hidden=false;
+}
+function refreshCloudUI(){
+  renderGate();
+  if(!gateOpen()&&$('#layer').innerHTML.includes('cloud-controls'))openSettings();
+}
+async function initSupabase(){
+  if(!window.supabase?.createClient){cloudMessage='Could not load the sign-in service. Check your connection and reload.';renderGate();return}
+  SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+  const {data}=await SB.auth.getSession();
+  cloudUser=data.session?.user||null;
+  if(cloudUser)await findCloudLibrary();
+  SB.auth.onAuthStateChange((_event,session)=>{
+    cloudUser=session?.user||null;
+    if(!cloudUser){cloudReady=false;cloudLibrary=null;cloudMessage=_event==='SIGNED_OUT'?'Signed out.':'';clearAccount();refreshCloudUI();return}
+    setTimeout(()=>findCloudLibrary(),0);
+  });
+  refreshCloudUI();
+}
+const profilesOff=()=>!!(cloudProfile&&cloudProfile.off);
+async function loadAccount(){
+  const {data,error}=await SB.from('profiles').select('username').eq('user_id',cloudUser.id).maybeSingle();
+  cloudProfile=error?{off:true,username:null}:{off:false,username:data?data.username:null};
+}
+async function loadInvites(){
+  cloudInvites=[]; if(!cloudProfile||cloudProfile.off||!cloudProfile.username)return;
+  const {data,error}=await SB.rpc('my_invites'); if(!error&&Array.isArray(data))cloudInvites=data;
+}
+async function loadMembers(){
+  cloudMembers=[]; if(!cloudProfile||cloudProfile.off)return;
+  const {data,error}=await SB.rpc('list_members'); if(!error&&Array.isArray(data))cloudMembers=data;
+}
+function syncInvitePoll(){
+  const need=SB&&cloudUser&&!cloudLibrary&&cloudProfile&&!cloudProfile.off&&cloudProfile.username;
+  if(need&&!invPoll){invPoll=setInterval(async()=>{
+    if(!cloudUser||cloudLibrary){syncInvitePoll();return}
+    await loadInvites();if(gateOpen())renderGate()},12000)}
+  else if(!need&&invPoll){clearInterval(invPoll);invPoll=0}
+}
+function clearAccount(){mineReady=false;mineOff=false;cloudProfile=null;cloudInvites=[];cloudMembers=[];userHits=[];userQ='';syncInvitePoll()}
+async function findCloudLibrary(){
+  if(!SB||!cloudUser)return;
+  claimLocal();
+  await loadAccount();
+  const {data,error}=await SB.from('library_members').select('library_id').eq('user_id',cloudUser.id).maybeSingle();
+  if(error){cloudMessage='Could not check library membership: '+error.message;refreshCloudUI();return}
+  if(data)await activateCloudLibrary(data.library_id,true);
+  else{cloudLibrary=null;cloudReady=false;cloudMessage='';await loadInvites()}
+  await loadMine();
+  if(S.view)route();
+  refreshCloudUI();syncInvitePoll();
+}
+function userResultsHTML(){
+  if(userQ.trim().length<3)return '';
+  if(!userHits.length)return `<li class="fine" style="padding:8px">${userBusy?'Searching…':'No one with that username.'}</li>`;
+  return userHits.map(u=>`<li><div class="res person"><span class="avatar" aria-hidden="true">${esc(u.username.charAt(0).toUpperCase())}</span><span><b>@${esc(u.username)}</b>${u.in_my_library?'<small>Already in your library</small>':''}</span>${u.in_my_library?'<em></em>':u.invited?'<em>Invited</em>':`<button type="button" class="btn line" data-cloud="invite-user" data-id="${esc(u.user_id)}">Invite</button>`}</div></li>`).join('');
+}
+function paintUsers(){const el=$('#user-res');if(el)el.innerHTML=userResultsHTML()}
+function cloudSettingsHTML(){
+  if(!SB)return `<section class="field"><p class="fine">Connecting…</p></section>`;
+  const msg=esc(cloudMessage||'');
+  if(!cloudUser)return `<form id="cloud-auth" class="field cloud-controls"><label for="cloud-login">Username</label><input id="cloud-login" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required><label for="cloud-password">Password</label><input id="cloud-password" type="password" autocomplete="current-password" minlength="8" required><div class="setrow"><button class="btn accent" type="submit" data-mode="signin">Sign in</button><button class="btn line" type="submit" data-mode="signup">Create account</button></div><p class="fine" id="cloud-message" aria-live="polite">${msg||'Pick a username and a password of at least 8 characters.'}</p></form>`;
+  const off=profilesOff();
+  if(!cloudProfile)return `<section class="field"><p class="fine">Opening your account…</p></section>`;
+  if(!off&&!cloudProfile.username)return `<form id="cloud-username" class="field cloud-controls"><label for="cloud-uname">Choose a username</label><input id="cloud-uname" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" required><p class="fine">This is how the people you share with will find you. Use 3 to 20 letters, numbers or underscores.</p><div class="setrow"><button class="btn accent" type="submit">Continue</button></div><p class="fine" aria-live="polite">${msg}</p><button type="button" class="tlink" data-cloud="signout">Sign out</button></form>`;
+  const me=cloudProfile.username?'@'+esc(cloudProfile.username):esc(shownName(cloudUser));
+  const codeBits=`<details class="joinbox"><summary>I have an invite code</summary><form id="cloud-join"><label for="cloud-invite-code">Invite code</label><input id="cloud-invite-code" type="text" autocomplete="one-time-code" required><div class="setrow"><button class="btn line" type="submit">Join</button></div></form></details>`;
+  if(!cloudLibrary){
+    const inv=cloudInvites.map(i=>`<li class="invrow"><span><b>@${esc(i.from_username||'someone')}</b> invited you to share <i>${esc(i.library_name)}</i>.</span><span class="setrow"><button type="button" class="btn accent" data-cloud="accept-invite" data-id="${esc(i.id)}">Accept</button><button type="button" class="btn line" data-cloud="decline-invite" data-id="${esc(i.id)}">Decline</button></span></li>`).join('');
+    return `<section class="field cloud-controls"><p class="fine">Signed in as ${me}.${msg?' '+msg:''}</p>${inv?`<ul class="invlist" aria-label="Invitations">${inv}</ul><p class="fine">Or start a library of your own.</p>`:(off?'':`<p class="fine">Waiting for someone to invite you? Tell them to search for <b>@${esc(cloudProfile.username)}</b>. This page checks for invitations by itself.</p>`)}<form id="cloud-create"><div class="setrow"><button class="btn ${inv?'line':'accent'}" type="submit">Start my own library</button></div></form>${off?codeBits:''}<button type="button" class="tlink" data-cloud="signout" style="margin-top:14px">Sign out</button></section>`;
+  }
+  const people=cloudMembers.length?`<ul class="members" aria-label="People in this library">${cloudMembers.map(m=>`<li>@${esc(m.username||'unknown')}${m.is_me?' (you)':''}</li>`).join('')}</ul>`:'';
+  const invite=off
+    ?`<div class="setrow"><button type="button" class="btn line" data-cloud="invite">Make an invite code</button>${cloudInvite?`<code>${esc(cloudInvite)}</code>`:''}</div>`
+    :`<label for="user-q" class="lab">Invite someone by username</label><input id="user-q" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Start typing their username" value="${esc(userQ)}"><ul id="user-res" class="results" aria-live="polite">${userResultsHTML()}</ul>`;
+  return `<section class="field cloud-controls"><p class="fine">Signed in as ${me}. ${msg||'Your shelf syncs across your devices.'}</p>${people}${invite}<button type="button" class="tlink" data-cloud="signout" style="justify-self:start">Sign out</button></section>`;
+}
+/* Accounts are made from a username. Behind the scenes Supabase still wants an email-shaped
+   identifier, so the username becomes name@example.com. example.com is reserved: nobody can ever
+   own it or receive mail there, so nothing is sent and nothing can be taken over. An address
+   that already has a real email (anything with an @) still signs in as typed. */
+const LOGIN_DOMAIN='example.com';
+const USERNAME_RE=/^[a-z0-9_]{3,20}$/;
+function loginEmail(raw){
+  const v=(raw||'').trim().toLowerCase();
+  if(v.includes('@'))return {email:v,username:null};
+  if(!USERNAME_RE.test(v))return {error:'Usernames are 3 to 20 letters, numbers or underscores.'};
+  return {email:v+'@'+LOGIN_DOMAIN,username:v};
+}
+function friendlyAuthError(msg,mode){
+  const m=(msg||'').toLowerCase();
+  if(m.includes('invalid login'))return 'That username and password don’t match.';
+  if(m.includes('already registered')||m.includes('already been registered'))return 'That username is taken.';
+  if(m.includes('signups not allowed')||m.includes('signup is disabled')||m.includes('signups are disabled'))return 'This shelf is private. Accounts are only made by invitation.';
+  if(m.includes('email not confirmed'))return 'This account still needs confirming. In Supabase, switch off “Confirm email”.';
+  if(m.includes('password')&&m.includes('character'))return 'Passwords need at least 8 characters.';
+  if(m.includes('rate limit')||m.includes('too many'))return 'Too many tries. Wait a minute and try again.';
+  return msg;
+}
+const shownName=u=>{const e=(u&&u.email)||'';return e.toLowerCase().endsWith('@'+LOGIN_DOMAIN)?e.split('@')[0]:e||'your account'};
+async function cloudAuthSubmit(form,mode){
+  const login=loginEmail($('#cloud-login').value), password=$('#cloud-password').value;
+  if(login.error){cloudMessage=login.error;refreshCloudUI();return}
+  if(mode==='signup'&&password.length<8){cloudMessage='Passwords need at least 8 characters.';refreshCloudUI();return}
+  const {email}=login;
+  const result=mode==='signup'?await SB.auth.signUp({email,password}):await SB.auth.signInWithPassword({email,password});
+  if(result.error){cloudMessage=friendlyAuthError(result.error.message,mode);refreshCloudUI();return}
+  if(mode==='signup'&&!result.data.session){cloudMessage='Account made, but it still needs confirming. In Supabase, switch off “Confirm email”, then sign in.';refreshCloudUI();return}
+  cloudMessage='';
+  cloudUser=result.data.user||cloudUser;
+  /* a username sign-up already chose its name, so don't ask twice */
+  if(mode==='signup'&&login.username&&cloudUser){try{await SB.rpc('set_username',{new_name:login.username})}catch(e){}}
+  refreshCloudUI();if(cloudUser)await findCloudLibrary();
+}
+
+/* ============================================================
+   DERIVED
+   ============================================================ */
+const byId=id=>S.items.find(i=>i.id===id);
+const wsorted=it=>it.watches.slice().sort((a,b)=>a.d.localeCompare(b.d));
+const lastW=it=>{const w=wsorted(it);return w[w.length-1]};
+const lastDate=it=>{const w=lastW(it);return w?w.d:''};
+const latestR=it=>{const w=wsorted(it).filter(x=>x.r);return w.length?w[w.length-1].r:null};
+const rewatches=it=>Math.max(0,it.watches.length-1);
+const nm=k=>S.people[k]?S.people[k].n:k;
+function myKey(){return (cloudProfile&&cloudProfile.username)||'me'}
+function partnerOf(){const me=myKey();const m=(cloudMembers||[]).find(x=>x.username&&!x.is_me&&x.username!==me);return m?{key:m.username,name:cap(m.username)}:null}
+function rname(k){return k===myKey()?'You':cap(k)}
+function coupleLabel(){const ms=(cloudMembers||[]).filter(m=>m.username);return ms.length<2?'':ms.slice(0,2).map(m=>cap(m.username)).join(' & ')}
+const fmtShort=d=>{const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+function ratingsHTML(w){
+  const rs=w.rs&&Object.keys(w.rs).length?w.rs:null, heart=w.love?'<span class="heart" title="Loved it" aria-label="Loved it">♥</span>':'';
+  if(!rs)return (w.r?starsHTML(w.r):'')+heart;
+  const keys=Object.keys(rs);
+  let tag='';
+  if(keys.length>1){const v=keys.map(k=>rs[k]),diff=Math.max(...v)-Math.min(...v);tag=diff===0?'<span class="ragree">Perfect agreement</span>':diff>=2?'<span class="ragree split">Split decision</span>':''}
+  return `<span class="rbox">${keys.map(k=>`<span class="rrow">${keys.length>1?`<span class="rwho">${esc(rname(k))}</span>`:''}${starsHTML(rs[k])}</span>`).join('')}${tag}</span>${heart}`;
+}
+const sitCount=w=>w.sit&&w.sit.length>1?w.sit.length:1;
+const withShort=w=>{const g=w.who.map(nm).join(' & ');return S.shelf==='together'?(g||'Together'):(g||'Just you')};
+const withText=w=>{const g=w.who.map(nm).join(' & ');return S.shelf==='together'?(g?'Together, with '+g:'Together'):(g?'With '+g:'Just you')};
+const heading=it=>it.type==='series'?`${it.t}, season ${it.s}`:it.t;
+const kindText=it=>it.type==='series'?`Series · Season ${it.s}`:'Film';
+const minsOf=it=>it.type==='series'?(it.eps||1)*(it.min||0):(it.min||0);
+const pcol=k=>`var(${S.people[k]?S.people[k].c:'--champagne'})`;
+const matches=(it,q)=>{
+  if(!q)return true; q=q.toLowerCase();
+  const hay=[it.t,it.short,it.dir,it.y,it.note,(it.gen||[]).join(' '),...it.watches.flatMap(w=>[w.note,w.ate,...w.who.map(nm)])].join(' ').toLowerCase();
+  return q.split(/\s+/).every(p=>hay.includes(p));
+};
+const SORTS={
+  added:{n:'The order I added them',f:null},
+  title:{n:'Title, A to Z',f:(a,b)=>sortKey(a.t).localeCompare(sortKey(b.t))},
+  year:{n:'Year released',f:(a,b)=>(a.y||0)-(b.y||0)||sortKey(a.t).localeCompare(sortKey(b.t))},
+  watched:{n:'Last watched',f:(a,b)=>lastDate(b).localeCompare(lastDate(a))},
+  colour:{n:'Colour of the spine',f:(a,b)=>a.col-b.col||sortKey(a.t).localeCompare(sortKey(b.t))}
+};
+const passFilter=it=>S.filter==='all'||(S.filter==='film'&&it.type==='film')||(S.filter==='series'&&it.type==='series')||(S.filter==='waiting'&&it.status==='waiting');
+function arranged(){
+  const list=S.items.filter(passFilter);
+  const f=SORTS[S.sort]&&SORTS[S.sort].f;
+  const seen=list.filter(i=>i.status==='seen'), wait=list.filter(i=>i.status==='waiting');
+  if(f){seen.sort(f);wait.sort(f)}
+  return {seen,wait};
+}
+function counts(){
+  return {all:S.items.length,film:S.items.filter(i=>i.type==='film').length,series:S.items.filter(i=>i.type==='series').length,waiting:S.items.filter(i=>i.status==='waiting').length};
+}
+
+/* ============================================================
+   RENDER PARTS: stars, cover, spine
+   ============================================================ */
+const starsHTML=r=>`<span class="stars" style="--p:${(r||0)/5*100}%" role="img" aria-label="${r?r+' out of 5':'Not rated'}">★★★★★</span>`;
+const rtxt=r=>r?(r%1?r:r+'.0'):'';
+
+function coverHTML(it){
+  const p=SP[it.col%SP.length], t=hash(it.id)%5, n=it.t.length;
+  if(it.poster)return `<div class="cover cvp" style="--cb:var(${p.bg});--ci:var(${p.ink});--ca:var(${p.band})"><img src="${esc(it.poster)}" alt="Poster for ${esc(heading(it))}" loading="lazy" onerror="this.remove()"><div class="cv-sheen"></div></div>`;
+  const sz=n<=13?'':n<=24?'m':'l';
+  return `<div class="cover cv${t}" style="--cb:var(${p.bg});--ci:var(${p.ink});--ca:var(${p.band})"><div class="cv-art"></div>
+    <div class="cv-top"><span>${it.type==='series'?'Series · S'+it.s:'Film'}</span><span>${it.y||''}</span></div>
+    <div class="cv-title ${sz}">${esc(it.t)}</div><div class="cv-by">${esc(it.status==='waiting'?'':(it.dir||''))}</div><div class="cv-sheen"></div></div>`;
+}
+function baseWidth(it){ // film cases are slim, season sets are thicker. Height never changes.
+  const j=hash(it.id)%3*2;
+  return it.type==='series'?34+j:26+j;
+}
+function spineHTML(it,o={}){
+  const p=SP[it.col%SP.length];
+  const label=it.short||it.t;
+  const fs=Math.max(9.5,Math.min(16,Math.floor(132/(label.length*.55))));
+  const y=String(it.y||'');
+  const first=it.watches.length?wsorted(it)[0].who[0]:null;
+  const r=latestR(it);
+  const aria=`${heading(it)}, ${it.y||''}. ${it.status==='waiting'?'Still wrapped. Its details unlock once you have watched it.':'On the shelf.'}${r?' Rated '+r+'.':''}`;
+  const tag=o.static?'span':'button';
+  const drag=o.drag&&!o.static?'draggable="true"':'';
+  const tip=`<span class="sp-tip"><b>${esc(heading(it))}</b><i>${it.y||''} · ${it.status==='waiting'?'Waiting':(r?'★ '+rtxt(r):'On the shelf')}</i></span>`;
+  return `<${tag} ${o.static?'':`type="button" ${drag} data-id="${esc(it.id)}" tabindex="-1" aria-label="${esc(aria)}"`}
+    class="sp ${it.type==='series'?'series':''} ${it.status==='waiting'?'wrapped':''} ${o.cls||''}"
+    style="--w:${baseWidth(it)};--fs:${fs};--sb:var(${p.bg});--si:var(${p.ink});--sa:var(${p.band})">
+    <span class="sp-body">${rewatches(it)?'<span class="sp-pip" title="Watched more than once"></span>':''}
+    <span class="sp-cap">${it.type==='series'?'S'+it.s:''}</span><span class="sp-t">${esc(label)}</span>
+    <span class="sp-foot">${y.length===4?`<span class="sp-y"><span>${y.slice(0,2)}</span><span>${y.slice(2)}</span></span>`:''}${first?`<span class="sp-dot" style="background:${pcol(first)}"></span>`:''}</span></span>
+    ${o.static?'':tip}</${tag}>`;
+}
+
+/* ============================================================
+   SHELL
+   ============================================================ */
+function paintMast(){
+  const tb=$('#btn-theme');tb.setAttribute('aria-label',S.theme==='dark'?'Evening light. Switch to daylight':'Daylight. Switch to evening');tb.title=S.theme==='dark'?'Switch to daylight':'Switch to evening';
+  $$('[data-nav]').forEach(a=>{if(a.dataset.nav===S.view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+}
+function applyTheme(){
+  document.documentElement.dataset.theme=S.theme;
+  tryLS.set('the-usual-theme',S.theme);
+  const m=$('meta[name=theme-color]');if(m)m.content=S.theme==='dark'?'#1d1816':'#F9F0E5';
+  paintMast();
+}
+let toastT;
+function toast(msg,act){
+  const t=$('#toast');t.textContent=msg;
+  if(act){const b=document.createElement('button');b.type='button';b.className='toast-act';b.textContent=act.label;
+    b.addEventListener('click',()=>{t.classList.remove('on');act.fn()});t.append(b)}
+  t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),act?8000:3200)
+}
+
+/* ============================================================
+   ROUTING
+   ============================================================ */
+function route(){
+  const h=(location.hash||'#/').replace(/^#\/?/,'');
+  S.view=h.startsWith('index')?'index':'shelf';
+  document.title=S.view==='index'?'The Index — The Usual':'The Usual';
+  document.body.classList.toggle('v-shelf',S.view==='shelf');
+  paintMast();
+  if(S.view==='index')viewIndex();else viewShelf();
+  if(S.sel)paintSel();
+}
+
+/* ============================================================
+   SHELF VIEW
+   ============================================================ */
+function controlsHTML(){
+  const c=counts();
+  const tabs=[['all','All'],['film','Films'],['series','Series'],['waiting','To watch']];
+  return `<div class="controls">
+    <div class="tabs" role="group" aria-label="Show">${tabs.map(([k,l])=>`<button type="button" data-filter="${k}" aria-pressed="${S.filter===k}">${l}<sup>${c[k]}</sup></button>`).join('')}</div>
+    ${S.view==='shelf'?`<div class="ctl"><label class="sr" for="sort">Arranged by</label><select id="sort">${Object.entries(SORTS).map(([k,v])=>`<option value="${k}" ${S.sort===k?'selected':''}>${v.n}</option>`).join('')}</select></div>`:''}
+    <div class="ctl"><label class="sr" for="find">Find</label><input id="find" type="search" autocomplete="off" placeholder="Search titles, names, notes" value="${esc(S.q)}"></div>
+    <button type="button" class="tlink" id="seltoggle" data-act="select-toggle">${S.sel?'Cancel selecting':'Select to remove'}</button>
+  </div>`;
+}
+function deckText(){
+  const seen=S.items.filter(i=>i.status==='seen').length, wait=S.items.filter(i=>i.status==='waiting').length, us=S.shelf==='together';
+  const hl=(f,t)=>`<button type="button" class="hl" data-filter="${f}" title="${f==='all'?'Show everything':'Show only what is still to watch'}">${t}</button>`;
+  if(!S.items.length)return us?`Our shelf is empty, <em>for now.</em>`:`An empty shelf, <em>for now.</em>`;
+  if(!seen)return hl('waiting',`${cap(words(wait))} on ${us?'our':'my'} list, <em>none watched yet.</em>`);
+  return `${hl('all',`${cap(words(seen))} watched${us?' together':''}${wait?',':'.'}`)}${wait?` <em>${hl('waiting',`${words(wait)} still to watch.`)}</em>`:''}`;
+}
+function shelfSwitchHTML(){
+  return `<div class="shelfsw" role="group" aria-label="Which shelf"><button type="button" data-act="shelf" data-v="together" aria-pressed="${S.shelf==='together'}">Us</button><button type="button" data-act="shelf" data-v="mine" aria-pressed="${S.shelf==='mine'}">Just me</button></div>`;
+}
+function sinceText(){
+  if(!S.items.length)return 'Nothing kept yet.';
+  const first=S.items.map(i=>i.added).sort()[0];
+  return `${S.shelf==='together'?'Kept together':'Kept'} since ${fmtMonth(first)}.`;
+}
+function viewShelf(){
+  $('#view').innerHTML=`<div class="wrap">
+    <div class="stage">
+      <div class="rail">
+        <div class="rail-main">
+          ${shelfSwitchHTML()}
+          <section class="deck">${S.shelf==='together'&&coupleLabel()?`<p class="kicker">${esc(coupleLabel())}</p>`:''}<h1 id="deck-h">${deckText()}</h1><p>${sinceText()}</p></section>
+          ${controlsHTML()}
+          <button type="button" class="btn line tonightbtn" data-act="tonight">What shall we watch tonight?</button>
+        </div>
+        <aside class="panel" id="panel" hidden tabindex="-1" aria-label="Title details"></aside>
+      </div>
+      <div class="shelfcol"><div class="bookcase" id="case" style="--u:1"><div class="crown"></div><div class="cavity" id="cavity"></div><div class="plinth"></div></div></div>
+    </div>
+    <div class="below" id="below"></div>
+  </div>`;
+  fillShelf();
+  fillBelow();
+  observe();
+  if(S.open&&byId(S.open))renderPanel();else{S.open=null;document.body.classList.remove('panel-open');$('#scrim').hidden=true}
+}
+let ro=null, lastBreaks='';
+function observe(){
+  if(ro)ro.disconnect();
+  const cav=$('#cavity'); if(!cav||!window.ResizeObserver)return;
+  let raf=0;
+  ro=new ResizeObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{ if(S.view==='shelf'){ const p=pack(); if(p.sig!==lastBreaks)fillShelf(true) } })});
+  ro.observe(cav);
+}
+const unitFor=w=>w>=1000?1.2:w>=820?1.08:w>=620?.98:w>=460?.92:1;
+function pack(){
+  const cav=$('#cavity'); const W=cav?cav.clientWidth:900;
+  const u=unitFor(W), padX=24*u, usable=W-2*padX, gap=2*u;
+  const {seen,wait}=arranged();
+  const groups=[];
+  if(seen.length)groups.push({key:'seen',label:'On the shelf',items:seen});
+  if(wait.length)groups.push({key:'wait',label:'Still to watch',items:wait});
+  const rows=[];
+  groups.forEach(g=>{
+    let row=null, used=0;
+    g.items.forEach(it=>{
+      const w=baseWidth(it)*u;
+      if(!row||used+w>usable){row={label:null,items:[]};rows.push(row);used=0;if(g.items[0]===it)row.label=g}
+      row.items.push(it);used+=w+gap;
+    });
+  });
+  const minRows=3;
+  const sig=u+'|'+rows.map(r=>(r.label?'#'+r.label.key:'')+r.items.map(i=>i.id).join(',')).join('/');
+  return {rows,groups,u,sig,minRows};
+}
+const canDrag=()=>S.sort==='added'&&S.filter==='all'&&!S.q.trim();
+function fillShelf(keepScroll){
+  const cav=$('#cavity'); if(!cav)return;
+  const p=pack(); lastBreaks=p.sig;
+  $('#case').style.setProperty('--u',p.u);
+  const empty=!p.rows.length;
+  let html='';
+  p.rows.forEach(r=>{
+    const n=r.items.length;
+    html+=`<div class="row"><div class="slots" role="group" aria-label="${r.label?esc(r.label.label):'Shelf'}">
+      ${r.label&&r.label.key==='wait'?`<span class="tag">${esc(r.label.label)}<i>${r.label.items.length}</i></span>`:''}
+      ${r.items.map((it,i)=>spineHTML(it,{drag:canDrag(),cls:`${i<3?'tl':''} ${i>=n-3?'tr':''} ${S.open===it.id?'pulled':''} ${S.landed===it.id?'landing':''}`})).join('')}
+    </div><div class="board"></div></div>`;
+  });
+  for(let i=p.rows.length;i<p.minRows;i++){
+    html+=`<div class="row bare"><div class="slots"></div><div class="board"></div></div>`;
+  }
+  if(empty){
+    const none=S.items.length>0;
+    html+=`<div class="hollow"><div>${none?`<h2>Nothing on this shelf.</h2><p>Try another filter, or add something new.</p>`:`<h2>${S.shelf==='together'?'Our shelf is empty.':'Your shelf is empty.'}</h2><p>${S.shelf==='together'?'Start with the one you keep saying you’ll watch.':'Start with the one you keep coming back to.'}</p>`}<div class="setrow" style="justify-content:center"><button class="btn" type="button" data-act="add">Add the first one</button>${none?'':`<button class="btn" type="button" data-act="open-import">Paste a list</button>`}</div></div></div>`;
+  }
+  cav.innerHTML=html;
+  S.order=p.rows.flatMap(r=>r.items.map(i=>i.id));
+  const first=$('.sp',cav); const pulled=$('.sp.pulled',cav);
+  (pulled||first)&&(pulled||first).setAttribute('tabindex','0');
+  applyFind();
+  if(S.sel)paintSel();
+  if(S.landed){
+    const el=$(`.sp[data-id="${CSS.escape(S.landed)}"]`,cav);
+    if(el)el.scrollIntoView({block:'center',behavior:reduceMotion()?'auto':'smooth'});
+    const id=S.landed; S.landed=null;
+    setTimeout(()=>{const e=$(`.sp[data-id="${CSS.escape(id)}"]`);if(e)e.classList.remove('landing')},1200);
+  }
+}
+function applyFind(){
+  const q=S.q.trim();
+  $$('#cavity .sp').forEach(el=>{const it=byId(el.dataset.id);el.classList.toggle('dim',!!q&&!!it&&!matches(it,q))});
+  $$('.idx tbody tr').forEach(tr=>{const it=byId(tr.dataset.id);tr.classList.toggle('dim',!!q&&!!it&&!matches(it,q))});
+}
+function fillBelow(){
+  const el=$('#below'); if(!el)return;
+  const seen=S.items.filter(i=>i.status==='seen');
+  const all=seen.flatMap(i=>i.watches.map(w=>({i,w})));
+  const mins=seen.reduce((a,i)=>a+i.watches.length*minsOf(i),0);
+  const re=seen.reduce((a,i)=>a+rewatches(i),0);
+  const notes=all.filter(x=>x.w.note).sort((a,b)=>b.w.d.localeCompare(a.w.d));
+  const pick=[];const used=new Set();
+  for(const n of notes){if(!used.has(n.i.id)){used.add(n.i.id);pick.push(n);if(pick.length===3)break}}
+  el.innerHTML=(S.items.length?`
+    <div class="figures">
+      <div class="fig"><b>${seen.length}</b><span>${S.shelf==='together'?'Watched together':'On my shelf'}</span></div>
+      <div class="fig"><b>${all.reduce((a,x)=>a+sitCount(x.w),0)}</b><span>${S.shelf==='together'?'Nights in':'Evenings'}</span></div>
+      <div class="fig"><b>${Math.round(mins/60)}</b><span>${S.shelf==='together'?'Hours on the sofa':'Hours watched'}</span></div>
+      <div class="fig"><b>${re}</b><span>Rewatches</span></div>
+    </div>`:'')+
+    (pick.length?`<section class="margins" aria-label="Lines you wrote"><div class="quotes">
+      ${pick.map(({i,w})=>`<button type="button" class="quote" data-id="${esc(i.id)}"><q>${esc(w.note)}</q><cite>${esc(heading(i))} · ${w.who.length?'with '+esc(w.who.map(nm).join(' & '))+' · ':''}${fmtMonth(w.d)}</cite></button>`).join('')}
+    </div></section>`:'')+
+    `<div class="foot"><span>Film and series data and images from TMDB. Streaming availability from JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></div>`;
+}
+function refreshHeader(){
+  const h=$('#deck-h'); if(h)h.innerHTML=deckText();
+  const tabs=$('.tabs'); if(tabs){const c=counts();$$('button',tabs).forEach(b=>{b.setAttribute('aria-pressed',String(S.filter===b.dataset.filter));$('sup',b).textContent=c[b.dataset.filter]})}
+}
+
+/* ============================================================
+   INDEX VIEW
+   ============================================================ */
+function viewIndex(){
+  const cols=[['title','Title'],['year','Year'],['format','Format'],['last','Last watched'],['with','With'],['rating','Rating']];
+  $('#view').innerHTML=`<div class="wrap">
+    ${shelfSwitchHTML()}
+    <section class="deck"><h1>Everything ${S.shelf==='together'?'we':'I'} keep, <em>in plain type.</em></h1></section>
+    ${controlsHTML()}
+    <table class="idx"><thead><tr>${cols.map(([k,l])=>`<th scope="col" class="${['format','with','last'].includes(k)?'hide-s':''}" ${S.isort.k===k?`aria-sort="${S.isort.d>0?'ascending':'descending'}"`:''}><button type="button" data-isort="${k}">${l}${S.isort.k===k?(S.isort.d>0?' ↑':' ↓'):''}</button></th>`).join('')}</tr></thead><tbody id="idx-body"></tbody></table>
+    <div class="below" id="below"></div>
+    <aside class="panel" id="panel" hidden tabindex="-1" aria-label="Title details"></aside></div>`;
+  fillIndex();
+  if(S.open&&byId(S.open))renderPanel();else{S.open=null;document.body.classList.remove('panel-open');$('#scrim').hidden=true}
+  const b=$('#below');if(b)b.innerHTML=`<div class="foot"><span>Click any title to open its page.</span><span>${S.items.length} kept</span></div>`;
+}
+function fillIndex(){
+  const key={title:i=>sortKey(i.t),year:i=>i.y||0,format:i=>i.type+(i.s||''),last:i=>lastDate(i),with:i=>{const w=lastW(i);return w?w.who.map(nm).join(' '):''},rating:i=>latestR(i)||0};
+  const k=key[S.isort.k]||key.title;
+  const list=S.items.filter(passFilter).sort((a,b)=>{const x=k(a),y=k(b);return (x<y?-1:x>y?1:0)*S.isort.d||sortKey(a.t).localeCompare(sortKey(b.t))});
+  S.order=list.map(i=>i.id);
+  $('#idx-body').innerHTML=list.map(i=>{const w=lastW(i),r=latestR(i);return `<tr data-id="${esc(i.id)}" tabindex="0" class="${S.open===i.id?'open':''}">
+    <td class="t">${esc(i.t)}<small>${i.status==='waiting'?'Still to watch':esc(i.dir||'')}${w?`<span class="only-s"> · ${fmtShort(w.d)}</span>`:''}</small></td>
+    <td class="n">${i.y||''}</td><td class="hide-s">${i.type==='series'?'Series · S'+i.s:'Film'}</td>
+    <td class="n hide-s">${w?fmt(w.d):'—'}</td><td class="hide-s">${w?esc(withShort(w)):'—'}</td>
+    <td>${r?starsHTML(r)+(w&&w.love?'<span class="heart" aria-label="Loved">♥</span>':''):'—'}</td></tr>`}).join('')||`<tr><td colspan="6" style="padding:30px 0;cursor:default"><span class="serif" style="font-size:26px;font-style:italic">Nothing here yet.</span></td></tr>`;
+  applyFind();
+}
+
+/* ============================================================
+   THE CASE — open it, turn it over
+   ============================================================ */
+function sealedCaseHTML(it){
+  const p=SP[it.col%SP.length];
+  return `<div class="case-wrap"><div class="case-stage locked" role="img" aria-label="The case for ${esc(heading(it))}, still in its shrink-wrap">
+    <div class="case3d" style="--sb:var(${p.bg});--si:var(${p.ink});--sa:var(${p.band});--ry:-24deg;--rx:5deg">
+      <div class="c-base"><div class="in"></div><div class="out"></div></div>
+      <div class="c-spine"><span>${esc(it.short||it.t)}</span></div><div class="c-edge-r"></div><div class="c-top"></div><div class="c-bot"></div>
+      <div class="c-front"><div class="f-out">${coverHTML(it)}<i class="gloss"></i><i class="wrapfx"></i></div><div class="f-in"></div></div>
+    </div></div>
+    <div class="case-ctl"><span class="sealed">Still in its wrapper</span></div></div>`;
+}
+function caseHTML(it){
+  if(it.status==='waiting')return sealedCaseHTML(it);
+  const c=S.cs, p=SP[it.col%SP.length], ws=wsorted(it), noted=ws.filter(w=>w.note), lw=noted[noted.length-1]||null;
+  const waiting=it.status==='waiting', label=it.short||it.t;
+  const sty=`--sb:var(${p.bg});--si:var(${p.ink});--sa:var(${p.band});--ry:${c.ry}deg;--rx:${c.rx}deg`;
+  const n=ws.length;
+  return `<div class="case-wrap">
+  <div class="case-stage" tabindex="0" role="group" aria-label="The case for ${esc(heading(it))}. Drag, or use the arrow keys, to turn it. Press Enter to open or close it.">
+    <div class="case3d ${c.open?'open':''}" style="${sty}">
+      <div class="c-base">
+        <div class="in"><div class="tray"><button type="button" class="disc" data-act="spin" aria-label="Spin the disc"><i>${it.y||''}</i></button>
+          <p class="tray-n">${waiting?'still to watch':n===1?'one evening':(words(n)+' evenings')}</p></div></div>
+        <div class="out"><div class="back"><p class="b-t">${esc(it.t)}</p>${it.syn?`<p class="b-s">${esc(it.syn)}</p>`:''}
+          <p class="b-m">${[it.dir,it.min?it.min+' min':'',(it.gen||[]).slice(0,2).join(' / ')].filter(Boolean).map(esc).join(' · ')}</p><div class="b-bar"></div></div></div>
+      </div>
+      <div class="c-spine"><span>${esc(label)}</span></div><div class="c-edge-r"></div><div class="c-top"></div><div class="c-bot"></div>
+      <div class="c-front"><div class="f-out">${coverHTML(it)}<i class="gloss"></i></div>
+        <div class="f-in"><div class="insert"><p class="in-h">${esc(it.t)}</p>
+          ${lw?`<p class="in-q">“${esc(lw.note)}”</p><p class="in-m">${esc(withText(lw))} · ${fmt(lw.d)}</p>`:`<p class="in-q">${waiting?(it.note?esc(it.note):'Saved for a good night.'):'Nothing written down yet.'}</p>`}</div></div></div>
+    </div>
+  </div>
+  <div class="case-ctl"><button type="button" class="tlink" data-act="case-open">${c.open?'Close the case':'Open the case'}</button><button type="button" class="tlink" data-act="case-flip">Turn it over</button></div></div>`;
+}
+function applyCase(){
+  const c=$('.case3d');if(!c)return;
+  c.style.setProperty('--ry',S.cs.ry+'deg');c.style.setProperty('--rx',S.cs.rx+'deg');
+  c.classList.toggle('open',S.cs.open);
+  const b=$('[data-act="case-open"]');if(b)b.textContent=S.cs.open?'Close the case':'Open the case';
+}
+function toggleCase(){
+  const cur=byId(S.open); if(cur&&cur.status==='waiting')return;
+  S.cs.open=!S.cs.open;
+  if(S.cs.open){S.cs.ry=Math.round(S.cs.ry/360)*360-10;S.cs.rx=4}
+  applyCase();
+}
+function flipCase(){
+  if(S.cs.open)S.cs.open=false;
+  S.cs.ry=S.cs.ry+180;applyCase();
+}
+let cdrag=null;
+document.addEventListener('pointerdown',e=>{
+  const st=e.target.closest&&e.target.closest('.case-stage'); if(!st||st.classList.contains('locked')||e.target.closest('.disc'))return;
+  cdrag={c:$('.case3d',st),x:e.clientX,y:e.clientY,ry:S.cs.ry,rx:S.cs.rx,moved:false,target:e.target};
+});
+document.addEventListener('pointermove',e=>{
+  if(!cdrag)return; const dx=e.clientX-cdrag.x,dy=e.clientY-cdrag.y;
+  if(!cdrag.moved&&Math.hypot(dx,dy)<6)return;
+  if(!cdrag.moved){cdrag.moved=true;cdrag.c.classList.add('dragging')}
+  S.cs.ry=cdrag.ry+dx*.6;S.cs.rx=Math.max(-28,Math.min(28,cdrag.rx-dy*.3));applyCase();
+});
+document.addEventListener('pointerup',e=>{
+  if(!cdrag)return; const d=cdrag;cdrag=null;d.c.classList.remove('dragging');
+  if(!d.moved&&d.target.closest&&d.target.closest('.f-out,.f-in'))toggleCase();
+});
+document.addEventListener('pointercancel',()=>{if(cdrag){cdrag.c.classList.remove('dragging');cdrag=null}});
+
+/* drag spines to reorder (only in "the order I added them") */
+let dragId=null;
+document.addEventListener('dragstart',e=>{
+  const sp=e.target.closest&&e.target.closest('#cavity .sp[draggable="true"]'); if(!sp)return;
+  dragId=sp.dataset.id;sp.classList.add('dragging');e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',dragId)}catch(_){}
+});
+document.addEventListener('dragover',e=>{
+  if(!dragId)return; const sp=e.target.closest&&e.target.closest('#cavity .sp'); if(!sp)return;
+  const a=byId(dragId),b=byId(sp.dataset.id); if(!a||!b||a.status!==b.status)return;
+  e.preventDefault();$$('#cavity .sp.over').forEach(x=>x!==sp&&x.classList.remove('over'));sp.classList.add('over');
+});
+document.addEventListener('drop',e=>{
+  if(!dragId)return; const sp=e.target.closest&&e.target.closest('#cavity .sp'); if(!sp)return;
+  e.preventDefault();
+  const a=byId(dragId),b=byId(sp.dataset.id); if(!a||!b||a===b||a.status!==b.status)return;
+  const from=S.items.indexOf(a),to=S.items.indexOf(b);
+  S.items.splice(from,1);S.items.splice(to,0,a);save();dragId=null;S.landed=null;fillShelf(true);
+});
+document.addEventListener('dragend',()=>{dragId=null;$$('#cavity .sp.dragging,#cavity .sp.over').forEach(x=>x.classList.remove('dragging','over'))});
+
+/* ============================================================
+   ENTRY PANEL — pulling one off the shelf
+   ============================================================ */
+function openEntry(id){
+  const w=byId(id); if(!w)return;
+  if(S.open!==id)S.cs={ry:-24,rx:5,open:false};
+  S.open=id; renderPanel();
+  $$('#cavity .sp').forEach(el=>el.classList.toggle('pulled',el.dataset.id===id));
+  $$('#cavity .sp').forEach(el=>el.setAttribute('tabindex',el.dataset.id===id?'0':'-1'));
+  $$('.idx tbody tr').forEach(tr=>tr.classList.toggle('open',tr.dataset.id===id));
+}
+function closeEntry(){
+  const id=S.open; S.open=null;
+  $('#panel').hidden=true;$('#panel').innerHTML='';$('#scrim').hidden=true;
+  document.body.classList.remove('panel-open');
+  $$('#cavity .sp.pulled').forEach(el=>el.classList.remove('pulled'));
+  const el=id&&$(`.sp[data-id="${CSS.escape(id)}"]`);
+  if(el)el.focus({preventScroll:true});
+}
+function renderPanel(){
+  const it=byId(S.open), p=$('#panel');
+  if(!it){closeEntry();return}
+  const ws=wsorted(it), idx=S.order.indexOf(it.id);
+  const wasOpen=!p.hidden, kept=wasOpen&&p.contains(document.activeElement)?document.activeElement.dataset.act:null;
+  const waiting=it.status==='waiting';
+  const hrs=ws.length?Math.round(ws.length*minsOf(it)/60*10)/10:0;
+  p.hidden=false; $('#scrim').hidden=false;
+  document.body.classList.add('panel-open');
+  p.innerHTML=`
+  <div class="pn-bar">
+    <button type="button" class="step" data-act="prev" aria-label="Previous on the shelf">←</button>
+    <button type="button" class="step" data-act="next" aria-label="Next on the shelf">→</button>
+    <span class="pn-pos">${idx>=0?`${idx+1} of ${S.order.length}`:''}</span>
+    <button type="button" class="tlink" data-act="close-panel">Close</button>
+  </div>
+  <div class="pn-body">
+    ${caseHTML(it)}
+    <h2 class="pn-title" id="pn-h">${esc(it.t)}${it.type==='series'?`<small>Season ${it.s}${!waiting&&it.eps?`, ${it.eps} episodes`:''}</small>`:''}</h2>
+    <p class="byline">${waiting?`${it.type==='series'?'Series, season '+it.s:'Film'} · ${it.y||''}`:`${esc(kindText(it))} · ${it.y||''}`}${(it.dir||it.min)?' · ':''}${it.dir?`${it.type==='series'?'Created by':'Directed by'} ${esc(it.dir)} · `:''}${it.min?`${it.min} min${it.type==='series'?' an episode':''}`:''}${it.gen&&it.gen.length?` · ${esc(it.gen.join(', '))}`:''}</p>
+    ${it.syn?`<p class="syn">${esc(it.syn)}</p>`:''}
+
+    <section class="pn-sec" aria-label="${waiting?'Still to watch':'Your copy'}">
+      ${waiting?`<p class="wrapnote">${it.note?`“${esc(it.note)}”`:'Saved for a good night.'}</p>
+        <p class="byline">On the list since ${fmt(it.added)}.</p>
+        <div class="pn-acts"><button class="btn" type="button" data-act="log" data-id="${esc(it.id)}">We watched it</button></div>`
+      :`<div class="facts">
+          <div><b>${ws.reduce((a,w)=>a+sitCount(w),0)}</b><span>${ws.reduce((a,w)=>a+sitCount(w),0)===1?'Evening':'Evenings'}</span></div>
+          <div><b>${latestR(it)?rtxt(latestR(it)):'—'}</b><span>Latest rating</span></div>
+          <div><b>${hrs}</b><span>Hours</span></div>
+        </div>
+        <ol class="ledger">${ws.map((w,i)=>{const gi=it.watches.indexOf(w);return `<li>
+          <div class="lg-d"><span class="lg-k">${i===0?'First watch':'Rewatch'}</span><time datetime="${w.d}">${fmt(w.d)}</time>${sitCount(w)>1?`<span class="lg-sit">${cap(words(sitCount(w)))} sittings, from ${fmt(w.sit[0])}</span>`:''}</div>
+          <div class="lg-b"><p class="lg-who"><span>${esc(withText(w))}</span>${ratingsHTML(w)}</p>
+            ${w.note?`<p class="lg-note">“${esc(w.note)}”</p>`:''}${w.ate?`<p class="lg-ate">On the table: ${esc(w.ate)}</p>`:''}</div>
+          <div class="lg-acts"><button type="button" class="lg-x" data-act="editwatch" data-i="${gi}">Edit</button><button type="button" class="lg-x" data-act="rmwatch" data-i="${gi}">Remove</button></div></li>`}).join('')}</ol>
+        <div class="pn-acts"><button class="btn" type="button" data-act="log" data-id="${esc(it.id)}">Log another watch</button></div>`}
+    </section>
+
+    <section class="pn-sec" aria-label="Spine colour">
+      <div class="preview">${spineHTML(it,{static:true})}
+        <div class="swatches" role="group" aria-label="Spine colour">${SP.map((c,i)=>`<button type="button" class="sw" style="--sb:var(${c.bg})" data-act="col" data-c="${i}" aria-label="${c.n}" aria-pressed="${it.col%SP.length===i}" title="${c.n}"></button>`).join('')}</div></div>
+    </section>
+    <section class="pn-sec avail" aria-label="Where to watch"><h3>Available at</h3><div id="avail" data-for="${esc(it.id)}"></div></section>
+    <div class="remove-row"><button type="button" class="btn line" data-act="move" data-id="${esc(it.id)}">Move to ${S.shelf==='together'?'my shelf':'Together'}</button><button type="button" class="btn line danger" data-act="remove" data-id="${esc(it.id)}">Remove</button></div>
+  </div>`;
+  p.scrollTop=0;
+  fillAvail(it,'#avail');
+  const again=kept&&$(`[data-act="${kept}"]`,p);
+  if(again)again.focus({preventScroll:true});else if(!wasOpen){p.focus({preventScroll:true})}
+}
+function step(dir){
+  if(!S.open||!S.order.length)return;
+  const i=S.order.indexOf(S.open);
+  const n=S.order[(i+dir+S.order.length)%S.order.length];
+  openEntry(n);
+  const el=$(`.sp[data-id="${CSS.escape(n)}"]`);
+  if(el)el.scrollIntoView({block:'nearest',inline:'nearest',behavior:reduceMotion()?'auto':'smooth'});
+}
+function setColour(i){
+  const it=byId(S.open);if(!it)return;
+  it.col=i;save();
+  const prev=$('.preview');
+  if(prev)prev.querySelector('.sp').outerHTML=spineHTML(it,{static:true});
+  const cw=$('.case-wrap');if(cw)cw.outerHTML=caseHTML(it);
+  $$('.sw').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.c===i)));
+  const sp=$(`#cavity .sp[data-id="${CSS.escape(it.id)}"]`);
+  if(sp){const keep=sp.classList.contains('pulled');sp.outerHTML=spineHTML(it,{cls:keep?'pulled':''});const n=$(`#cavity .sp[data-id="${CSS.escape(it.id)}"]`);if(n)n.setAttribute('tabindex','0')}
+}
+function removeItems(ids){
+  const gone=S.items.map((it,i)=>({it,i})).filter(x=>ids.includes(x.it.id));
+  if(!gone.length)return;
+  S.items=S.items.filter(i=>!ids.includes(i.id)); save();
+  if(S.open&&ids.includes(S.open)){S.open=null;closeEntry()}
+  refreshView();
+  toast(gone.length===1?`Removed ${gone[0].it.t}.`:`Removed ${gone.length} titles.`,{label:'Undo',fn:()=>{
+    gone.forEach(x=>S.items.splice(Math.min(x.i,S.items.length),0,x.it));save();refreshView()}});
+}
+function removeItem(id){removeItems([id])}
+function moveItem(id){
+  const it=byId(id); if(!it)return;
+  const from=S.shelf, to=from==='together'?'mine':'together';
+  syncStore();
+  if(S.store[to].some(i=>i.id===id||(i.tmdb&&i.tmdb===it.tmdb&&i.s===it.s))){toast('That one is already on the other shelf.');return}
+  const at=S.items.indexOf(it);
+  S.items=S.items.filter(i=>i.id!==id);S.store[from]=S.items;S.store[to].push(it);
+  save();if(S.open===id){S.open=null;closeEntry()}refreshView();
+  toast(`Moved to ${to==='mine'?'your shelf':'Together'}.`,{label:'Undo',fn:()=>{
+    S.store[to]=S.store[to].filter(i=>i.id!==id);
+    const arr=S.store[from];arr.splice(Math.min(at,arr.length),0,it);
+    if(S.shelf===from)S.items=S.store[from];else S.items=S.store[S.shelf];
+    save();refreshView()}});
+}
+function addPerson(name){
+  const n=name.trim().slice(0,40);if(!n)return null;
+  const k=n.toLowerCase().replace(/[^a-z0-9]/g,'')||('p'+Date.now());
+  if(!S.people[k]){const cols=['--mauve','--blue','--champagne','--copper','--gold'];S.people[k]={n,c:cols[Object.keys(S.people).length%cols.length]}}
+  save();return k;
+}
+function removePerson(k){
+  delete S.people[k];
+  [S.store.mine,S.store.together].forEach(arr=>arr.forEach(it=>it.watches.forEach(w=>{w.who=(w.who||[]).filter(x=>x!==k)})));
+  save();refreshView(true);
+}
+function startSelect(){if(S.open)closeEntry();S.sel=new Set();paintSel()}
+function endSelect(){S.sel=null;paintSel()}
+function toggleSel(id){if(!S.sel)return;if(S.sel.has(id))S.sel.delete(id);else S.sel.add(id);paintSel()}
+function paintSel(){
+  const on=!!S.sel;
+  document.body.classList.toggle('selecting',on);
+  $$('.sp[data-id],.idx tbody tr[data-id]').forEach(el=>{
+    const sel=on&&S.sel.has(el.dataset.id);el.classList.toggle('sel',sel);
+    if(el.classList.contains('sp')){if(on)el.setAttribute('aria-pressed',String(sel));else el.removeAttribute('aria-pressed')}
+  });
+  const bar=$('#selbar');bar.hidden=!on;
+  if(on){$('#selcount').textContent=S.sel.size?`${S.sel.size} selected`:'Tap the ones to remove';$('#selrm').disabled=!S.sel.size}
+  const t=$('#seltoggle');if(t)t.textContent=on?'Cancel selecting':'Select to remove';
+}
+function removeWatch(i){
+  const it=byId(S.open); if(!it||!it.watches[i])return;
+  if(!confirm('Remove this evening from the record?'))return;
+  it.watches.splice(i,1);
+  if(!it.watches.length){it.status='waiting';save();closeEntry();refreshView(true);toast('Back on the list.');return}
+  save();renderPanel();refreshView(true);
+}
+function refreshView(keepPanel){
+  if(S.view==='index'){fillIndex();} else {refreshHeader();fillShelf(true);fillBelow();}
+  refreshHeader();
+}
+
+/* ============================================================
+   ADD / LOG SHEET
+   ============================================================ */
+let lastFocus=null;
+function openLayer(html){
+  $('#toast').classList.remove('on');
+  if(!$('#layer').innerHTML)lastFocus=document.activeElement;
+  $('#layer').innerHTML=`<div class="layer-scrim" data-act="scrim">${html}</div>`;
+  document.body.style.overflow='hidden';
+}
+function closeLayer(){
+  $('#layer').innerHTML='';S.add=null;document.body.style.overflow='';
+  if(lastFocus&&lastFocus.focus)try{lastFocus.focus({preventScroll:true})}catch(e){}
+}
+function catalogue(){ if(!S.cat)S.cat=CATALOGUE(); return S.cat }
+
+function openAdd(tab){
+  S.add={step:'find',tab:tab||'search',status:'seen',q:'',tres:[],msg:'',offline:false,done:{},busy:{},
+    imp:{stage:'input',text:'',date:TODAY,rows:[],msg:''}};
+  paintAdd();
+}
+function statusSegHTML(a){
+  return `<div class="seg" role="group" aria-label="Add as"><button type="button" data-act="addstatus" data-v="seen" aria-pressed="${a.status==='seen'}">Watched</button><button type="button" data-act="addstatus" data-v="waiting" aria-pressed="${a.status==='waiting'}">To watch</button></div>`;
+}
+function paintAdd(){
+  const a=S.add; if(!a)return;
+  const tabs=`<div class="addtabs" role="group" aria-label="How to add"><button type="button" data-act="addtab" data-v="search" aria-pressed="${a.tab==='search'}">Search</button><button type="button" data-act="addtab" data-v="import" aria-pressed="${a.tab==='import'}">Paste a list</button></div>`;
+  let pane='';
+  if(a.tab==='search'){
+    pane=`<div class="field"><label class="sr" for="sh-q">Title</label>
+        <input id="sh-q" class="bigfield" type="text" autocomplete="off" placeholder="Start typing a title" aria-controls="sh-res" value="${esc(a.q)}"></div>
+      <div class="addrow">${statusSegHTML(a)}<span class="fine">Tap a title to add it.</span></div>
+      <p class="fine" style="margin-top:-6px">Adding to <b>${S.shelf==='together'?'our shelf':'my shelf'}</b>. <button type="button" class="tlink" data-act="addshelf">Switch</button></p>
+      <ul id="sh-res" class="results" role="listbox" aria-label="Results"></ul>
+      <div class="setrow"><button type="button" class="btn" data-act="sheet-close">Done</button></div>`;
+  }else{
+    const im=a.imp;
+    if(im.stage==='input'){
+      pane=`<div class="field"><label for="imp-text">One title per line</label>
+        <textarea id="imp-text" class="imp-text" spellcheck="false" placeholder="Parasite (2019)&#10;Past Lives&#10;Severance&#10;The Godfather, 1972">${esc(im.text)}</textarea>
+        <p class="fine">Adding the year helps when titles repeat. Numbered lists and Letterboxd or spreadsheet CSV files work too.</p></div>
+      <div class="addrow"><label class="btn line filebtn">Choose a file<input id="imp-file" type="file" accept=".txt,.csv,.tsv,.md,text/plain,text/csv" hidden></label>${statusSegHTML(a)}</div>
+      <div class="field" id="imp-date-wrap" ${a.status==='seen'?'':'hidden'}><label for="imp-date">Watched on</label><input id="imp-date" type="date" value="${esc(im.date)}" max="${TODAY}"></div>
+      <div class="setrow"><button type="button" class="btn accent" data-act="imp-go">Find these titles</button></div>`;
+    }else if(im.stage==='working'){
+      pane=`<p class="fine" id="imp-prog" aria-live="polite" style="font-size:15px">${esc(im.msg)}</p>`;
+    }else{
+      const rows=im.rows, ok=rows.filter(r=>r.item).length, n=rows.filter(r=>r.on&&!r.dup).length;
+      pane=`<p class="fine" style="font-size:14px">Matched ${ok} of ${rows.length}. Untick anything that looks wrong. Titles with no match go on as plain spines.</p>
+      <div class="imp-list">${rows.map((r,k)=>{
+        const m=r.item||{id:'x'+k,t:r.e.t,y:r.e.y,type:'film',col:hash(r.e.t)%SP.length,watches:[]};
+        const note=r.dup?'Already on your shelf':r.item?kindText(m)+' · '+(m.y||'')+(r.exact?'':' · check this one'):'No match, added by title';
+        return `<label class="imp-row ${r.item?'':'miss'} ${r.dup?'dup':''}">
+          <input type="checkbox" data-k="${k}" ${r.on&&!r.dup?'checked':''} ${r.dup?'disabled':''}>
+          ${coverHTML(smallPoster(norm(m)))}
+          <span><b>${esc(m.t)}</b><small>${esc(note)}</small></span></label>`}).join('')}</div>
+      <div class="addrow"><button type="button" class="btn accent" id="imp-confirm" data-act="imp-confirm" ${n?'':'disabled'}>Add ${n} to the ${a.status==='seen'?'shelf':'list'}</button><button type="button" class="tlink" data-act="imp-back">Back</button></div>`;
+    }
+  }
+  openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+    <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
+    <h2 id="sh-h">Add to the library</h2>
+    ${tabs}${pane}
+  </div>`);
+  if(a.tab==='search'){paintResults();setTimeout(()=>{const q=$('#sh-q');if(q)q.focus({preventScroll:true})},30)}
+  else if(a.imp.stage==='input')setTimeout(()=>{const q=$('#imp-text');if(q)q.focus({preventScroll:true})},30);
+}
+const owned=r=>S.items.find(i=>i.tmdb===r.tmdb&&r.type==='film')||(r.type==='film'&&S.items.find(i=>i.type==='film'&&sortKey(i.t)===sortKey(r.t)&&Math.abs((i.y||0)-(r.y||0))<=1))||null;
+const smallPoster=t=>t.poster&&t.poster.includes('/w500/')?{...t,poster:t.poster.replace('/w500/','/w185/')}:t;
+function resultRow(t,attr,tag,kind){
+  return `<li><button type="button" class="res" role="option" ${attr}>${coverHTML(smallPoster(norm(t)))}
+    <span><b>${esc(t.t)}</b><small>${esc(kind||kindText(t))} · ${t.y||''}${t.dir?' · '+esc(t.dir):''}</small></span><em>${tag||''}</em></button></li>`;
+}
+function resultsHTML(q){
+  const a=S.add||{}; q=q.trim().toLowerCase();
+  const live=TMDB.on()&&!a.offline;
+  const handRow=()=>{const nm=q.replace(/\b\w/g,c=>c.toUpperCase());return `<li><button type="button" class="res hand" data-act="manual" data-q="${esc(nm)}">
+    <span class="cover" style="--cb:var(--bg2);--ci:var(--ink);display:grid;place-items:center;font:400 26px var(--serif);border:1px dashed var(--rule)">+</span>
+    <span><b>Add “${esc(nm)}” by hand</b><small>${live?'Not on TMDB':'Not in the starter catalogue'}</small></span><em></em></button></li>`};
+  const doneRow=(r,k)=>`<li><div class="res done">${coverHTML(smallPoster(norm(r)))}<span><b>${esc(r.t)}</b><small>${a.status==='waiting'?'Saved for later':'Added'} · ${r.y||''}</small></span>
+    <em>${a.status==='seen'?`<button type="button" class="tlink" data-act="add-details" data-k="${esc(k)}">Rate</button>`:''}<button type="button" class="tlink" data-act="undo-add" data-k="${esc(k)}">Undo</button></em></div></li>`;
+  let h='';
+  if(live){
+    const doneIds=Object.values(a.done||{}).map(d=>d.id);
+    const mine=q?S.items.filter(i=>(i.t+' '+(i.dir||'')+' '+i.y).toLowerCase().includes(q)&&!doneIds.includes(i.id)).slice(0,4):[];
+    h+=mine.map(i=>resultRow(i,`data-act="pick" data-cid="${esc(i.id)}"`,i.status==='waiting'?'Waiting':'On your shelf')).join('');
+    (a.tres||[]).forEach((r,i)=>{
+      if(a.done&&a.done[r.tmdb]){h+=doneRow(r,r.tmdb);return}
+      if(owned(r))return;
+      const tvHave=r.type==='series'&&S.items.some(x=>x.tmdb===r.tmdb);
+      const busy=a.busy&&a.busy[r.tmdb];
+      h+=resultRow(r,`data-act="pick-tmdb" data-i="${i}"`,busy?'Adding…':tvHave?'Some seasons shelved':'',r.type==='series'?'Series':'Film').replace('class="res"',busy?'class="res busy"':'class="res"');
+    });
+    if(a.msg)h+=`<li class="fine" style="padding:8px">${esc(a.msg)}</li>`;
+    if(q)h+=handRow();
+    return h;
+  }
+  const cat=catalogue();
+  let hits=q?cat.filter(t=>(t.t+' '+(t.dir||'')+' '+t.y).toLowerCase().includes(q)):cat.filter(t=>!byId(t.id)).slice(0,6);
+  hits=hits.slice(0,8);
+  h=hits.map(t=>{const have=byId(t.id);return resultRow(have||t,`data-act="pick" data-cid="${esc(t.id)}"`,have?(have.status==='waiting'?'Waiting':'On your shelf'):'')}).join('');
+  if(a.msg)h=`<li class="fine" style="padding:8px">${esc(a.msg)}</li>`+h;
+  if(q)h+=handRow();
+  return h;
+}
+let sT=0;
+function paintResults(){const el=$('#sh-res');if(el&&S.add&&S.add.step==='find'&&S.add.tab==='search')el.innerHTML=resultsHTML(S.add.q)}
+function queueSearch(){
+  clearTimeout(sT); const a=S.add; if(!a||a.step!=='find'||!TMDB.on())return;
+  const q=a.q.trim();
+  if(q.length<2){a.tres=[];a.msg='';a.offline=false;paintResults();return}
+  a.msg='Searching…';paintResults();
+  sT=setTimeout(async()=>{
+    try{const r=await tmdbSearch(q);if(!S.add||S.add.q.trim()!==q)return;S.add.tres=r;S.add.offline=false;S.add.msg=r.length?'':'Nothing on TMDB by that name.'}
+    catch(e){if(!S.add||S.add.q.trim()!==q)return;S.add.tres=[];
+      if(e.message==='key'){S.add.msg='TMDB didn’t accept the key.'}
+      else{S.add.offline=true;S.add.msg='Couldn’t reach TMDB, so this is the starter catalogue.'}}
+    paintResults();
+  },280);
+}
+/* one-tap add: no form, straight onto the shelf */
+function findDup(m){
+  const tv=m.type==='series', title=(m.t||'').trim();
+  if(m.tmdb){const d=byId('tmdb-'+m.tmdb+(tv?'-s'+(m.s||1):''));if(d)return d;if(!tv){const o=owned(m);if(o)return o}return null}
+  return S.items.find(i=>i.type===(m.type||'film')&&sortKey(i.t)===sortKey(title)&&Math.abs((i.y||0)-(m.y||0))<=1&&(!tv||i.s===(m.s||1)))||null;
+}
+function quickAdd(m,status,date){
+  const title=(m.t||'').trim(); if(!title)return {};
+  const dup=findDup(m); if(dup)return {dup};
+  const tv=m.type==='series';
+  const id=m.tmdb?'tmdb-'+m.tmdb+(tv?'-s'+(m.s||1):''):'m-'+title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+(tv?'-s'+(m.s||1):'')+'-'+Math.random().toString(36).slice(2,6);
+  const who=[];
+  const it=norm({id,t:title,y:m.y||0,type:m.type||'film',s:m.s,eps:m.eps,min:m.min||0,dir:m.dir||'',gen:m.gen||[],syn:m.syn||'',short:m.short,
+    status,watches:status==='seen'?[Wt(date||TODAY,who,null,'','')]:[],added:TODAY,poster:m.poster||'',tmdb:m.tmdb||'',note:''});
+  S.items.push(it);
+  return {item:it};
+}
+async function pickTmdb(i){
+  const a=S.add, r=a&&a.tres[i]; if(!r||a.busy[r.tmdb])return;
+  const have=owned(r); if(have&&!a.done[r.tmdb]){openRate(have.id,{wi:null,back:a});return}
+  a.busy[r.tmdb]=1; paintResults();
+  let meta=r; try{meta=await tmdbDetails(r)}catch(e){}
+  delete a.busy[r.tmdb];
+  if(S.add!==a)return;
+  const res=quickAdd(meta,a.status);
+  if(res.dup){toast(`${res.dup.t} is already on your shelf.`);paintResults();return}
+  save(); a.done[r.tmdb]={id:res.item.id,meta};
+  refreshView(true);
+  if(a.status==='seen'){openRate(res.item.id,{wi:0,back:a});return}
+  paintResults();
+  const q=$('#sh-q'); if(q){q.focus({preventScroll:true});q.select()}
+}
+function undoAdd(k){
+  const a=S.add, d=a&&a.done[k]; if(!d)return;
+  S.items=S.items.filter(i=>i.id!==d.id); delete a.done[k]; save(); paintResults(); refreshView(true);
+}
+function addDetails(k){
+  const a=S.add, d=a&&a.done[k]; if(!d||!byId(d.id))return;
+  openRate(d.id,{wi:0,back:a});
+}
+
+/* ---------- paste a list ---------- */
+function splitCSV(l){const o=[];let c='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];
+  if(q){if(ch==='"'){if(l[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===','){o.push(c);c=''}else c+=ch}
+  o.push(c);return o}
+function parseList(text){
+  const lines=text.replace(/\r/g,'').split('\n').map(l=>l.trim()).filter(Boolean);
+  const out=[],seen=new Set(), maxY=new Date().getFullYear()+1;
+  if(!lines.length)return out;
+  const push=(t,y,d)=>{t=t.replace(/\s+/g,' ').trim().replace(/^["“']+|["”']+$/g,'').trim();if(!t||t.length>140)return;
+    const k=sortKey(t)+'|'+(y||'');if(seen.has(k))return;seen.add(k);out.push({t,y:y||0,d:d||''})};
+  const head=splitCSV(lines[0]).map(h=>h.toLowerCase().trim());
+  const ti=head.findIndex(h=>['name','title','film','movie','series','show'].includes(h));
+  if(ti>=0&&head.length>1){
+    const yi=head.findIndex(h=>h==='year'||h==='release year'), di=head.findIndex(h=>h==='date'||h==='watched date'||h==='date watched');
+    lines.slice(1).forEach(l=>{const c=splitCSV(l);const y=yi>=0?+c[yi]:0;
+      push(c[ti]||'',y>1880&&y<=maxY?y:0,di>=0&&/^\d{4}-\d{2}-\d{2}$/.test((c[di]||'').trim())?c[di].trim():'')});
+    return out.slice(0,300);
+  }
+  lines.forEach(l=>{
+    l=l.replace(/^\s*(?:[-*•–]|\d+[.)])\s+/,'').replace(/^\[.?\]\s*/,'');
+    if(l.includes('\t'))l=l.split('\t').filter(Boolean).join(' ');
+    let y=0;
+    const m=l.match(/^(.*?)[\s,\-–—|:]*[(\[]?\b((?:18|19|20)\d{2})\b[)\]]?\s*$/);
+    if(m&&m[1].trim()&&+m[2]<=maxY){l=m[1];y=+m[2]}
+    push(l,y);
+  });
+  return out.slice(0,300);
+}
+async function matchEntry(e){
+  try{
+    const d=await TMDB.get('/search/multi',{query:e.t,include_adult:'false',language:'en-GB'});
+    const rs=d.results.filter(r=>r.media_type==='movie'||r.media_type==='tv').slice(0,8);
+    const n1=x=>sortKey(x).replace(/[^a-z0-9]/g,''), nt=n1(e.t);
+    let best=null,bs=-9,exact=false;
+    rs.forEach((r,i)=>{
+      const tv=r.media_type==='tv', nn=n1((tv?r.name:r.title)||''), yr=+((tv?r.first_air_date:r.release_date)||'').slice(0,4)||0;
+      let sc=0; const ex=nn===nt;
+      if(ex)sc+=4;else if(nn&&nt&&(nn.includes(nt)||nt.includes(nn)))sc+=1;
+      if(e.y&&yr){const dy=Math.abs(yr-e.y);sc+=dy===0?3:dy===1?1:-2}
+      if(r.poster_path)sc+=.5; sc-=i*.1;
+      if(sc>bs){bs=sc;best=r;exact=ex}
+    });
+    return best&&bs>0?{item:tmdbToItem(best),exact}:null;
+  }catch(err){return null}
+}
+async function impFind(){
+  const a=S.add; if(!a)return;
+  const entries=parseList(a.imp.text);
+  if(!entries.length){toast('Paste a few titles first.');return}
+  a.imp.stage='working'; a.imp.msg=`Finding titles… 0 of ${entries.length}`; paintAdd();
+  const rows=entries.map(e=>({e,item:null,exact:false,on:true,dup:false}));
+  const queue=rows.slice(); let n=0;
+  const worker=async()=>{while(queue.length){const r=queue.shift();
+    const m=TMDB.on()?await matchEntry(r.e):null; if(m){r.item=m.item;r.exact=m.exact}
+    n++; if(S.add===a){a.imp.msg=`Finding titles… ${n} of ${rows.length}`;const el=$('#imp-prog');if(el)el.textContent=a.imp.msg}}};
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  if(S.add!==a)return;
+  const seenIds=new Set();
+  rows.forEach(r=>{
+    const m=r.item||{t:r.e.t,y:r.e.y,type:'film'};
+    const key=r.item?r.item.id:'t:'+sortKey(r.e.t);
+    r.dup=!!findDup(m)||seenIds.has(key); seenIds.add(key); if(r.dup)r.on=false;
+  });
+  a.imp.rows=rows; a.imp.stage='review'; paintAdd();
+}
+async function impConfirm(){
+  const a=S.add; if(!a)return;
+  const picks=a.imp.rows.filter(r=>r.on&&!r.dup);
+  if(!picks.length)return;
+  a.imp.stage='working'; a.imp.msg=`Adding… 0 of ${picks.length}`; paintAdd();
+  const queue=picks.slice(); let n=0, added=0, skipped=0;
+  const status=a.status, baseDate=a.imp.date||TODAY;
+  const worker=async()=>{while(queue.length){const r=queue.shift();
+    let meta=r.item?{...r.item}:{t:r.e.t,y:r.e.y,type:'film'};
+    if(r.item){try{meta=await tmdbDetails(r.item)}catch(e){}}
+    let when=r.e.d||baseDate; if(when>TODAY)when=TODAY;
+    const res=quickAdd(meta,status,when);
+    if(res.item)added++;else skipped++;
+    n++; const el=$('#imp-prog'); if(S.add===a&&el)el.textContent=`Adding… ${n} of ${picks.length}`}};
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  save(); if(S.add===a)closeLayer();
+  S.q='';
+  if(S.view==='index')viewIndex();else viewShelf();
+  toast(`Added ${added} ${added===1?'title':'titles'}${skipped?`, skipped ${skipped} already there`:''}.`);
+}
+let tonightIv=0;
+async function openTonight(){
+  if(S.open)closeEntry();
+  const all=S.items.filter(i=>i.status==='waiting');
+  S.tonight={pool:all.map(i=>i.id),cur:null,note:''};
+  if(!all.length){
+    openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+      <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
+      <p class="kicker">Tonight</p><h2 id="sh-h">Nothing on ${S.shelf==='together'?'our':'my'} list yet.</h2>
+      <p class="byline">Add a few you keep meaning to watch and this will choose for you.</p>
+      <div class="setrow"><button type="button" class="btn accent" data-act="add">Add something</button></div></div>`);
+    return;
+  }
+  const t=S.tonight;
+  if((S.services||[]).length&&TMDB.on()){
+    openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+      <p class="kicker">Tonight</p><h2 id="sh-h">Looking through your list…</h2><p class="fine">Checking what’s on your services.</p></div>`);
+    const ok=new Set(), queue=all.slice(0,40);
+    const worker=async()=>{while(queue.length){const it=queue.shift();try{if(onOurs(await providersFor(it)))ok.add(it.id)}catch(e){}}};
+    await Promise.all([worker(),worker(),worker(),worker(),worker()]);
+    if(S.tonight!==t)return;
+    if(ok.size){t.pool=all.filter(i=>ok.has(i.id)).map(i=>i.id);t.note='Picked from what’s on your services.'}
+    else t.note='Nothing on your list is on your services right now, so this is any pick.';
+  }
+  paintTonight(true);
+}
+function paintTonight(spin){
+  const t=S.tonight; if(!t||!t.pool.length)return;
+  let id;do{id=t.pool[Math.floor(Math.random()*t.pool.length)]}while(t.pool.length>1&&id===t.cur);
+  t.cur=id; const it=byId(id); if(!it)return;
+  clearInterval(tonightIv);
+  const syn=(it.syn||'').length>230?it.syn.slice(0,227).replace(/\s+\S*$/,'')+'…':(it.syn||'');
+  openLayer(`<div class="sheet tonight" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+    <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
+    <p class="kicker">Tonight’s pick</p>${t.note?`<p class="fine" style="margin-top:-4px">${esc(t.note)}</p>`:''}
+    <h2 id="sh-h" aria-live="polite">${esc(heading(it))}</h2>
+    <div class="metaline"><div id="f-cover" class="${spin&&!reduceMotion()?'pop':''}">${coverHTML(smallPoster(it))}</div>
+      <div><p class="byline">${esc(kindText(it))}${it.y?' · '+it.y:''}${it.min?' · '+it.min+' min':''}${it.dir?' · '+esc(it.dir):''}</p>
+      ${syn?`<p class="syn" style="font-size:16px;margin-top:8px">${esc(syn)}</p>`:''}
+      ${it.note?`<p class="byline" style="margin-top:8px">“${esc(it.note)}”</p>`:''}</div></div>
+    <div class="avail"><p class="pv-l" style="margin-top:0">Available at</p><div id="t-avail" data-for="${esc(it.id)}"></div></div>
+    <div class="formfoot"><button type="button" class="btn accent" data-act="tonight-yes" data-id="${esc(id)}">We watched it</button><button type="button" class="btn line" data-act="tonight-again">${t.pool.length>1?'Pick another':'Close'}</button></div>
+  </div>`);
+  fillAvail(it,'#t-avail',true);
+  if(t.pool.length<2){const b=$('[data-act=tonight-again]');if(b)b.setAttribute('data-act','sheet-close')}
+  if(spin&&!reduceMotion()&&t.pool.length>1){
+    const h=$('#sh-h');let n=0;
+    tonightIv=setInterval(()=>{const x=byId(t.pool[n++%t.pool.length]);if(h&&x)h.textContent=heading(x)},70);
+    setTimeout(()=>{clearInterval(tonightIv);if(h)h.textContent=heading(it)},900);
+  }
+}
+function sittingsHTML(d){
+  const multi=d.sit.length>1;
+  return `<span class="lab">${multi?'Sittings':'When'}</span>
+    <div class="sits">${d.sit.map((x,i)=>`<div class="sitrow">${multi?`<span class="sitn">${i+1}</span>`:''}<input type="date" class="f-sit" data-i="${i}" value="${esc(x)}" max="${TODAY}" aria-label="${multi?'Sitting '+(i+1):'Date watched'}">${multi?`<button type="button" class="tlink" data-act="rmsit" data-i="${i}" aria-label="Remove sitting ${i+1}">Remove</button>`:''}</div>`).join('')}</div>
+    <div class="chips">${multi?'':`<button type="button" class="chip" data-act="date" data-v="0">Tonight</button><button type="button" class="chip" data-act="date" data-v="-1">Last night</button>`}<button type="button" class="chip" data-act="addsit">+ Another sitting</button></div>
+    ${multi?'':`<p class="fine">Watched it over more than one night? Add each sitting.</p>`}`;
+}
+function paintSits(){const el=$('#f-when');if(el&&S.add&&S.add.step==='rate')el.innerHTML=sittingsHTML(S.add.d)}
+function openRate(id,opt){
+  opt=opt||{}; const it=byId(id); if(!it)return;
+  const w=opt.wi!=null?it.watches[opt.wi]:null;
+  const rs=w?(w.rs&&Object.keys(w.rs).length?{...w.rs}:(w.r?{[myKey()]:w.r}:{})):{};
+  S.add={step:'rate',id,wi:w?opt.wi:null,back:opt.back||null,
+    d:{sit:w?(w.sit&&w.sit.length?w.sit.slice():[w.d]):[TODAY],who:w?(w.who||[]).slice():[],rs,love:w?!!w.love:false,note:w?(w.note||''):'',ate:w?(w.ate||''):''}};
+  renderRate();
+}
+function renderRate(){
+  const a=S.add, it=byId(a.id), d=a.d; if(!it)return;
+  const together=S.shelf==='together', partner=together?partnerOf():null, persons=Object.entries(S.people);
+  const again=a.wi==null&&it.watches.length>0;
+  const raters=[{k:myKey(),label:'Your rating'}].concat(partner?[{k:partner.key,label:partner.name+'’s rating'}]:[]);
+  openLayer(`<form class="sheet" id="rateform" role="dialog" aria-modal="true" aria-labelledby="sh-h" novalidate>
+    <button type="button" class="sh-x" data-act="rate-skip" aria-label="Close">×</button>
+    <div class="metaline"><div id="f-cover">${coverHTML(smallPoster(it))}</div><div><h2 id="sh-h">${partner?'How was it, you two?':'How was it?'}</h2><p class="byline" style="margin-top:6px">${esc(heading(it))} · ${it.y||''}${again?' · another time through':''}</p></div></div>
+    ${raters.map(r=>`<div class="field"><span class="lab">${esc(r.label)}</span>
+      <div class="rate"><span class="stars" data-rk="${esc(r.k)}" role="slider" tabindex="0" aria-label="${esc(r.label)}, out of five" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${d.rs[r.k]||0}" style="--p:${(d.rs[r.k]||0)/5*100}%">★★★★★</span><output>${d.rs[r.k]?rtxt(d.rs[r.k]):''}</output><button type="button" class="tlink" data-act="norate" data-rk="${esc(r.k)}">Clear</button></div></div>`).join('')}
+    <div class="chips"><button type="button" class="chip" data-act="love" aria-pressed="${!!d.love}">♥ ${partner?'We loved it':'Loved it'}</button></div>
+    <div class="field"><label for="f-note">A line to remember it by <span class="opt">optional</span></label><textarea id="f-note" rows="2" placeholder="${partner?'What did you two say afterwards?':'What did you say afterwards?'}">${esc(d.note)}</textarea></div>
+    <div class="field" id="f-when">${sittingsHTML(d)}</div>
+    <details class="more"><summary>More details</summary>
+      <div class="field"><span class="lab">${together?'Anyone else there?':'Who was there'}</span>
+        <div class="chips" id="f-who">
+          ${together?'':`<button type="button" class="chip" data-act="who" data-v="" aria-pressed="${!d.who.length}">Just me</button>`}
+          ${persons.map(([k,p])=>`<button type="button" class="chip" data-act="who" data-v="${esc(k)}" aria-pressed="${d.who.includes(k)}">${esc(p.n)}</button>`).join('')}
+          <button type="button" class="chip" data-act="newwho">+ Someone</button>
+          <input id="f-newwho" type="text" hidden placeholder="A name, then Enter" aria-label="New person's name" style="border:0;border-bottom:1px solid var(--soft);background:transparent;font:italic 400 19px var(--serif);width:12em">
+        </div></div>
+      <div class="field"><label for="f-ate">What was on the table</label><input id="f-ate" type="text" value="${esc(d.ate)}" placeholder="tea, a bad idea involving cheese"></div>
+    </details>
+    <div class="formfoot"><button type="submit" class="btn accent">Save</button><button type="button" class="tlink" data-act="rate-skip">${a.wi==null&&!a.back?'Cancel':'Skip for now'}</button></div>
+  </form>`);
+  setTimeout(()=>{const r=$('.stars[data-rk]');r&&r.focus({preventScroll:true})},30);
+}
+function syncRate(){
+  const a=S.add; if(!a||a.step!=='rate')return;
+  const g=id=>{const e=$(id);return e?e.value:undefined};
+  a.d.note=g('#f-note')??a.d.note; a.d.ate=g('#f-ate')??a.d.ate;
+  $$('.f-sit').forEach(el=>{a.d.sit[+el.dataset.i]=el.value||TODAY});
+}
+function submitRate(){
+  syncRate();
+  const a=S.add, it=byId(a.id), d=a.d; if(!it)return;
+  const sit=[...new Set(d.sit.filter(Boolean))].sort(); const last=sit[sit.length-1]||TODAY;
+  const rs={};Object.entries(d.rs).forEach(([k,v])=>{if(v>0)rs[k]=v});
+  const vals=Object.values(rs), avg=vals.length?Math.round(vals.reduce((x,y)=>x+y,0)/vals.length*2)/2:null;
+  const w=Wt(last,d.who.slice(),avg,(d.note||'').trim(),(d.ate||'').trim());
+  if(vals.length)w.rs=rs; if(d.love)w.love=true; if(sit.length>1)w.sit=sit;
+  if(a.wi!=null&&it.watches[a.wi])it.watches[a.wi]=w;else it.watches.push(w);
+  it.status='seen';
+  save();
+  const back=a.back;
+  if(back){S.add=back;paintAdd()}else closeLayer();
+  if(S.open===it.id)renderPanel();
+  refreshView(true);
+  if(!back)toast(S.shelf==='together'?`${it.t} is on our shelf.`:`${it.t} is on the shelf.`);
+}
+function rateSkip(){
+  const back=S.add&&S.add.back;
+  if(back){S.add=back;paintAdd()}else closeLayer();
+}
+function startForm(meta,existingId){
+  const ex=existingId?byId(existingId):null;
+  const base=ex||norm(meta);
+  const watched=ex?true:true;
+  S.add={step:'form',meta:{...base},exist:ex?ex.id:null,manual:!!meta.manual,
+    d:{status:ex&&ex.status==='waiting'?'seen':'seen',date:TODAY,who:[],r:0,note:'',ate:'',col:ex?ex.col:base.col,why:''}};
+  renderForm();
+}
+function renderForm(){
+  const a=S.add, m=a.meta, d=a.d, ex=a.exist;
+  const persons=Object.entries(S.people);
+  const title=ex?(m.status==='waiting'?'You watched it.':'Another evening.'):'Put it on the shelf.';
+  openLayer(`<form class="sheet" id="addform" role="dialog" aria-modal="true" aria-labelledby="sh-h" novalidate>
+    <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
+    <h2 id="sh-h">${title}</h2>
+    ${a.manual?`
+      <div class="field"><label for="f-t">Title</label><input id="f-t" type="text" value="${esc(m.t)}" required></div>
+      <div class="two">
+        <div class="field"><label for="f-y">Year</label><input id="f-y" type="number" min="1888" max="2100" value="${m.y||''}" placeholder="2024"></div>
+        <div class="field"><span class="lab">Format</span><div class="seg" role="group" aria-label="Format"><button type="button" data-act="fmt" data-v="film" aria-pressed="${m.type==='film'}">Film</button><button type="button" data-act="fmt" data-v="series" aria-pressed="${m.type==='series'}">Series</button></div></div>
+      </div>
+      <div class="two" id="f-series" ${m.type==='series'?'':'hidden'}>
+        <div class="field"><label for="f-s">Season</label><input id="f-s" type="number" min="1" max="60" value="${m.s||1}"></div>
+        <div class="field"><label for="f-d">Director or creator <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="f-d" type="text" value="${esc(m.dir||'')}"></div>
+      </div>
+      <div class="field" id="f-dir" ${m.type==='series'?'hidden':''}><label for="f-d2">Director <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="f-d2" type="text" value="${esc(m.dir||'')}"></div>`
+    :`<div class="metaline"><div id="f-cover">${coverHTML(m)}</div><div><b class="serif" style="font-size:30px;font-weight:400;line-height:1">${esc(m.t)}</b><p class="byline" id="f-by" style="margin-top:6px">${esc(kindText(m))} · ${m.y||''}${m.dir?' · '+esc(m.dir):''}</p>
+      ${m.seasons&&m.seasons.length>0&&!ex?`<div class="field" style="margin-top:12px"><label class="sr" for="f-season">Season</label><select id="f-season">${m.seasons.map(x=>`<option value="${x.n}" ${x.n===m.s?'selected':''}>Season ${x.n}${x.y?' · '+x.y:''}${x.eps?' · '+x.eps+' episodes':''}</option>`).join('')}</select></div>`:''}${ex&&m.status==='seen'?`<p class="byline">Already on your shelf, ${m.watches.length===1?'once':words(m.watches.length)+' times'}. This will be a rewatch.</p>`:''}</div></div>`}
+
+    ${ex?'':`<div class="field"><span class="lab">Where does it go?</span>
+      <div class="seg" role="group" aria-label="Status"><button type="button" data-act="status" data-v="seen" aria-pressed="${d.status==='seen'}">We’ve watched it</button><button type="button" data-act="status" data-v="waiting" aria-pressed="${d.status==='waiting'}">Saving it for later</button></div></div>`}
+
+    <div id="f-seen" ${d.status==='seen'?'':'hidden'} style="display:grid;gap:20px">
+      <div class="two">
+        <div class="field"><label for="f-date">When</label><input id="f-date" type="date" value="${d.date}" max="${TODAY}"></div>
+        <div class="field"><span class="lab">Quickly</span><div class="chips"><button type="button" class="chip" data-act="date" data-v="0">Tonight</button><button type="button" class="chip" data-act="date" data-v="-1">Last night</button></div></div>
+      </div>
+      <div class="field"><span class="lab">Who was there</span>
+        <div class="chips" id="f-who">
+          <button type="button" class="chip" data-act="who" data-v="" aria-pressed="${!d.who.length}">Just me</button>
+          ${persons.map(([k,p])=>`<button type="button" class="chip" data-act="who" data-v="${k}" aria-pressed="${d.who.includes(k)}">${esc(p.n)}</button>`).join('')}
+          <button type="button" class="chip" data-act="newwho">+ Someone</button>
+          <input id="f-newwho" type="text" hidden placeholder="A name, then Enter" style="border:0;border-bottom:1px solid var(--ink);background:transparent;font:italic 19px var(--serif);width:12em">
+        </div></div>
+      <div class="field"><span class="lab">How was it</span>
+        <div class="rate"><span class="stars" data-rk="r" role="slider" tabindex="0" aria-label="Rating" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${d.r}" style="--p:${d.r/5*100}%">★★★★★</span><output id="f-rout">${d.r?rtxt(d.r):''}</output>
+        ${d.r?'':''}<button type="button" class="tlink" data-act="norate">Clear</button></div></div>
+      <div class="field"><label for="f-note">A line to remember it by</label><textarea id="f-note" rows="2" placeholder="What did you say afterwards?"></textarea></div>
+      <div class="field"><label for="f-ate">What was on the table <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="f-ate" type="text" placeholder="tea, a bad idea involving cheese"></div>
+    </div>
+    <div id="f-wait" ${d.status==='waiting'?'':'hidden'}>
+      <div class="field"><label for="f-why">Why is it going on the list?</label><input id="f-why" type="text" placeholder="Who suggested it? What are you waiting for?"></div>
+    </div>
+
+    ${ex?'':`<div class="field"><span class="lab">Choose the spine</span>
+      <div class="preview"><span id="f-prev">${spineHTML({...m,col:d.col},{static:true})}</span>
+      <div class="swatches" role="group" aria-label="Spine colour">${SP.map((c,i)=>`<button type="button" class="sw" style="--sb:var(${c.bg})" data-act="fcol" data-c="${i}" aria-label="${c.n}" title="${c.n}" aria-pressed="${d.col%SP.length===i}"></button>`).join('')}</div></div></div>`}
+
+    <div class="formfoot"><button type="submit" class="btn accent" id="f-go">${ex?'Save this evening':(d.status==='seen'?'Put it on the shelf':'Add it to the list')}</button><button type="button" class="tlink" data-act="back">${ex?'Cancel':'Back to search'}</button></div>
+  </form>`);
+  setTimeout(()=>{const f=$(a.manual?'#f-t':'#f-date');f&&f.focus({preventScroll:true})},30);
+}
+function syncForm(){
+  const a=S.add; if(!a||a.step!=='form')return;
+  const g=id=>{const e=$(id);return e?e.value:undefined};
+  if(a.manual){
+    a.meta.t=g('#f-t')??a.meta.t;
+    const y=g('#f-y'); a.meta.y=y?+y:0;
+    if(a.meta.type==='series'){a.meta.s=+g('#f-s')||1;a.meta.dir=g('#f-d')??a.meta.dir}else{a.meta.dir=g('#f-d2')??a.meta.dir}
+  }
+  a.d.date=g('#f-date')||a.d.date; a.d.note=g('#f-note')??a.d.note; a.d.ate=g('#f-ate')??a.d.ate; a.d.why=g('#f-why')??a.d.why;
+}
+function submitForm(){
+  syncForm();
+  const a=S.add,m=a.meta,d=a.d;
+  if(a.manual&&!(m.t||'').trim()){const t=$('#f-t');t&&t.focus();toast('Give it a title first.');return}
+  const watch=Wt(d.date||TODAY,d.who.slice(),d.r||null,(d.note||'').trim(),(d.ate||'').trim());
+  let id;
+  if(!a.exist&&m.tmdb){
+    const tid='tmdb-'+m.tmdb+(m.type==='series'?'-s'+(m.s||1):'');
+    if(byId(tid)){
+      if(d.status==='seen')a.exist=tid;
+      else{save();closeLayer();toast(`${m.t} is already on your shelf.`);return}
+    }
+  }
+  if(a.exist){
+    const it=byId(a.exist); it.watches.push(watch); it.status='seen'; id=it.id;
+    toast(it.watches.length>1?`Logged. That’s ${words(it.watches.length)} evenings with ${it.t}.`:`${it.t} is on the shelf.`);
+    if(S.open===it.id){save();closeLayer();renderPanel();refreshView(true);return}
+  }else{
+    m.t=(m.t||'').trim();
+    let nid=m.manual||a.manual?'m-'+m.t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+(m.type==='series'?'-s'+(m.s||1):'')+'-'+Math.random().toString(36).slice(2,6):(m.tmdb?'tmdb-'+m.tmdb+(m.type==='series'?'-s'+(m.s||1):''):m.id);
+    if(byId(nid))nid+='-'+Math.random().toString(36).slice(2,5);
+    const it=norm({id:nid,t:m.t,y:m.y||0,type:m.type,s:m.s,eps:m.eps,min:m.min||0,dir:m.dir||'',gen:m.gen||[],syn:m.syn||'',short:m.short,
+      status:d.status,watches:d.status==='seen'?[watch]:[],col:d.col,added:TODAY,poster:m.poster||'',tmdb:m.tmdb||'',note:d.status==='waiting'?(d.why||'').trim():''});
+    S.items.push(it); id=it.id;
+    toast(d.status==='seen'?`${it.t} is on the shelf.`:`${it.t} is on the list.`);
+  }
+  save();closeLayer();
+  S.landed=id;
+  if(S.filter!=='all'&&!passFilter(byId(id)))S.filter='all';
+  S.q='';
+  if(S.view==='index'){viewIndex()}else{viewShelf()}
+}
+
+/* rating widget */
+function rateFrom(e,el){const r=el.getBoundingClientRect();const x=(e.clientX-r.left)/r.width;return Math.min(5,Math.max(.5,Math.ceil(x*10)/2))}
+function getRate(key){const d=S.add.d;return !key||key==='r'?(d.r||0):((d.rs&&d.rs[key])||0)}
+function setRate(v,key){
+  key=key||'r';const d=S.add.d;
+  if(key==='r')d.r=v;else d.rs[key]=v;
+  const el=$(`.stars[data-rk="${CSS.escape(key)}"]`);if(!el)return;
+  el.style.setProperty('--p',v/5*100+'%');el.setAttribute('aria-valuenow',v);
+  const o=el.parentElement.querySelector('output');if(o)o.textContent=v?rtxt(v):'';
+}
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+async function saveKey(){
+  const v=($('#s-key').value||'').trim(), msg=$('#s-msg'); tryLS.set('the-usual-tmdb',v);
+  if(!v){msg.textContent='Key removed. Search is back to the starter catalogue.';return}
+  msg.textContent='Checking…';
+  try{await TMDB.get('/configuration');msg.textContent='Connected. Search now covers all of TMDB.'}
+  catch(e){msg.textContent=e.message==='key'?'TMDB didn’t accept that key.':'Couldn’t reach TMDB just now. The key is saved.'}
+}
+async function fetchArt(){
+  const msg=$('#s-msg'); if(!TMDB.on()){msg.textContent='Add a TMDB key first.';return}
+  const todo=S.items.filter(i=>!i.poster); if(!todo.length){msg.textContent='Every title already has its art.';return}
+  let got=0,stop=false;
+  for(let n=0;n<todo.length&&!stop;n++){
+    const it=todo[n]; msg.textContent=`Finding art… ${n+1} of ${todo.length}`;
+    try{
+      const tv=it.type==='series', params={query:it.t,include_adult:'false',language:'en-GB'}; if(!tv&&it.y)params.year=it.y;
+      const d=await TMDB.get(tv?'/search/tv':'/search/movie',params), nt=sortKey(it.t);
+      const hit=d.results.find(r=>sortKey((tv?r.name:r.title)||'')===nt&&r.poster_path)||d.results.find(r=>r.poster_path);
+      if(hit){
+        it.poster=TMDB.poster(hit.poster_path);it.tmdb=(tv?'tv-':'movie-')+hit.id;
+        if(tv&&it.s){try{const sd=await TMDB.get(`/tv/${hit.id}/season/${it.s}`);if(sd.poster_path)it.poster=TMDB.poster(sd.poster_path)}catch(_){}}
+        got++;
+      }
+    }catch(e){if(e.message==='key'){msg.textContent='TMDB didn’t accept that key.';stop=true}}
+  }
+  save(); if(!stop)msg.textContent=`Found art for ${got} of ${todo.length}.`;
+  if(S.view==='shelf')fillShelf(true);else fillIndex();
+  if(S.open&&byId(S.open))renderPanel();
+}
+function openSettings(){
+  openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+    <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
+    <h2 id="sh-h">Settings</h2>
+    <div class="field"><span class="lab">Account</span>${cloudSettingsHTML()}</div>
+    <div class="field"><span class="lab">People you watch with</span>
+      ${Object.keys(S.people).length?`<ul class="members" aria-label="People">${Object.entries(S.people).map(([k,p])=>`<li>${esc(p.n)} <button type="button" data-act="rmperson" data-k="${esc(k)}" aria-label="Remove ${esc(p.n)}">×</button></li>`).join('')}</ul>`:''}
+      <div class="addrow"><label class="sr" for="s-newp">Add a name</label><input id="s-newp" type="text" maxlength="40" placeholder="Add a name" style="border:0;border-bottom:1px solid var(--soft);background:transparent;font:italic 400 19px var(--serif);width:12em;padding:6px 0"><button type="button" class="btn line" data-act="addperson">Add</button></div>
+      <p class="fine">They appear as choices when you log a watch. Your Together shelf already counts the two of you.</p></div>
+    ${TMDB_BAKED?'':`<div class="field"><label for="s-key">TMDB key</label>
+      <input id="s-key" type="password" autocomplete="off" spellcheck="false" placeholder="paste an API key or a read access token" value="${esc(TMDB.key())}">
+      <div class="setrow"><button type="button" class="btn line" data-act="key-save">Save and test</button></div></div>`}
+    <div class="field"><label for="s-region">Where you watch</label>
+      <select id="s-region">${REGIONS.map(([c,n])=>`<option value="${c}" ${region()===c?'selected':''}>${n}</option>`).join('')}</select>
+      <p class="fine">Decides which streaming services are shown on each title.</p></div>
+    <div class="field"><span class="lab">Our services</span>
+      <div class="chips" id="svc" role="group" aria-label="Streaming services you have">${serviceChoices().map(n=>`<button type="button" class="chip" data-act="svc" data-v="${esc(n)}" aria-pressed="${S.services.includes(n)}">${esc(n)}</button>`).join('')}</div>
+      <p class="fine">Tick the ones you both have. Titles you can watch right now get highlighted, and Tonight picks from them first.</p></div>
+    <div class="field"><span class="lab">Your shelf</span><div class="setrow">
+      <button type="button" class="btn line" data-act="open-import">Import a list</button>
+      <button type="button" class="btn line" data-act="art">Find missing posters</button>
+      <button type="button" class="btn line" data-act="export">Download a backup</button></div>
+      <p class="fine" id="s-msg" aria-live="polite"></p>
+      <button type="button" class="tlink danger" data-act="empty" style="justify-self:start">Clear this shelf and start again</button>${mineOff?'<p class="fine">Your private shelf is saved on this device only until the database update (accounts.sql) has been run.</p>':''}</div>
+    <div class="formfoot"><button type="button" class="btn" data-act="settings-done">Done</button></div>
+  </div>`);
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const cloud=t.closest('[data-cloud]');
+  if(cloud){e.preventDefault();(async()=>{
+    if(cloud.dataset.cloud==='signout'){await SB.auth.signOut();cloudReady=false;cloudLibrary=null;cloudUser=null;cloudMessage='Signed out.';cloudInvite='';clearAccount();refreshCloudUI()}
+    if(cloud.dataset.cloud==='invite-user'){
+      const {error}=await SB.rpc('send_invite',{target:cloud.dataset.id});
+      if(error){toast(error.message)}else{const u=userHits.find(x=>x.user_id===cloud.dataset.id);if(u)u.invited=true;toast('Invitation sent.');paintUsers()}
+      return}
+    if(cloud.dataset.cloud==='accept-invite'||cloud.dataset.cloud==='decline-invite'){
+      const accept=cloud.dataset.cloud==='accept-invite';
+      const {data,error}=await SB.rpc('respond_invite',{invite_id:cloud.dataset.id,accept});
+      if(error){cloudMessage=error.message;await loadInvites();refreshCloudUI();return}
+      if(accept&&data){cloudInvites=[];await activateCloudLibrary(data,true);route();cloudMessage='';syncInvitePoll()}
+      else{cloudMessage='';await loadInvites()}
+      refreshCloudUI();return}
+    if(cloud.dataset.cloud==='invite'){const {data,error}=await SB.rpc('create_library_invite');cloudMessage=error?error.message:'Invite code is ready.';cloudInvite=data||'';refreshCloudUI()}
+  })();return}
+  const sp=t.closest('#cavity .sp[data-id]'); if(sp){if(S.sel)toggleSel(sp.dataset.id);else openEntry(sp.dataset.id);return}
+  const q=t.closest('.quote[data-id]'); if(q){if(!S.sel)openEntry(q.dataset.id);return}
+  const tr=t.closest('.idx tbody tr[data-id]'); if(tr){if(S.sel)toggleSel(tr.dataset.id);else openEntry(tr.dataset.id);return}
+  const f=t.closest('[data-filter]'); if(f){S.filter=(f.classList.contains('hl')&&S.filter===f.dataset.filter)?'all':f.dataset.filter;save();if(S.view==='index')fillIndex();else fillShelf();refreshHeader();return}
+  const is=t.closest('[data-isort]'); if(is){const k=is.dataset.isort;S.isort=S.isort.k===k?{k,d:-S.isort.d}:{k,d:1};save();viewIndex();return}
+  const b=t.closest('[data-act]'); if(!b)return;
+  const act=b.dataset.act;
+  switch(act){
+    case 'add': openAdd();break;
+    case 'tonight': openTonight();break;
+    case 'svc': {const v=b.dataset.v;const i=S.services.indexOf(v);if(i>=0)S.services.splice(i,1);else S.services.push(v);b.setAttribute('aria-pressed',String(i<0));save();break}
+    case 'tonight-again': paintTonight(true);break;
+    case 'tonight-yes': {const id=b.dataset.id;closeLayer();openRate(id,{wi:null});break}
+    case 'editwatch': {const it=byId(S.open);if(it)openRate(it.id,{wi:+b.dataset.i})}break;
+    case 'love': if(S.add&&S.add.step==='rate'){S.add.d.love=!S.add.d.love;b.setAttribute('aria-pressed',String(S.add.d.love))}break;
+    case 'addshelf': if(S.add){const to=S.shelf==='together'?'mine':'together';useShelf(to);S.add.done={};S.add.busy={};route();paintAdd()}break;
+    case 'shelf': if(b.dataset.v!==S.shelf){if(S.open)closeEntry();useShelf(b.dataset.v);route()}break;
+    case 'move': moveItem(b.dataset.id);break;
+    case 'addperson': {const i=$('#s-newp');if(i&&i.value.trim()){addPerson(i.value);openSettings()}break}
+    case 'rmperson': removePerson(b.dataset.k);openSettings();break;
+    case 'addsit': if(S.add&&S.add.step==='rate'){syncRate();const l=S.add.d.sit[S.add.d.sit.length-1]||TODAY;const n=addDays(l,1);S.add.d.sit.push(n>TODAY?TODAY:n);paintSits()}break;
+    case 'rmsit': if(S.add&&S.add.step==='rate'){syncRate();S.add.d.sit.splice(+b.dataset.i,1);if(!S.add.d.sit.length)S.add.d.sit=[TODAY];paintSits()}break;
+    case 'rate-skip': rateSkip();break;
+    case 'select-toggle': if(S.sel)endSelect();else startSelect();break;
+    case 'sel-all': if(S.sel){$$('.sp[data-id]:not(.dim),.idx tbody tr[data-id]:not(.dim)').forEach(el=>S.sel.add(el.dataset.id));paintSel()}break;
+    case 'sel-remove': if(S.sel&&S.sel.size){const ids=[...S.sel];endSelect();removeItems(ids)}break;
+    case 'open-import': openAdd('import');break;
+    case 'addtab': if(S.add){S.add.tab=b.dataset.v;S.add.step='find';paintAdd()}break;
+    case 'addstatus': if(S.add){S.add.status=b.dataset.v;$$('[data-act=addstatus]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+      const dw=$('#imp-date-wrap');if(dw)dw.hidden=b.dataset.v!=='seen';
+      const ic=$('#imp-confirm');if(ic)ic.textContent=ic.textContent.replace(/to the \w+/,'to the '+(b.dataset.v==='seen'?'shelf':'list'))}break;
+    case 'undo-add': undoAdd(b.dataset.k);break;
+    case 'add-details': addDetails(b.dataset.k);break;
+    case 'imp-go': impFind();break;
+    case 'imp-confirm': impConfirm();break;
+    case 'imp-back': if(S.add){S.add.imp.stage='input';paintAdd()}break;
+    case 'settings': openSettings();break;
+    case 'theme': S.theme=S.theme==='dark'?'light':'dark';applyTheme();break;
+    case 'close-panel': closeEntry();break;
+    case 'prev': step(-1);break;
+    case 'next': step(1);break;
+    case 'col': setColour(+b.dataset.c);break;
+    case 'case-open': toggleCase();break;
+    case 'case-flip': flipCase();break;
+    case 'spin': {b.classList.remove('spin');void b.offsetWidth;b.classList.add('spin');break}
+    case 'pull': {const pool=S.order.filter(id=>{const i=byId(id);return i&&i.status==='seen'&&id!==S.open});
+      if(!pool.length){toast('Nothing to pull out yet.');break}
+      const id=pool[Math.floor(Math.random()*pool.length)];openEntry(id);
+      const el=$(`#cavity .sp[data-id="${CSS.escape(id)}"]`);if(el)el.scrollIntoView({block:'center',behavior:reduceMotion()?'auto':'smooth'});break}
+    case 'remove': removeItem(b.dataset.id);break;
+    case 'rmwatch': removeWatch(+b.dataset.i);break;
+    case 'log': {const it=byId(b.dataset.id);if(it){S.add=null;openRate(it.id,{wi:null})}break}
+    case 'scrim': if(t===b)closeLayer();break;
+    case 'sheet-close': case 'settings-done': closeLayer();break;
+    case 'pick-tmdb': pickTmdb(+b.dataset.i);break;
+    case 'pick': {const c=byId(b.dataset.cid)||catalogue().find(x=>x.id===b.dataset.cid);if(!c)break;const have=byId(c.id);if(have)openRate(have.id,{wi:null,back:S.add});else startForm(c,null);break}
+    case 'manual': startForm({id:'manual',t:b.dataset.q,y:0,type:'film',min:0,dir:'',gen:[],syn:'',col:hash(b.dataset.q)%SP.length,manual:true,watches:[]},null);break;
+    case 'back': if(S.add&&S.add.exist){closeLayer()}else{closeLayer();openAdd()}break;
+    case 'fmt': {syncForm();S.add.meta.type=b.dataset.v;$$('[data-act=fmt]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+      $('#f-series').hidden=b.dataset.v!=='series';$('#f-dir').hidden=b.dataset.v==='series';
+      $('#f-prev').innerHTML=spineHTML({...S.add.meta,col:S.add.d.col},{static:true});break}
+    case 'status': {S.add.d.status=b.dataset.v;$$('[data-act=status]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+      $('#f-seen').hidden=b.dataset.v!=='seen';$('#f-wait').hidden=b.dataset.v!=='waiting';
+      $('#f-go').textContent=b.dataset.v==='seen'?'Put it on the shelf':'Add it to the list';break}
+    case 'date': {const v=addDays(TODAY,+b.dataset.v);if(S.add.step==='rate'){S.add.d.sit=[v];paintSits()}else{$('#f-date').value=v;S.add.d.date=v}break}
+    case 'who': {const v=b.dataset.v,w=S.add.d.who;
+      if(!v){w.length=0}else{const i=w.indexOf(v);i>=0?w.splice(i,1):w.push(v)}
+      $$('#f-who [data-act=who]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v?w.includes(x.dataset.v):!w.length)));break}
+    case 'newwho': {const i=$('#f-newwho');i.hidden=false;i.focus();break}
+    case 'norate': setRate(0,b.dataset.rk);break;
+    case 'fcol': {const i=+b.dataset.c;syncForm();S.add.d.col=i;$$('[data-act=fcol]').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.c===i)));
+      $('#f-prev').innerHTML=spineHTML({...S.add.meta,col:i},{static:true});break}
+    case 'key-save': saveKey();break;
+    case 'art': fetchArt();break;
+    case 'export': {const blob=new Blob([JSON.stringify({exported:TODAY,people:S.people,mine:S.store.mine,together:S.store.together},null,2)],{type:'application/json'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`the-usual-${TODAY}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);break}
+    case 'example': if(confirm('Replace your library with the example one? Your current shelf will be lost unless you took a copy.')){S.items=seedItems();save();closeLayer();closeEntry();route();toast('The example library is back.')}break;
+    case 'empty': if(confirm('Clear the shelf and start again? This can’t be undone unless you took a copy.')){S.items=[];save();closeLayer();closeEntry();route();toast('A clean shelf. Start with the first one you loved.')}break;
+    case 'settheme': S.theme=b.dataset.v;applyTheme();$$('[data-act=settheme]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));break;
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='sh-q'){S.add.q=t.value;$('#sh-res').innerHTML=resultsHTML(t.value);queueSearch()}
+  else if(t.id==='user-q'){
+    userQ=t.value;clearTimeout(userT);userHits=[];userBusy=userQ.trim().length>=3;paintUsers();
+    userT=setTimeout(async()=>{const q=userQ.trim();if(q.length<3){userBusy=false;paintUsers();return}
+      const {data,error}=await SB.rpc('search_users',{q});if(userQ.trim()!==q)return;
+      userBusy=false;userHits=error?[]:(data||[]);paintUsers()},300)}
+  else if(t.classList&&t.classList.contains('f-sit')){S.add.d.sit[+t.dataset.i]=t.value||TODAY}
+  else if(t.id==='imp-text'){S.add.imp.text=t.value}
+  else if(t.id==='imp-date'){S.add.imp.date=t.value||TODAY}
+  else if(t.id==='find'){S.q=t.value;applyFind()}
+  else if(t.closest('#addform')){syncForm(); if(t.id==='f-t'||t.id==='f-y'||t.id==='f-s'){const p=$('#f-prev');if(p)p.innerHTML=spineHTML({...S.add.meta,col:S.add.d.col},{static:true})}}
+});
+function applySeason(n){
+  const a=S.add,m=a&&a.meta,x=m&&(m.seasons||[]).find(y=>y.n===n); if(!x)return;
+  m.s=n;m.eps=x.eps||m.eps;m.poster=x.poster||m.showPoster||'';if(x.y)m.y=x.y;
+  const c=$('#f-cover'),by=$('#f-by'),pv=$('#f-prev');
+  if(c)c.innerHTML=coverHTML(m);
+  if(by)by.textContent=`${kindText(m)} · ${m.y||''}${m.dir?' · '+m.dir:''}`;
+  if(pv)pv.innerHTML=spineHTML({...m,col:a.d.col},{static:true});
+}
+document.addEventListener('change',e=>{
+  if(e.target.id==='s-region'){tryLS.set('the-usual-region',e.target.value);toast('Streaming services will show for '+regionName(e.target.value)+'.');return}
+  if(e.target.id==='f-season'){applySeason(+e.target.value);return}
+  if(e.target.id==='imp-file'){const f=e.target.files&&e.target.files[0];if(!f||!S.add)return;
+    f.text().then(tx=>{const ta=$('#imp-text');if(!ta)return;ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+tx;S.add.imp.text=ta.value});return}
+  if(e.target.closest&&e.target.closest('.imp-row')&&S.add){const r=S.add.imp.rows[+e.target.dataset.k];if(r){r.on=e.target.checked;
+    const n=S.add.imp.rows.filter(x=>x.on&&!x.dup).length,ic=$('#imp-confirm');if(ic){ic.disabled=!n;ic.textContent=ic.textContent.replace(/Add \d+/,'Add '+n)}}return}
+  if(e.target.id==='sort'){S.sort=e.target.value;save();fillShelf()}
+});
+document.addEventListener('submit',e=>{
+  const form=e.target;
+  if(form.id==='addform'){e.preventDefault();submitForm();return}
+  if(form.id==='rateform'){e.preventDefault();submitRate();return}
+  if(form.id==='cloud-auth'){e.preventDefault();cloudAuthSubmit(form,e.submitter?.dataset.mode||'signin');return}
+  if(form.id==='cloud-username'){e.preventDefault();(async()=>{
+    const {data,error}=await SB.rpc('set_username',{new_name:$('#cloud-uname').value.trim()});
+    if(error){cloudMessage=error.message;refreshCloudUI();return}
+    cloudMessage='';cloudProfile={off:false,username:data};await loadInvites();refreshCloudUI();syncInvitePoll();
+  })();return}
+  if(form.id==='cloud-create'){e.preventDefault();(async()=>{
+    const {data,error}=await SB.rpc('create_library',{library_name:(cloudProfile&&cloudProfile.username?cloudProfile.username+'’s library':'Our library').slice(0,80)});
+    if(error){cloudMessage=error.message;refreshCloudUI();return}
+    await activateCloudLibrary(data,false);route();refreshCloudUI();
+  })();return}
+  if(form.id==='cloud-join'){e.preventDefault();(async()=>{
+    const {data,error}=await SB.rpc('join_library',{invite_code:$('#cloud-invite-code').value.trim()});
+    if(error){cloudMessage=error.message;refreshCloudUI();return}
+    await activateCloudLibrary(data,true);route();refreshCloudUI();
+  })();return}
+});
+document.addEventListener('keydown',e=>{
+  const t=e.target;
+  if(e.key==='Escape'){
+    if($('#layer').innerHTML){closeLayer();e.preventDefault();return}
+    if(S.sel){endSelect();e.preventDefault();return}
+    if(S.open){closeEntry();return}
+  }
+  if(t.id==='f-newwho'&&e.key==='Enter'){
+    e.preventDefault();const n=t.value.trim();if(!n)return;
+    const k=addPerson(n);
+    if(S.add.step==='rate'){syncRate();if(!S.add.d.who.includes(k))S.add.d.who.push(k);renderRate();const m=$('details.more');if(m)m.open=true;return}
+    syncForm();const d=S.add.d;if(!d.who.includes(k))d.who.push(k);
+    renderForm();return;
+  }
+  if(t.id==='sh-q'&&e.key==='Enter'){const f=$('#sh-res button.res[data-act="pick-tmdb"]')||$('#sh-res button.res');if(f){e.preventDefault();f.click()}return}
+  if(t.classList&&t.classList.contains('case-stage')){
+    const k=e.key;
+    if(k==='ArrowLeft'){e.preventDefault();S.cs.ry-=20;applyCase()}
+    else if(k==='ArrowRight'){e.preventDefault();S.cs.ry+=20;applyCase()}
+    else if(k==='ArrowUp'){e.preventDefault();S.cs.rx=Math.min(28,S.cs.rx+8);applyCase()}
+    else if(k==='ArrowDown'){e.preventDefault();S.cs.rx=Math.max(-28,S.cs.rx-8);applyCase()}
+    else if(k==='Enter'||k===' '){e.preventDefault();toggleCase()}
+    return;
+  }
+  if(t.classList&&t.classList.contains('stars')&&t.dataset.rk&&S.add){
+    const k=t.dataset.rk;
+    if(e.key==='ArrowRight'||e.key==='ArrowUp'){e.preventDefault();setRate(Math.min(5,getRate(k)+.5),k)}
+    if(e.key==='ArrowLeft'||e.key==='ArrowDown'){e.preventDefault();setRate(Math.max(0,getRate(k)-.5),k)}
+    return;
+  }
+  if(t.matches&&t.matches('.idx tbody tr')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openEntry(t.dataset.id);return}
+  if(t.id==='find'&&e.key==='Escape'){t.value='';S.q='';applyFind();return}
+  const typing=/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+  if(e.key==='/'&&!typing&&!$('#layer').innerHTML){const f=$('#find');if(f){e.preventDefault();f.focus()}return}
+  if(S.open&&!typing&&!$('#layer').innerHTML&&t.closest&&!t.closest('#panel')){
+    if(e.key==='ArrowRight'&&!t.closest('#cavity')){step(1)}
+    if(e.key==='ArrowLeft'&&!t.closest('#cavity')){step(-1)}
+  }
+  const sp=t.closest&&t.closest('#cavity .sp');
+  if(sp&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key)){
+    e.preventDefault();
+    const all=$$('#cavity .sp'),i=all.indexOf(sp);let n=null;
+    if(e.key==='ArrowLeft')n=all[i-1];else if(e.key==='ArrowRight')n=all[i+1];
+    else if(e.key==='Home')n=all[0];else if(e.key==='End')n=all[all.length-1];
+    else{
+      const rows=$$('#cavity .row'),ri=rows.findIndex(r=>r.contains(sp)),tr=rows[ri+(e.key==='ArrowUp'?-1:1)];
+      if(tr){const x=sp.getBoundingClientRect().left;const c=$$('.sp',tr);n=c.sort((a,b)=>Math.abs(a.getBoundingClientRect().left-x)-Math.abs(b.getBoundingClientRect().left-x))[0]}
+    }
+    if(n){sp.setAttribute('tabindex','-1');n.setAttribute('tabindex','0');n.focus()}
+  }
+});
+/* rating pointer handling: tap, or slide a finger across the stars */
+let rateDrag=null;
+document.addEventListener('pointerdown',e=>{
+  const el=e.target.closest&&e.target.closest('.stars[data-rk]'); if(!el||!S.add)return;
+  const key=el.dataset.rk, v=rateFrom(e,el);
+  rateDrag={el,key};
+  setRate(getRate(key)===v?0:v,key);
+  try{el.setPointerCapture(e.pointerId)}catch(_){}
+});
+document.addEventListener('pointermove',e=>{
+  if(rateDrag){setRate(rateFrom(e,rateDrag.el),rateDrag.key);return}
+  const el=e.target.closest&&e.target.closest('.stars[data-rk]'); if(!el||e.pointerType==='touch')return;
+  el.style.setProperty('--p',rateFrom(e,el)/5*100+'%');
+});
+document.addEventListener('pointerup',()=>{rateDrag=null});
+document.addEventListener('pointercancel',()=>{rateDrag=null});
+document.addEventListener('pointerout',e=>{
+  const el=e.target.closest&&e.target.closest('.stars[data-rk]'); if(!el||rateDrag||!S.add)return;
+  el.style.setProperty('--p',getRate(el.dataset.rk)/5*100+'%');
+});
+window.addEventListener('hashchange',()=>{ if(S.open)closeEntry(); route() });
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+load();
+applyTheme();
+route();
+cloudMessage='Connecting…';renderGate();
+initSupabase();
+</script>
+</body>
+</html>

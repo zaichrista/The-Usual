@@ -6,6 +6,11 @@
 <title>The Usual</title>
 <meta name="description" content="A private library of the films and series you keep, shelved by hand.">
 <meta name="theme-color" content="#F9F0E5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="The Usual">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..600,100;1,9..144,300..600,100&family=DM+Sans:wght@400..700&display=swap" rel="stylesheet">
@@ -102,7 +107,7 @@ img,svg{display:block;max-width:100%}
 .wordmark em{font-style:italic}
 .mainnav{display:flex;gap:26px;align-items:center}
 .navicons{display:flex;gap:4px;align-items:center;margin-left:-6px}
-.mainnav .iconbtn{padding:0;border:0;width:36px;height:36px;color:var(--soft)}
+.mainnav .iconbtn{padding:0;border:0;width:44px;height:44px;color:var(--soft)}
 .mainnav .iconbtn:hover{color:var(--ink)}
 .mainnav a,.mainnav button{font:600 13px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:var(--soft);padding:13px 0;border-bottom:1.5px solid transparent}
 .mainnav a:hover,.mainnav button:hover{color:var(--ink)}
@@ -486,7 +491,8 @@ input::placeholder,textarea::placeholder{color:var(--soft);opacity:1}
 @media (max-width:640px){
   .deck{padding:18px 0 10px;gap:6px}
   .deck p:last-child{display:none}
-  .deck h1{font-size:30px}
+  .deck h1{font-size:28px}
+  .deck{padding:14px 0 8px}
   .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;padding:10px 0 14px}
   .controls .tabs{grid-column:1/-1}
   .ctl input,.ctl select{min-width:0;width:100%}
@@ -541,6 +547,83 @@ details.more>.field{margin-top:14px}
 .members li button{margin-left:6px;font-size:16px;line-height:1;color:var(--soft);padding:2px 4px}
 .members li button:hover{color:var(--danger)}
 .remove-row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- couple + rating ---------- */
+.heart{color:var(--accent);margin-left:6px;font-size:15px}
+.rbox{display:grid;gap:2px}
+.rrow{display:flex;align-items:center;gap:10px}
+.rwho{font:600 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--soft);min-width:3.6em}
+.ragree{font:italic 400 15px/1.2 var(--serif);color:var(--accent);margin-top:2px}
+.ragree.split{color:var(--danger)}
+.lg-acts{grid-column:2;display:flex;gap:18px}
+.lg-acts .lg-x{min-height:44px}
+.kicker{margin-bottom:2px}
+.tonightbtn{justify-self:start}
+.deskonly{display:inline-flex}
+.tabbar{display:none}
+.only-s{display:none}
+#f-cover.pop{animation:pop .7s var(--ease) .85s both}
+@keyframes pop{from{transform:scale(.7) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+.sheet.tonight h2{font-style:italic}
+
+/* ---------- touch targets, everywhere ---------- */
+.btn{min-height:44px}
+.tlink{display:inline-flex;align-items:center;min-height:44px}
+.fine .tlink,p .tlink{display:inline;min-height:0}
+.chip{min-height:44px;display:inline-flex;align-items:center}
+.sh-x{width:44px;height:44px;top:8px;right:8px}
+.iconbtn{width:44px;height:44px}
+.sw{width:32px;height:32px}
+.res{min-height:56px}
+.mainnav a{display:inline-flex;align-items:center}
+.rate .stars{padding:6px 0}
+
+.shelfsw button{padding-left:4px;padding-right:4px;min-height:44px}
+.tabs button{padding-left:4px;padding-right:4px}
+.tabs button sup,sup{font-size:12px}
+.idx th button{padding:14px 0;min-height:44px;align-items:center}
+.field input[type=date],.field input[type=text],.field input[type=email],.field input[type=password]{min-height:44px}
+details.more>summary{min-height:44px;display:flex;align-items:center}
+.tlink{padding:0 6px}
+.fine .tlink,p .tlink{padding:0}
+
+/* ---------- phones ---------- */
+@media (max-width:700px){
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .mast-main{padding:10px 0 8px;flex-wrap:nowrap}
+  .mainnav{order:0;width:auto;border:0;padding:0;gap:0}
+  .mainnav a[data-nav],.mainnav .deskonly,.mast-main>.btn.accent,.navicons .iconbtn:nth-child(2){display:none}
+  .navicons{margin-left:0}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:55;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
+    background:var(--bg);border-top:1px solid var(--rule);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;
+    font:600 12px/1 var(--sans);letter-spacing:.02em;color:var(--soft);text-decoration:none}
+  .tabbar a[aria-current="page"]{color:var(--ink)}
+  .tabbar a[aria-current="page"] svg{stroke-width:2.3}
+  .tabbar .plus{width:56px;height:56px;min-height:56px;margin:-22px auto 4px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+    box-shadow:0 8px 18px -6px rgba(0,0,0,.5);justify-content:center}
+  #toast{bottom:calc(92px + env(safe-area-inset-bottom))}
+  #selbar{bottom:calc(88px + env(safe-area-inset-bottom))}
+  .tonightbtn{display:none}
+  /* controls: search first, filters scroll sideways, nothing wraps awkwardly */
+  .controls{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 16px;padding:6px 0 12px}
+  .controls .ctl{order:1;grid-column:1/-1;width:100%}
+  .controls .ctl input,.controls .ctl select{width:100%;min-height:44px;font-size:18px}
+  .controls .tabs{order:2;flex-wrap:nowrap;overflow-x:auto;margin-right:0;gap:22px;scrollbar-width:none;padding-bottom:2px}
+  .controls .tabs::-webkit-scrollbar{display:none}
+  .controls .tabs button{white-space:nowrap;flex:none}
+  .controls .tabs{grid-column:1/-1}
+  .controls .ctl:has(select){order:3;grid-column:1;grid-row:auto}
+  #seltoggle{order:4;grid-column:2;justify-self:end}
+  .deck h1{font-size:28px}
+  .deck{padding:14px 0 8px}
+  .figures{grid-template-columns:1fr 1fr}
+  .idx td.t{font-size:22px}
+  .idx td.t small .only-s,.only-s{display:inline}
+  #gate{align-items:flex-start;padding-top:max(14vh,28px)}
+  .rate .stars{font-size:40px;letter-spacing:6px}
+  .sheet h2{font-size:32px}
+}
 </style>
 </head>
 <body>
@@ -554,6 +637,7 @@ details.more>.field{margin-top:14px}
       <nav class="mainnav" aria-label="Primary">
         <a href="#/" data-nav="shelf">Shelf</a>
         <a href="#/index" data-nav="index">Index</a>
+        <button type="button" class="deskonly" data-act="tonight">Tonight</button>
         <span class="navicons">
           <button type="button" id="btn-theme" class="iconbtn themebtn" data-act="theme">
             <svg class="ic-sun" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor" fill-opacity=".18"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>
@@ -568,6 +652,14 @@ details.more>.field{margin-top:14px}
 </header>
 
 <main id="view" tabindex="-1"></main>
+
+<nav class="tabbar" aria-label="Main">
+  <a href="#/" data-nav="shelf"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V5M4 20h16M8 20V9M12 20V6M16 20V11M20 20v-6"/></svg><span>Shelf</span></a>
+  <a href="#/index" data-nav="index"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>Index</span></a>
+  <button type="button" class="plus" data-act="add" aria-label="Add a film or series"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button type="button" data-act="tonight"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg><span>Tonight</span></button>
+  <button type="button" data-act="settings"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20.2c.9-3.7 3.7-5.6 7.2-5.6s6.3 1.9 7.2 5.6"/></svg><span>Settings</span></button>
+</nav>
 
 <div class="scrim for-panel" id="scrim" hidden data-act="close-panel"></div>
 <div id="gate" role="dialog" aria-modal="true" aria-label="Sign in" hidden></div>
@@ -632,7 +724,10 @@ function tmdbToItem(r){
 }
 async function tmdbSearch(q){
   const d=await TMDB.get('/search/multi',{query:q,include_adult:'false',language:'en-GB'});
-  return d.results.filter(r=>(r.media_type==='movie'||r.media_type==='tv')).slice(0,8).map(tmdbToItem);
+  const nq=sortKey(q).replace(/[^a-z0-9]/g,'');
+  const rank=r=>{const t=sortKey((r.media_type==='tv'?r.name:r.title)||'').replace(/[^a-z0-9]/g,'');
+    return (t===nq?100:t.startsWith(nq)?30:0)+Math.min(r.popularity||0,150)*.4+((r.vote_count||0)>300?25:0)};
+  return d.results.filter(r=>(r.media_type==='movie'||r.media_type==='tv')).sort((a,b)=>rank(b)-rank(a)).slice(0,10).map(tmdbToItem);
 }
 async function tmdbDetails(it){
   const tid=it.tmdb.split('-')[1];
@@ -893,7 +988,7 @@ function renderGate(){
   const active=document.activeElement;
   if(g.contains(active)&&active.tagName==='INPUT'&&g.dataset.sig===inner)return;
   g.dataset.sig=inner;
-  g.innerHTML=`<div class="gate-card"><h1>The Usual</h1><p class="gate-sub">Your private library of films and series.</p>${inner}</div>`;
+  g.innerHTML=`<div class="gate-card"><h1>The Usual</h1><p class="gate-sub">A shelf for two. Everything you’ve watched together, and what’s next.</p>${inner}</div>`;
   g.hidden=false;
 }
 function refreshCloudUI(){
@@ -908,7 +1003,7 @@ async function initSupabase(){
   if(cloudUser)await findCloudLibrary();
   SB.auth.onAuthStateChange((_event,session)=>{
     cloudUser=session?.user||null;
-    if(!cloudUser){cloudReady=false;cloudLibrary=null;cloudMessage='Signed out.';clearAccount();refreshCloudUI();return}
+    if(!cloudUser){cloudReady=false;cloudLibrary=null;cloudMessage=_event==='SIGNED_OUT'?'Signed out.':'';clearAccount();refreshCloudUI();return}
     setTimeout(()=>findCloudLibrary(),0);
   });
   refreshCloudUI();
@@ -955,7 +1050,7 @@ function paintUsers(){const el=$('#user-res');if(el)el.innerHTML=userResultsHTML
 function cloudSettingsHTML(){
   if(!SB)return `<section class="field"><p class="fine">Connecting…</p></section>`;
   const msg=esc(cloudMessage||'');
-  if(!cloudUser)return `<form id="cloud-auth" class="field cloud-controls"><label for="cloud-email">Email</label><input id="cloud-email" type="email" autocomplete="email" required><label for="cloud-password">Password</label><input id="cloud-password" type="password" autocomplete="current-password" minlength="8" required><div class="setrow"><button class="btn accent" type="submit" data-mode="signin">Sign in</button></div><p class="fine" id="cloud-message" aria-live="polite">${msg}</p><p class="fine">New here? <button class="tlink" type="submit" data-mode="signup">Create an account</button> with at least 8 characters.</p></form>`;
+  if(!cloudUser)return `<form id="cloud-auth" class="field cloud-controls"><label for="cloud-email">Email</label><input id="cloud-email" type="email" autocomplete="email" required><label for="cloud-password">Password</label><input id="cloud-password" type="password" autocomplete="current-password" minlength="8" required><div class="setrow"><button class="btn accent" type="submit" data-mode="signin">Sign in</button><button class="btn line" type="submit" data-mode="signup">Create account</button></div><p class="fine" id="cloud-message" aria-live="polite">${msg||'Passwords need at least 8 characters.'}</p></form>`;
   const off=profilesOff();
   if(!cloudProfile)return `<section class="field"><p class="fine">Opening your account…</p></section>`;
   if(!off&&!cloudProfile.username)return `<form id="cloud-username" class="field cloud-controls"><label for="cloud-uname">Choose a username</label><input id="cloud-uname" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" required><p class="fine">This is how the people you share with will find you. Use 3 to 20 letters, numbers or underscores.</p><div class="setrow"><button class="btn accent" type="submit">Continue</button></div><p class="fine" aria-live="polite">${msg}</p><button type="button" class="tlink" data-cloud="signout">Sign out</button></form>`;
@@ -990,6 +1085,19 @@ const lastDate=it=>{const w=lastW(it);return w?w.d:''};
 const latestR=it=>{const w=wsorted(it).filter(x=>x.r);return w.length?w[w.length-1].r:null};
 const rewatches=it=>Math.max(0,it.watches.length-1);
 const nm=k=>S.people[k]?S.people[k].n:k;
+function myKey(){return (cloudProfile&&cloudProfile.username)||'me'}
+function partnerOf(){const me=myKey();const m=(cloudMembers||[]).find(x=>x.username&&!x.is_me&&x.username!==me);return m?{key:m.username,name:cap(m.username)}:null}
+function rname(k){return k===myKey()?'You':cap(k)}
+function coupleLabel(){const ms=(cloudMembers||[]).filter(m=>m.username);return ms.length<2?'':ms.slice(0,2).map(m=>cap(m.username)).join(' & ')}
+const fmtShort=d=>{const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+function ratingsHTML(w){
+  const rs=w.rs&&Object.keys(w.rs).length?w.rs:null, heart=w.love?'<span class="heart" title="Loved it" aria-label="Loved it">♥</span>':'';
+  if(!rs)return (w.r?starsHTML(w.r):'')+heart;
+  const keys=Object.keys(rs);
+  let tag='';
+  if(keys.length>1){const v=keys.map(k=>rs[k]),diff=Math.max(...v)-Math.min(...v);tag=diff===0?'<span class="ragree">Perfect agreement</span>':diff>=2?'<span class="ragree split">Split decision</span>':''}
+  return `<span class="rbox">${keys.map(k=>`<span class="rrow">${keys.length>1?`<span class="rwho">${esc(rname(k))}</span>`:''}${starsHTML(rs[k])}</span>`).join('')}${tag}</span>${heart}`;
+}
 const sitCount=w=>w.sit&&w.sit.length>1?w.sit.length:1;
 const withShort=w=>{const g=w.who.map(nm).join(' & ');return S.shelf==='together'?(g||'Together'):(g||'Just you')};
 const withText=w=>{const g=w.who.map(nm).join(' & ');return S.shelf==='together'?(g?'Together, with '+g:'Together'):(g?'With '+g:'Just you')};
@@ -1098,23 +1206,23 @@ function route(){
    ============================================================ */
 function controlsHTML(){
   const c=counts();
-  const tabs=[['all','All'],['film','Films'],['series','Series'],['waiting','Waiting']];
+  const tabs=[['all','All'],['film','Films'],['series','Series'],['waiting','To watch']];
   return `<div class="controls">
     <div class="tabs" role="group" aria-label="Show">${tabs.map(([k,l])=>`<button type="button" data-filter="${k}" aria-pressed="${S.filter===k}">${l}<sup>${c[k]}</sup></button>`).join('')}</div>
     ${S.view==='shelf'?`<div class="ctl"><label class="sr" for="sort">Arranged by</label><select id="sort">${Object.entries(SORTS).map(([k,v])=>`<option value="${k}" ${S.sort===k?'selected':''}>${v.n}</option>`).join('')}</select></div>`:''}
-    <div class="ctl"><label class="sr" for="find">Find</label><input id="find" type="search" autocomplete="off" placeholder="a title, a name, a line you wrote" value="${esc(S.q)}"></div>
+    <div class="ctl"><label class="sr" for="find">Find</label><input id="find" type="search" autocomplete="off" placeholder="Search titles, names, notes" value="${esc(S.q)}"></div>
     <button type="button" class="tlink" id="seltoggle" data-act="select-toggle">${S.sel?'Cancel selecting':'Select to remove'}</button>
   </div>`;
 }
 function deckText(){
-  const seen=S.items.filter(i=>i.status==='seen').length, wait=S.items.filter(i=>i.status==='waiting').length;
-  const hl=(f,t)=>`<button type="button" class="hl" data-filter="${f}" title="${f==='all'?'Show everything':'Show only what is waiting'}">${t}</button>`;
-  if(!S.items.length)return `An empty shelf, <em>for now.</em>`;
-  if(!seen)return hl('waiting',`${cap(words(wait))} ${wait===1?'title':'titles'}, <em>all still in the wrapper.</em>`);
-  return `${hl('all',`${cap(words(seen))} ${seen===1?'title':'titles'}`)} on the shelf${wait?`, <em>${hl('waiting',`and ${words(wait)} still in the wrapper.`)}</em>`:'.'}`;
+  const seen=S.items.filter(i=>i.status==='seen').length, wait=S.items.filter(i=>i.status==='waiting').length, us=S.shelf==='together';
+  const hl=(f,t)=>`<button type="button" class="hl" data-filter="${f}" title="${f==='all'?'Show everything':'Show only what is still to watch'}">${t}</button>`;
+  if(!S.items.length)return us?`Our shelf is empty, <em>for now.</em>`:`An empty shelf, <em>for now.</em>`;
+  if(!seen)return hl('waiting',`${cap(words(wait))} on ${us?'our':'my'} list, <em>none watched yet.</em>`);
+  return `${hl('all',`${cap(words(seen))} watched${us?' together':''}${wait?',':'.'}`)}${wait?` <em>${hl('waiting',`${words(wait)} still to watch.`)}</em>`:''}`;
 }
 function shelfSwitchHTML(){
-  return `<div class="shelfsw" role="group" aria-label="Which shelf"><button type="button" data-act="shelf" data-v="mine" aria-pressed="${S.shelf==='mine'}">Mine</button><button type="button" data-act="shelf" data-v="together" aria-pressed="${S.shelf==='together'}">Together</button></div>`;
+  return `<div class="shelfsw" role="group" aria-label="Which shelf"><button type="button" data-act="shelf" data-v="together" aria-pressed="${S.shelf==='together'}">Us</button><button type="button" data-act="shelf" data-v="mine" aria-pressed="${S.shelf==='mine'}">Just me</button></div>`;
 }
 function sinceText(){
   if(!S.items.length)return 'Nothing kept yet.';
@@ -1127,9 +1235,9 @@ function viewShelf(){
       <div class="rail">
         <div class="rail-main">
           ${shelfSwitchHTML()}
-          <section class="deck"><h1 id="deck-h">${deckText()}</h1><p>${sinceText()}</p></section>
+          <section class="deck">${S.shelf==='together'&&coupleLabel()?`<p class="kicker">${esc(coupleLabel())}</p>`:''}<h1 id="deck-h">${deckText()}</h1><p>${sinceText()}</p></section>
           ${controlsHTML()}
-          <button type="button" class="tlink pull" data-act="pull">Pull one out at random</button>
+          <button type="button" class="btn line tonightbtn" data-act="tonight">What shall we watch tonight?</button>
         </div>
         <aside class="panel" id="panel" hidden tabindex="-1" aria-label="Title details"></aside>
       </div>
@@ -1150,14 +1258,14 @@ function observe(){
   ro=new ResizeObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{ if(S.view==='shelf'){ const p=pack(); if(p.sig!==lastBreaks)fillShelf(true) } })});
   ro.observe(cav);
 }
-const unitFor=w=>w>=1000?1.2:w>=820?1.08:w>=620?.98:w>=460?.86:.76;
+const unitFor=w=>w>=1000?1.2:w>=820?1.08:w>=620?.98:w>=460?.92:1;
 function pack(){
   const cav=$('#cavity'); const W=cav?cav.clientWidth:900;
   const u=unitFor(W), padX=24*u, usable=W-2*padX, gap=2*u;
   const {seen,wait}=arranged();
   const groups=[];
   if(seen.length)groups.push({key:'seen',label:'On the shelf',items:seen});
-  if(wait.length)groups.push({key:'wait',label:'Waiting in the wrapper',items:wait});
+  if(wait.length)groups.push({key:'wait',label:'Still to watch',items:wait});
   const rows=[];
   groups.forEach(g=>{
     let row=null, used=0;
@@ -1190,7 +1298,7 @@ function fillShelf(keepScroll){
   }
   if(empty){
     const none=S.items.length>0;
-    html+=`<div class="hollow"><div>${none?`<h2>Nothing on this shelf.</h2><p>Try another filter, or add something new.</p>`:`<h2>Nothing here yet.</h2><p>Add the first one you ever loved, or paste in a list you already have.</p>`}<div class="setrow" style="justify-content:center"><button class="btn" type="button" data-act="add">Add the first one</button>${none?'':`<button class="btn" type="button" data-act="open-import">Paste a list</button>`}</div></div></div>`;
+    html+=`<div class="hollow"><div>${none?`<h2>Nothing on this shelf.</h2><p>Try another filter, or add something new.</p>`:`<h2>${S.shelf==='together'?'Our shelf is empty.':'Your shelf is empty.'}</h2><p>${S.shelf==='together'?'Start with the one you keep saying you’ll watch.':'Start with the one you keep coming back to.'}</p>`}<div class="setrow" style="justify-content:center"><button class="btn" type="button" data-act="add">Add the first one</button>${none?'':`<button class="btn" type="button" data-act="open-import">Paste a list</button>`}</div></div></div>`;
   }
   cav.innerHTML=html;
   S.order=p.rows.flatMap(r=>r.items.map(i=>i.id));
@@ -1221,15 +1329,15 @@ function fillBelow(){
   for(const n of notes){if(!used.has(n.i.id)){used.add(n.i.id);pick.push(n);if(pick.length===3)break}}
   el.innerHTML=(S.items.length?`
     <div class="figures">
-      <div class="fig"><b>${seen.length}</b><span>On the shelf</span></div>
-      <div class="fig"><b>${all.reduce((a,x)=>a+sitCount(x.w),0)}</b><span>Evenings</span></div>
-      <div class="fig"><b>${Math.round(mins/60)}</b><span>Hours together</span></div>
-      <div class="fig"><b>${re}</b><span>Returns</span></div>
+      <div class="fig"><b>${seen.length}</b><span>${S.shelf==='together'?'Watched together':'On my shelf'}</span></div>
+      <div class="fig"><b>${all.reduce((a,x)=>a+sitCount(x.w),0)}</b><span>${S.shelf==='together'?'Nights in':'Evenings'}</span></div>
+      <div class="fig"><b>${Math.round(mins/60)}</b><span>${S.shelf==='together'?'Hours on the sofa':'Hours watched'}</span></div>
+      <div class="fig"><b>${re}</b><span>Rewatches</span></div>
     </div>`:'')+
     (pick.length?`<section class="margins" aria-label="Lines you wrote"><div class="quotes">
       ${pick.map(({i,w})=>`<button type="button" class="quote" data-id="${esc(i.id)}"><q>${esc(w.note)}</q><cite>${esc(heading(i))} · ${w.who.length?'with '+esc(w.who.map(nm).join(' & '))+' · ':''}${fmtMonth(w.d)}</cite></button>`).join('')}
     </div></section>`:'')+
-    `<div class="foot"><span>Your shelf is kept in this browser, and synced to your shared library when you’re signed in.</span><span>Film and series data and images from TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></div>`;
+    `<div class="foot"><span>Film and series data and images from TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></div>`;
 }
 function refreshHeader(){
   const h=$('#deck-h'); if(h)h.innerHTML=deckText();
@@ -1245,7 +1353,7 @@ function viewIndex(){
     ${shelfSwitchHTML()}
     <section class="deck"><h1>Everything ${S.shelf==='together'?'we':'I'} keep, <em>in plain type.</em></h1></section>
     ${controlsHTML()}
-    <table class="idx"><thead><tr>${cols.map(([k,l])=>`<th scope="col" class="${['format','with'].includes(k)?'hide-s':''}" ${S.isort.k===k?`aria-sort="${S.isort.d>0?'ascending':'descending'}"`:''}><button type="button" data-isort="${k}">${l}${S.isort.k===k?(S.isort.d>0?' ↑':' ↓'):''}</button></th>`).join('')}</tr></thead><tbody id="idx-body"></tbody></table>
+    <table class="idx"><thead><tr>${cols.map(([k,l])=>`<th scope="col" class="${['format','with','last'].includes(k)?'hide-s':''}" ${S.isort.k===k?`aria-sort="${S.isort.d>0?'ascending':'descending'}"`:''}><button type="button" data-isort="${k}">${l}${S.isort.k===k?(S.isort.d>0?' ↑':' ↓'):''}</button></th>`).join('')}</tr></thead><tbody id="idx-body"></tbody></table>
     <div class="below" id="below"></div>
     <aside class="panel" id="panel" hidden tabindex="-1" aria-label="Title details"></aside></div>`;
   fillIndex();
@@ -1258,10 +1366,10 @@ function fillIndex(){
   const list=S.items.filter(passFilter).sort((a,b)=>{const x=k(a),y=k(b);return (x<y?-1:x>y?1:0)*S.isort.d||sortKey(a.t).localeCompare(sortKey(b.t))});
   S.order=list.map(i=>i.id);
   $('#idx-body').innerHTML=list.map(i=>{const w=lastW(i),r=latestR(i);return `<tr data-id="${esc(i.id)}" tabindex="0" class="${S.open===i.id?'open':''}">
-    <td class="t">${esc(i.t)}<small>${i.status==='waiting'?'Waiting in the wrapper':esc(i.dir||'')}</small></td>
+    <td class="t">${esc(i.t)}<small>${i.status==='waiting'?'Still to watch':esc(i.dir||'')}${w?`<span class="only-s"> · ${fmtShort(w.d)}</span>`:''}</small></td>
     <td class="n">${i.y||''}</td><td class="hide-s">${i.type==='series'?'Series · S'+i.s:'Film'}</td>
-    <td class="n">${w?fmt(w.d):'—'}</td><td class="hide-s">${w?esc(withShort(w)):'—'}</td>
-    <td>${r?starsHTML(r):'—'}</td></tr>`}).join('')||`<tr><td colspan="6" style="padding:30px 0;cursor:default"><span class="serif" style="font-size:26px;font-style:italic">Nothing here yet.</span></td></tr>`;
+    <td class="n hide-s">${w?fmt(w.d):'—'}</td><td class="hide-s">${w?esc(withShort(w)):'—'}</td>
+    <td>${r?starsHTML(r)+(w&&w.love?'<span class="heart" aria-label="Loved">♥</span>':''):'—'}</td></tr>`}).join('')||`<tr><td colspan="6" style="padding:30px 0;cursor:default"><span class="serif" style="font-size:26px;font-style:italic">Nothing here yet.</span></td></tr>`;
   applyFind();
 }
 
@@ -1276,7 +1384,7 @@ function sealedCaseHTML(it){
       <div class="c-spine"><span>${esc(it.short||it.t)}</span></div><div class="c-edge-r"></div><div class="c-top"></div><div class="c-bot"></div>
       <div class="c-front"><div class="f-out">${coverHTML(it)}<i class="gloss"></i><i class="wrapfx"></i></div><div class="f-in"></div></div>
     </div></div>
-    <div class="case-ctl"><span class="sealed">Sealed until you’ve watched it</span></div></div>`;
+    <div class="case-ctl"><span class="sealed">Still in its wrapper</span></div></div>`;
 }
 function caseHTML(it){
   if(it.status==='waiting')return sealedCaseHTML(it);
@@ -1289,7 +1397,7 @@ function caseHTML(it){
     <div class="case3d ${c.open?'open':''}" style="${sty}">
       <div class="c-base">
         <div class="in"><div class="tray"><button type="button" class="disc" data-act="spin" aria-label="Spin the disc"><i>${it.y||''}</i></button>
-          <p class="tray-n">${waiting?'still in the wrapper':n===1?'one evening':(words(n)+' evenings')}</p></div></div>
+          <p class="tray-n">${waiting?'still to watch':n===1?'one evening':(words(n)+' evenings')}</p></div></div>
         <div class="out"><div class="back"><p class="b-t">${esc(it.t)}</p>${it.syn?`<p class="b-s">${esc(it.syn)}</p>`:''}
           <p class="b-m">${[it.dir,it.min?it.min+' min':'',(it.gen||[]).slice(0,2).join(' / ')].filter(Boolean).map(esc).join(' · ')}</p><div class="b-bar"></div></div></div>
       </div>
@@ -1392,12 +1500,12 @@ function renderPanel(){
   <div class="pn-body">
     ${caseHTML(it)}
     <h2 class="pn-title" id="pn-h">${esc(it.t)}${it.type==='series'?`<small>Season ${it.s}${!waiting&&it.eps?`, ${it.eps} episodes`:''}</small>`:''}</h2>
-    <p class="byline">${waiting?`${it.type==='series'?'Series, season '+it.s:'Film'} · ${it.y||''}`:`${esc(kindText(it))} · ${it.y||''}`}${!waiting&&(it.dir||it.min)?' · ':''}${!waiting&&it.dir?`${it.type==='series'?'Created by':'Directed by'} ${esc(it.dir)} · `:''}${!waiting&&it.min?`${it.min} min${it.type==='series'?' an episode':''}`:''}${!waiting&&it.gen&&it.gen.length?` · ${esc(it.gen.join(', '))}`:''}</p>
-    ${!waiting&&it.syn?`<p class="syn">${esc(it.syn)}</p>`:''}
+    <p class="byline">${waiting?`${it.type==='series'?'Series, season '+it.s:'Film'} · ${it.y||''}`:`${esc(kindText(it))} · ${it.y||''}`}${(it.dir||it.min)?' · ':''}${it.dir?`${it.type==='series'?'Created by':'Directed by'} ${esc(it.dir)} · `:''}${it.min?`${it.min} min${it.type==='series'?' an episode':''}`:''}${it.gen&&it.gen.length?` · ${esc(it.gen.join(', '))}`:''}</p>
+    ${it.syn?`<p class="syn">${esc(it.syn)}</p>`:''}
 
-    <section class="pn-sec" aria-label="${waiting?'Waiting in the wrapper':'Your copy'}">
-      ${waiting?`<p class="wrapnote">${it.note?`“${esc(it.note)}”`:'Not yet. Saved for a good night.'}</p>
-        <p class="byline">Added ${fmt(it.added)}. Its case, synopsis and details stay sealed until you’ve watched it.</p>
+    <section class="pn-sec" aria-label="${waiting?'Still to watch':'Your copy'}">
+      ${waiting?`<p class="wrapnote">${it.note?`“${esc(it.note)}”`:'Saved for a good night.'}</p>
+        <p class="byline">On the list since ${fmt(it.added)}.</p>
         <div class="pn-acts"><button class="btn" type="button" data-act="log" data-id="${esc(it.id)}">We watched it</button></div>`
       :`<div class="facts">
           <div><b>${ws.reduce((a,w)=>a+sitCount(w),0)}</b><span>${ws.reduce((a,w)=>a+sitCount(w),0)===1?'Evening':'Evenings'}</span></div>
@@ -1406,9 +1514,9 @@ function renderPanel(){
         </div>
         <ol class="ledger">${ws.map((w,i)=>{const gi=it.watches.indexOf(w);return `<li>
           <div class="lg-d"><span class="lg-k">${i===0?'First watch':'Rewatch'}</span><time datetime="${w.d}">${fmt(w.d)}</time>${sitCount(w)>1?`<span class="lg-sit">${cap(words(sitCount(w)))} sittings, from ${fmt(w.sit[0])}</span>`:''}</div>
-          <div class="lg-b"><p class="lg-who"><span>${esc(withText(w))}</span>${w.r?starsHTML(w.r):''}</p>
+          <div class="lg-b"><p class="lg-who"><span>${esc(withText(w))}</span>${ratingsHTML(w)}</p>
             ${w.note?`<p class="lg-note">“${esc(w.note)}”</p>`:''}${w.ate?`<p class="lg-ate">On the table: ${esc(w.ate)}</p>`:''}</div>
-          <button type="button" class="lg-x" data-act="rmwatch" data-i="${gi}">Remove this evening</button></li>`}).join('')}</ol>
+          <div class="lg-acts"><button type="button" class="lg-x" data-act="editwatch" data-i="${gi}">Edit</button><button type="button" class="lg-x" data-act="rmwatch" data-i="${gi}">Remove</button></div></li>`}).join('')}</ol>
         <div class="pn-acts"><button class="btn" type="button" data-act="log" data-id="${esc(it.id)}">Log another watch</button></div>`}
     </section>
 
@@ -1493,7 +1601,7 @@ function removeWatch(i){
   const it=byId(S.open); if(!it||!it.watches[i])return;
   if(!confirm('Remove this evening from the record?'))return;
   it.watches.splice(i,1);
-  if(!it.watches.length){it.status='waiting';save();closeEntry();refreshView(true);toast('Back in the wrapper.');return}
+  if(!it.watches.length){it.status='waiting';save();closeEntry();refreshView(true);toast('Back on the list.');return}
   save();renderPanel();refreshView(true);
 }
 function refreshView(keepPanel){
@@ -1523,7 +1631,7 @@ function openAdd(tab){
   paintAdd();
 }
 function statusSegHTML(a){
-  return `<div class="seg" role="group" aria-label="Add as"><button type="button" data-act="addstatus" data-v="seen" aria-pressed="${a.status==='seen'}">Watched</button><button type="button" data-act="addstatus" data-v="waiting" aria-pressed="${a.status==='waiting'}">Want to watch</button></div>`;
+  return `<div class="seg" role="group" aria-label="Add as"><button type="button" data-act="addstatus" data-v="seen" aria-pressed="${a.status==='seen'}">Watched</button><button type="button" data-act="addstatus" data-v="waiting" aria-pressed="${a.status==='waiting'}">To watch</button></div>`;
 }
 function paintAdd(){
   const a=S.add; if(!a)return;
@@ -1533,6 +1641,7 @@ function paintAdd(){
     pane=`<div class="field"><label class="sr" for="sh-q">Title</label>
         <input id="sh-q" class="bigfield" type="text" autocomplete="off" placeholder="Start typing a title" aria-controls="sh-res" value="${esc(a.q)}"></div>
       <div class="addrow">${statusSegHTML(a)}<span class="fine">Tap a title to add it.</span></div>
+      <p class="fine" style="margin-top:-6px">Adding to <b>${S.shelf==='together'?'our shelf':'my shelf'}</b>. <button type="button" class="tlink" data-act="addshelf">Switch</button></p>
       <ul id="sh-res" class="results" role="listbox" aria-label="Results"></ul>
       <div class="setrow"><button type="button" class="btn" data-act="sheet-close">Done</button></div>`;
   }else{
@@ -1556,7 +1665,7 @@ function paintAdd(){
           <input type="checkbox" data-k="${k}" ${r.on&&!r.dup?'checked':''} ${r.dup?'disabled':''}>
           ${coverHTML(smallPoster(norm(m)))}
           <span><b>${esc(m.t)}</b><small>${esc(note)}</small></span></label>`}).join('')}</div>
-      <div class="addrow"><button type="button" class="btn accent" id="imp-confirm" data-act="imp-confirm" ${n?'':'disabled'}>Add ${n} to the ${a.status==='seen'?'shelf':'wrapper'}</button><button type="button" class="tlink" data-act="imp-back">Back</button></div>`;
+      <div class="addrow"><button type="button" class="btn accent" id="imp-confirm" data-act="imp-confirm" ${n?'':'disabled'}>Add ${n} to the ${a.status==='seen'?'shelf':'list'}</button><button type="button" class="tlink" data-act="imp-back">Back</button></div>`;
     }
   }
   openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
@@ -1746,6 +1855,44 @@ async function impConfirm(){
   if(S.view==='index')viewIndex();else viewShelf();
   toast(`Added ${added} ${added===1?'title':'titles'}${skipped?`, skipped ${skipped} already there`:''}.`);
 }
+let tonightIv=0;
+function openTonight(){
+  if(S.open)closeEntry();
+  const pool=S.items.filter(i=>i.status==='waiting').map(i=>i.id);
+  S.tonight={pool,cur:null};
+  if(!pool.length){
+    openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+      <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
+      <p class="kicker">Tonight</p><h2 id="sh-h">Nothing on ${S.shelf==='together'?'our':'my'} list yet.</h2>
+      <p class="byline">Add a few you keep meaning to watch and this will choose for you.</p>
+      <div class="setrow"><button type="button" class="btn accent" data-act="add">Add something</button></div></div>`);
+    return;
+  }
+  paintTonight(true);
+}
+function paintTonight(spin){
+  const t=S.tonight; if(!t||!t.pool.length)return;
+  let id;do{id=t.pool[Math.floor(Math.random()*t.pool.length)]}while(t.pool.length>1&&id===t.cur);
+  t.cur=id; const it=byId(id); if(!it)return;
+  clearInterval(tonightIv);
+  const syn=(it.syn||'').length>230?it.syn.slice(0,227).replace(/\s+\S*$/,'')+'…':(it.syn||'');
+  openLayer(`<div class="sheet tonight" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+    <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
+    <p class="kicker">Tonight’s pick</p>
+    <h2 id="sh-h" aria-live="polite">${esc(heading(it))}</h2>
+    <div class="metaline"><div id="f-cover" class="${spin&&!reduceMotion()?'pop':''}">${coverHTML(smallPoster(it))}</div>
+      <div><p class="byline">${esc(kindText(it))}${it.y?' · '+it.y:''}${it.min?' · '+it.min+' min':''}${it.dir?' · '+esc(it.dir):''}</p>
+      ${syn?`<p class="syn" style="font-size:16px;margin-top:8px">${esc(syn)}</p>`:''}
+      ${it.note?`<p class="byline" style="margin-top:8px">“${esc(it.note)}”</p>`:''}</div></div>
+    <div class="formfoot"><button type="button" class="btn accent" data-act="tonight-yes" data-id="${esc(id)}">We watched it</button><button type="button" class="btn line" data-act="tonight-again">${t.pool.length>1?'Pick another':'Close'}</button></div>
+  </div>`);
+  if(t.pool.length<2){const b=$('[data-act=tonight-again]');if(b)b.setAttribute('data-act','sheet-close')}
+  if(spin&&!reduceMotion()&&t.pool.length>1){
+    const h=$('#sh-h');let n=0;
+    tonightIv=setInterval(()=>{const x=byId(t.pool[n++%t.pool.length]);if(h&&x)h.textContent=heading(x)},70);
+    setTimeout(()=>{clearInterval(tonightIv);if(h)h.textContent=heading(it)},900);
+  }
+}
 function sittingsHTML(d){
   const multi=d.sit.length>1;
   return `<span class="lab">${multi?'Sittings':'When'}</span>
@@ -1757,20 +1904,23 @@ function paintSits(){const el=$('#f-when');if(el&&S.add&&S.add.step==='rate')el.
 function openRate(id,opt){
   opt=opt||{}; const it=byId(id); if(!it)return;
   const w=opt.wi!=null?it.watches[opt.wi]:null;
+  const rs=w?(w.rs&&Object.keys(w.rs).length?{...w.rs}:(w.r?{[myKey()]:w.r}:{})):{};
   S.add={step:'rate',id,wi:w?opt.wi:null,back:opt.back||null,
-    d:{sit:w?(w.sit&&w.sit.length?w.sit.slice():[w.d]):[TODAY],who:w?(w.who||[]).slice():[],r:w?(w.r||0):0,note:w?(w.note||''):'',ate:w?(w.ate||''):''}};
+    d:{sit:w?(w.sit&&w.sit.length?w.sit.slice():[w.d]):[TODAY],who:w?(w.who||[]).slice():[],rs,love:w?!!w.love:false,note:w?(w.note||''):'',ate:w?(w.ate||''):''}};
   renderRate();
 }
 function renderRate(){
   const a=S.add, it=byId(a.id), d=a.d; if(!it)return;
-  const together=S.shelf==='together', persons=Object.entries(S.people);
+  const together=S.shelf==='together', partner=together?partnerOf():null, persons=Object.entries(S.people);
   const again=a.wi==null&&it.watches.length>0;
+  const raters=[{k:myKey(),label:'Your rating'}].concat(partner?[{k:partner.key,label:partner.name+'’s rating'}]:[]);
   openLayer(`<form class="sheet" id="rateform" role="dialog" aria-modal="true" aria-labelledby="sh-h" novalidate>
     <button type="button" class="sh-x" data-act="rate-skip" aria-label="Close">×</button>
-    <div class="metaline"><div id="f-cover">${coverHTML(smallPoster(it))}</div><div><h2 id="sh-h">How was it?</h2><p class="byline" style="margin-top:6px">${esc(heading(it))} · ${it.y||''}${again?' · another time through':''}</p></div></div>
-    <div class="field"><span class="lab">Your rating</span>
-      <div class="rate"><span class="stars" id="f-rate" role="slider" tabindex="0" aria-label="Rating out of five" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${d.r}" style="--p:${d.r/5*100}%">★★★★★</span><output id="f-rout">${d.r?rtxt(d.r):''}</output><button type="button" class="tlink" data-act="norate">Clear</button></div></div>
-    <div class="field"><label for="f-note">A line to remember it by <span class="opt">optional</span></label><textarea id="f-note" rows="2" placeholder="What did you say afterwards?">${esc(d.note)}</textarea></div>
+    <div class="metaline"><div id="f-cover">${coverHTML(smallPoster(it))}</div><div><h2 id="sh-h">${partner?'How was it, you two?':'How was it?'}</h2><p class="byline" style="margin-top:6px">${esc(heading(it))} · ${it.y||''}${again?' · another time through':''}</p></div></div>
+    ${raters.map(r=>`<div class="field"><span class="lab">${esc(r.label)}</span>
+      <div class="rate"><span class="stars" data-rk="${esc(r.k)}" role="slider" tabindex="0" aria-label="${esc(r.label)}, out of five" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${d.rs[r.k]||0}" style="--p:${(d.rs[r.k]||0)/5*100}%">★★★★★</span><output>${d.rs[r.k]?rtxt(d.rs[r.k]):''}</output><button type="button" class="tlink" data-act="norate" data-rk="${esc(r.k)}">Clear</button></div></div>`).join('')}
+    <div class="chips"><button type="button" class="chip" data-act="love" aria-pressed="${!!d.love}">♥ ${partner?'We loved it':'Loved it'}</button></div>
+    <div class="field"><label for="f-note">A line to remember it by <span class="opt">optional</span></label><textarea id="f-note" rows="2" placeholder="${partner?'What did you two say afterwards?':'What did you say afterwards?'}">${esc(d.note)}</textarea></div>
     <div class="field" id="f-when">${sittingsHTML(d)}</div>
     <details class="more"><summary>More details</summary>
       <div class="field"><span class="lab">${together?'Anyone else there?':'Who was there'}</span>
@@ -1784,7 +1934,7 @@ function renderRate(){
     </details>
     <div class="formfoot"><button type="submit" class="btn accent">Save</button><button type="button" class="tlink" data-act="rate-skip">${a.wi==null&&!a.back?'Cancel':'Skip for now'}</button></div>
   </form>`);
-  setTimeout(()=>{const r=$('#f-rate');r&&r.focus({preventScroll:true})},30);
+  setTimeout(()=>{const r=$('.stars[data-rk]');r&&r.focus({preventScroll:true})},30);
 }
 function syncRate(){
   const a=S.add; if(!a||a.step!=='rate')return;
@@ -1796,8 +1946,10 @@ function submitRate(){
   syncRate();
   const a=S.add, it=byId(a.id), d=a.d; if(!it)return;
   const sit=[...new Set(d.sit.filter(Boolean))].sort(); const last=sit[sit.length-1]||TODAY;
-  const w=Wt(last,d.who.slice(),d.r||null,(d.note||'').trim(),(d.ate||'').trim());
-  if(sit.length>1)w.sit=sit;
+  const rs={};Object.entries(d.rs).forEach(([k,v])=>{if(v>0)rs[k]=v});
+  const vals=Object.values(rs), avg=vals.length?Math.round(vals.reduce((x,y)=>x+y,0)/vals.length*2)/2:null;
+  const w=Wt(last,d.who.slice(),avg,(d.note||'').trim(),(d.ate||'').trim());
+  if(vals.length)w.rs=rs; if(d.love)w.love=true; if(sit.length>1)w.sit=sit;
   if(a.wi!=null&&it.watches[a.wi])it.watches[a.wi]=w;else it.watches.push(w);
   it.status='seen';
   save();
@@ -1805,7 +1957,7 @@ function submitRate(){
   if(back){S.add=back;paintAdd()}else closeLayer();
   if(S.open===it.id)renderPanel();
   refreshView(true);
-  if(!back)toast(it.watches.length>1?`Logged. That’s ${words(it.watches.length)} times with ${it.t}.`:`${it.t} is on the shelf.`);
+  if(!back)toast(S.shelf==='together'?`${it.t} is on our shelf.`:`${it.t} is on the shelf.`);
 }
 function rateSkip(){
   const back=S.add&&S.add.back;
@@ -1856,7 +2008,7 @@ function renderForm(){
           <input id="f-newwho" type="text" hidden placeholder="A name, then Enter" style="border:0;border-bottom:1px solid var(--ink);background:transparent;font:italic 19px var(--serif);width:12em">
         </div></div>
       <div class="field"><span class="lab">How was it</span>
-        <div class="rate"><span class="stars" id="f-rate" role="slider" tabindex="0" aria-label="Rating" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${d.r}" style="--p:${d.r/5*100}%">★★★★★</span><output id="f-rout">${d.r?rtxt(d.r):''}</output>
+        <div class="rate"><span class="stars" data-rk="r" role="slider" tabindex="0" aria-label="Rating" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${d.r}" style="--p:${d.r/5*100}%">★★★★★</span><output id="f-rout">${d.r?rtxt(d.r):''}</output>
         ${d.r?'':''}<button type="button" class="tlink" data-act="norate">Clear</button></div></div>
       <div class="field"><label for="f-note">A line to remember it by</label><textarea id="f-note" rows="2" placeholder="What did you say afterwards?"></textarea></div>
       <div class="field"><label for="f-ate">What was on the table <span style="text-transform:none;letter-spacing:0">(optional)</span></label><input id="f-ate" type="text" placeholder="tea, a bad idea involving cheese"></div>
@@ -1869,7 +2021,7 @@ function renderForm(){
       <div class="preview"><span id="f-prev">${spineHTML({...m,col:d.col},{static:true})}</span>
       <div class="swatches" role="group" aria-label="Spine colour">${SP.map((c,i)=>`<button type="button" class="sw" style="--sb:var(${c.bg})" data-act="fcol" data-c="${i}" aria-label="${c.n}" title="${c.n}" aria-pressed="${d.col%SP.length===i}"></button>`).join('')}</div></div></div>`}
 
-    <div class="formfoot"><button type="submit" class="btn accent" id="f-go">${ex?'Save this evening':(d.status==='seen'?'Put it on the shelf':'Put it in the wrapper')}</button><button type="button" class="tlink" data-act="back">${ex?'Cancel':'Back to search'}</button></div>
+    <div class="formfoot"><button type="submit" class="btn accent" id="f-go">${ex?'Save this evening':(d.status==='seen'?'Put it on the shelf':'Add it to the list')}</button><button type="button" class="tlink" data-act="back">${ex?'Cancel':'Back to search'}</button></div>
   </form>`);
   setTimeout(()=>{const f=$(a.manual?'#f-t':'#f-date');f&&f.focus({preventScroll:true})},30);
 }
@@ -1907,7 +2059,7 @@ function submitForm(){
     const it=norm({id:nid,t:m.t,y:m.y||0,type:m.type,s:m.s,eps:m.eps,min:m.min||0,dir:m.dir||'',gen:m.gen||[],syn:m.syn||'',short:m.short,
       status:d.status,watches:d.status==='seen'?[watch]:[],col:d.col,added:TODAY,poster:m.poster||'',tmdb:m.tmdb||'',note:d.status==='waiting'?(d.why||'').trim():''});
     S.items.push(it); id=it.id;
-    toast(d.status==='seen'?`${it.t} is on the shelf.`:`${it.t} is waiting in the wrapper.`);
+    toast(d.status==='seen'?`${it.t} is on the shelf.`:`${it.t} is on the list.`);
   }
   save();closeLayer();
   S.landed=id;
@@ -1918,9 +2070,13 @@ function submitForm(){
 
 /* rating widget */
 function rateFrom(e,el){const r=el.getBoundingClientRect();const x=(e.clientX-r.left)/r.width;return Math.min(5,Math.max(.5,Math.ceil(x*10)/2))}
-function setRate(v){
-  S.add.d.r=v;const el=$('#f-rate');if(!el)return;
-  el.style.setProperty('--p',v/5*100+'%');el.setAttribute('aria-valuenow',v);$('#f-rout').textContent=v?rtxt(v):'';
+function getRate(key){const d=S.add.d;return !key||key==='r'?(d.r||0):((d.rs&&d.rs[key])||0)}
+function setRate(v,key){
+  key=key||'r';const d=S.add.d;
+  if(key==='r')d.r=v;else d.rs[key]=v;
+  const el=$(`.stars[data-rk="${CSS.escape(key)}"]`);if(!el)return;
+  el.style.setProperty('--p',v/5*100+'%');el.setAttribute('aria-valuenow',v);
+  const o=el.parentElement.querySelector('output');if(o)o.textContent=v?rtxt(v):'';
 }
 
 /* ============================================================
@@ -2006,6 +2162,12 @@ document.addEventListener('click',e=>{
   const act=b.dataset.act;
   switch(act){
     case 'add': openAdd();break;
+    case 'tonight': openTonight();break;
+    case 'tonight-again': paintTonight(true);break;
+    case 'tonight-yes': {const id=b.dataset.id;closeLayer();openRate(id,{wi:null});break}
+    case 'editwatch': {const it=byId(S.open);if(it)openRate(it.id,{wi:+b.dataset.i})}break;
+    case 'love': if(S.add&&S.add.step==='rate'){S.add.d.love=!S.add.d.love;b.setAttribute('aria-pressed',String(S.add.d.love))}break;
+    case 'addshelf': if(S.add){const to=S.shelf==='together'?'mine':'together';useShelf(to);S.add.done={};S.add.busy={};route();paintAdd()}break;
     case 'shelf': if(b.dataset.v!==S.shelf){if(S.open)closeEntry();useShelf(b.dataset.v);route()}break;
     case 'move': moveItem(b.dataset.id);break;
     case 'addperson': {const i=$('#s-newp');if(i&&i.value.trim()){addPerson(i.value);openSettings()}break}
@@ -2020,7 +2182,7 @@ document.addEventListener('click',e=>{
     case 'addtab': if(S.add){S.add.tab=b.dataset.v;S.add.step='find';paintAdd()}break;
     case 'addstatus': if(S.add){S.add.status=b.dataset.v;$$('[data-act=addstatus]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
       const dw=$('#imp-date-wrap');if(dw)dw.hidden=b.dataset.v!=='seen';
-      const ic=$('#imp-confirm');if(ic)ic.textContent=ic.textContent.replace(/to the \w+/,'to the '+(b.dataset.v==='seen'?'shelf':'wrapper'))}break;
+      const ic=$('#imp-confirm');if(ic)ic.textContent=ic.textContent.replace(/to the \w+/,'to the '+(b.dataset.v==='seen'?'shelf':'list'))}break;
     case 'undo-add': undoAdd(b.dataset.k);break;
     case 'add-details': addDetails(b.dataset.k);break;
     case 'imp-go': impFind();break;
@@ -2053,13 +2215,13 @@ document.addEventListener('click',e=>{
       $('#f-prev').innerHTML=spineHTML({...S.add.meta,col:S.add.d.col},{static:true});break}
     case 'status': {S.add.d.status=b.dataset.v;$$('[data-act=status]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
       $('#f-seen').hidden=b.dataset.v!=='seen';$('#f-wait').hidden=b.dataset.v!=='waiting';
-      $('#f-go').textContent=b.dataset.v==='seen'?'Put it on the shelf':'Put it in the wrapper';break}
+      $('#f-go').textContent=b.dataset.v==='seen'?'Put it on the shelf':'Add it to the list';break}
     case 'date': {const v=addDays(TODAY,+b.dataset.v);if(S.add.step==='rate'){S.add.d.sit=[v];paintSits()}else{$('#f-date').value=v;S.add.d.date=v}break}
     case 'who': {const v=b.dataset.v,w=S.add.d.who;
       if(!v){w.length=0}else{const i=w.indexOf(v);i>=0?w.splice(i,1):w.push(v)}
       $$('#f-who [data-act=who]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v?w.includes(x.dataset.v):!w.length)));break}
     case 'newwho': {const i=$('#f-newwho');i.hidden=false;i.focus();break}
-    case 'norate': setRate(0);break;
+    case 'norate': setRate(0,b.dataset.rk);break;
     case 'fcol': {const i=+b.dataset.c;syncForm();S.add.d.col=i;$$('[data-act=fcol]').forEach(x=>x.setAttribute('aria-pressed',String(+x.dataset.c===i)));
       $('#f-prev').innerHTML=spineHTML({...S.add.meta,col:i},{static:true});break}
     case 'key-save': saveKey();break;
@@ -2146,9 +2308,10 @@ document.addEventListener('keydown',e=>{
     else if(k==='Enter'||k===' '){e.preventDefault();toggleCase()}
     return;
   }
-  if(t.id==='f-rate'){
-    if(e.key==='ArrowRight'||e.key==='ArrowUp'){e.preventDefault();setRate(Math.min(5,(S.add.d.r||0)+.5))}
-    if(e.key==='ArrowLeft'||e.key==='ArrowDown'){e.preventDefault();setRate(Math.max(0,(S.add.d.r||0)-.5))}
+  if(t.classList&&t.classList.contains('stars')&&t.dataset.rk&&S.add){
+    const k=t.dataset.rk;
+    if(e.key==='ArrowRight'||e.key==='ArrowUp'){e.preventDefault();setRate(Math.min(5,getRate(k)+.5),k)}
+    if(e.key==='ArrowLeft'||e.key==='ArrowDown'){e.preventDefault();setRate(Math.max(0,getRate(k)-.5),k)}
     return;
   }
   if(t.matches&&t.matches('.idx tbody tr')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openEntry(t.dataset.id);return}
@@ -2172,18 +2335,25 @@ document.addEventListener('keydown',e=>{
     if(n){sp.setAttribute('tabindex','-1');n.setAttribute('tabindex','0');n.focus()}
   }
 });
-/* rating pointer handling */
+/* rating pointer handling: tap, or slide a finger across the stars */
+let rateDrag=null;
 document.addEventListener('pointerdown',e=>{
-  const el=e.target.closest&&e.target.closest('#f-rate'); if(!el)return;
-  const v=rateFrom(e,el); setRate(S.add.d.r===v?0:v);
+  const el=e.target.closest&&e.target.closest('.stars[data-rk]'); if(!el||!S.add)return;
+  const key=el.dataset.rk, v=rateFrom(e,el);
+  rateDrag={el,key};
+  setRate(getRate(key)===v?0:v,key);
+  try{el.setPointerCapture(e.pointerId)}catch(_){}
 });
 document.addEventListener('pointermove',e=>{
-  const el=e.target.closest&&e.target.closest('#f-rate'); if(!el||e.pointerType==='touch')return;
+  if(rateDrag){setRate(rateFrom(e,rateDrag.el),rateDrag.key);return}
+  const el=e.target.closest&&e.target.closest('.stars[data-rk]'); if(!el||e.pointerType==='touch')return;
   el.style.setProperty('--p',rateFrom(e,el)/5*100+'%');
 });
+document.addEventListener('pointerup',()=>{rateDrag=null});
+document.addEventListener('pointercancel',()=>{rateDrag=null});
 document.addEventListener('pointerout',e=>{
-  const el=e.target.closest&&e.target.closest('#f-rate'); if(!el)return;
-  el.style.setProperty('--p',(S.add.d.r||0)/5*100+'%');
+  const el=e.target.closest&&e.target.closest('.stars[data-rk]'); if(!el||rateDrag||!S.add)return;
+  el.style.setProperty('--p',getRate(el.dataset.rk)/5*100+'%');
 });
 window.addEventListener('hashchange',()=>{ if(S.open)closeEntry(); route() });
 

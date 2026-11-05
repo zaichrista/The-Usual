@@ -1,9 +1,15 @@
 # The Usual — Product Design Requirements (PDR)
 
-**Version:** 0.4 · **Date:** 2026-11-05 · **Owner:** Zai
+**Version:** 0.5 · **Date:** 2026-11-05 · **Owner:** Zai
 **Build status:** Front-end prototype built (`index.html`, mock data, no backend). Supabase, TMDB and real auth are not started.
 
 > Status key: **[LOCKED]** = decided, build to it. **[DEFAULT]** = recommended, assumed unless overruled. **[LATER]** = explicitly not in the first build.
+
+### Changelog v0.5 (from v0.4)
+- **Together hero is playful but quiet**: a big arc lamp arches over the sofa (click it to dim the lights for "movie mode"), a throw on the sofa arm, a popcorn bowl on a small table, and the two of you who say a dry line when clicked.
+- **The miniature shelf is a toy, not a link**: drag spines to rearrange (the order is saved), hover for the title and rating, click to open the real case, **Shuffle**, and **Pull one out** to surface a random shared film. "Open the full shelf" sits beside them.
+- **"How Tonight works" is collapsible** with an explicit chevron button; it starts open for new users and remembers when you close it.
+- **Phones:** the hero stacks (sofa and lamp above, shelf below) so the lamp has room and the shelf is big enough to drag.
 
 ### Changelog v0.4 (from v0.3)
 - **Couples only.** The product is for two people. Solo, Duo and Long-Distance personas are removed (§3, §4.1). People you watch with who are not your partner are **Guest companions**.
@@ -203,7 +209,13 @@ Drafts autosave locally.
 - Optional, skippable, off-switchable in Settings.
 
 ### 6.6 Together and the Shared Shelf [LOCKED]
-- **Hero:** a calm room: a plain sofa with the two of you on it, one pendant light, a wood floor. **Our shelf in miniature** stands beside the sofa with a brass "Open our shelf" plate. Clicking it opens the full Shared Shelf.
+- **Hero:** a calm room with one big arc lamp over the sofa, the two of you on it, a throw on the arm and a popcorn bowl on a small table. **Our shelf in miniature** stands beside the sofa and is interactive:
+  - **Drag** a spine to rearrange; the order is saved.
+  - **Hover** a spine for its title and rating; **click** it to open the real case.
+  - **Shuffle** hops the spines into a new order. **Pull one out** slides a random shared film forward.
+  - Click the **lamp** to dim the lights (the room goes dark and the two of you get a faint screen glow). Click either person for a dry line.
+  - "Open the full shelf" goes to the Shared Shelf page.
+  - All motion respects reduced-motion.
 - **Shared Shelf page** (`/together/shelf`): the full cabinet (or grid) of every case you have watched together, with Films / Shows / Rewatches filters. Opening a case shows both ratings.
 - Header: "You & Sam", titles, hours, "since March 2025", and **The Usual** ritual name ("Sunday nights", renamable).
 - **Sealed Take** card appears here when your partner has sealed theirs and you have not.
@@ -233,7 +245,7 @@ Drafts autosave locally.
 - **Another**: picks again with no veto spent.
 
 **Other**
-- A collapsible "How Tonight works" is open by default for new users and remembers when closed.
+- **How Tonight works** is a collapsible panel (a chevron button, not a hidden disclosure). Open by default for new users; remembers when you close it.
 - **Currently watching together** keeps a simple "up to S1 E4" marker for shows.
 - No calendar integration in v1.
 

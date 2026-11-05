@@ -81,7 +81,7 @@ ul,ol{list-style:none}
 /* ---------- buttons ---------- */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:.5em;
-  padding:.8em 1.25em;border-radius:3px;font:600 14px/1 var(--sans);letter-spacing:.04em;
+  padding:.8em 1.25em;border-radius:3px;font:600 14px/1 var(--sans);letter-spacing:.04em;text-decoration:none;
   background:var(--accent);color:var(--accent-ink);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 2px 0 rgba(0,0,0,.35);
   transition:transform .15s var(--ease),filter .2s;
@@ -522,34 +522,78 @@ select.sel{background:var(--surface);border:0;padding:9px 12px;border-radius:3px
 .sw[aria-pressed="true"]::after{content:"";position:absolute;inset:-5px;border:2px solid var(--champagne);border-radius:5px}
 
 /* ============================================================
-   TOGETHER hero: a quiet sofa, and our shelf in miniature
+   TOGETHER hero: a living room with one big lamp, and a shelf you can play with
    ============================================================ */
-.pit{position:relative;margin:6px -16px 26px;padding:0 14px 34px;min-height:300px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;
-  background:linear-gradient(180deg,var(--bg2),var(--bg));border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-@media(min-width:768px){.pit{margin-left:0;margin-right:0;border:1px solid var(--line);border-radius:4px;min-height:350px}}
-.pit-row{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:center;gap:clamp(12px,7vw,96px);width:100%;max-width:840px}
-.pend{position:absolute;top:0;left:calc(50% - 150px);width:1px;height:78px;background:var(--champagne);z-index:1}
-.pend::after{content:"";position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;
-  background:radial-gradient(circle at 34% 30%,var(--gold),var(--copper) 55%,var(--walnut));box-shadow:0 0 50px 12px color-mix(in srgb,var(--gold) 30%,transparent)}
+.pit{position:relative;margin:6px -16px 10px;padding:0 14px 34px;min-height:370px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;
+  background:linear-gradient(180deg,var(--bg2),var(--bg));border-top:1px solid var(--line);border-bottom:1px solid var(--line);transition:background .7s}
+@media(min-width:768px){.pit{margin-left:0;margin-right:0;border:1px solid var(--line);border-radius:4px;min-height:470px}}
+.pit.dim{background:linear-gradient(180deg,#171110,#0a0605)}
+.pit-row{position:relative;z-index:2;display:flex;align-items:flex-end;justify-content:center;gap:clamp(12px,6vw,84px);width:100%;max-width:880px}
 .floor{position:absolute;left:0;right:0;bottom:0;height:34px;background:var(--wood);background-size:900px 520px;
   box-shadow:inset 0 3px 0 rgba(228,198,163,.28),inset 0 12px 16px rgba(0,0,0,.5)}
-.sofa{position:relative;flex:1 1 0;min-width:176px;max-width:430px;height:150px}
-.sb{position:absolute;inset:0 0 40px;border-radius:44px 44px 6px 6px;background:var(--oxblood);box-shadow:inset 0 2px 0 rgba(255,255,255,.12),inset 0 -16px 22px rgba(0,0,0,.25)}
-.ss{position:absolute;left:-3%;right:-3%;bottom:0;height:56px;border-radius:10px;background:color-mix(in srgb,var(--oxblood),#000 18%);
+.sofa{position:relative;flex:1 1 0;min-width:176px;max-width:430px;height:150px;z-index:2}
+.biglamp{position:absolute;left:-26%;bottom:0;width:134%;aspect-ratio:460/330;z-index:0}
+.biglamp svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.lampbtn{position:absolute;left:41%;top:9%;width:27%;height:17%;border-radius:50% 50% 6px 6px;z-index:6;cursor:pointer}
+.lampbtn:hover{background:rgba(228,198,163,.12)}
+.biglamp .cone,.biglamp .bulb{transition:opacity .6s}
+.pit.dim .biglamp .cone{opacity:0}.pit.dim .biglamp .bulb{opacity:.15}
+.sb{position:absolute;inset:0 0 40px;z-index:1;border-radius:44px 44px 6px 6px;background:var(--oxblood);box-shadow:inset 0 2px 0 rgba(255,255,255,.12),inset 0 -16px 22px rgba(0,0,0,.25)}
+.ss{position:absolute;left:-3%;right:-3%;bottom:0;z-index:2;height:56px;border-radius:10px;background:color-mix(in srgb,var(--oxblood),#000 18%);
   box-shadow:0 12px 16px -4px rgba(0,0,0,.55),inset 0 2px 0 rgba(255,255,255,.12)}
-.seatp{position:absolute;bottom:50px;display:grid;justify-items:center;gap:6px;z-index:3;transform:translateX(-50%)}
-.seatp .av{width:clamp(46px,11vw,60px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font:700 22px var(--font);color:var(--espresso);background:var(--pc);box-shadow:0 0 0 3px var(--oxblood),0 0 0 4px var(--champagne)}
+.throw{position:absolute;right:-1%;bottom:46px;width:21%;height:78px;z-index:3;background:var(--mauve);border-radius:8px 8px 16px 16px;transform:rotate(-5deg);transform-origin:50% 100%;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.2),0 5px 8px rgba(0,0,0,.4)}
+.pool{position:absolute;left:4%;right:4%;top:-30px;bottom:0;z-index:5;pointer-events:none;mix-blend-mode:screen;transition:opacity .6s;
+  background:radial-gradient(ellipse 58% 72% at 52% 0,color-mix(in srgb,var(--gold) 34%,transparent),transparent 72%)}
+.pit.dim .pool{opacity:0}
+.seatp{position:absolute;bottom:50px;display:grid;justify-items:center;gap:6px;z-index:4;transform:translateX(-50%);cursor:pointer}
+.seatp .av{width:clamp(46px,11vw,60px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font:700 22px var(--font);color:var(--espresso);background:var(--pc);
+  box-shadow:0 0 0 3px var(--oxblood),0 0 0 4px var(--champagne);animation:bob 5s ease-in-out infinite;transition:box-shadow .6s}
+.seatp+.seatp .av{animation-delay:-2.3s}
+@keyframes bob{50%{transform:translateY(-3px)}}
+.pit.dim .seatp .av{box-shadow:0 0 0 3px var(--oxblood),0 0 0 4px var(--champagne),0 0 26px 5px rgba(156,175,203,.5);animation:bob 5s ease-in-out infinite,flick 3.4s steps(1) infinite}
+@keyframes flick{0%{filter:brightness(1)}18%{filter:brightness(.78)}34%{filter:brightness(1.08)}58%{filter:brightness(.86)}80%{filter:brightness(1)}}
 .seatp .nm{font:700 11px var(--font);letter-spacing:.1em;text-transform:uppercase;background:rgba(20,12,10,.7);color:var(--cream);padding:4px 8px 3px;border-radius:2px}
-.minicab{--unit:.5;display:block;position:relative;flex:0 0 clamp(124px,22vw,230px);padding:30px 8px 8px;background:var(--wood);background-size:900px 520px;border-radius:3px;text-decoration:none;color:var(--ink);
-  box-shadow:0 22px 34px -10px rgba(0,0,0,.65),inset 0 2px 0 rgba(228,198,163,.3);transition:transform .35s var(--ease)}
-.minicab:hover,.minicab:focus-visible{transform:translateY(-6px)}
+.bubble{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--cream);color:var(--espresso);font:600 12px/1.2 var(--font);padding:8px 11px;border-radius:12px;box-shadow:0 6px 12px rgba(0,0,0,.4);animation:pop .3s var(--ease);z-index:9}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;background:var(--cream);transform:translateX(-50%) rotate(45deg)}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(6px) scale(.9)}}
+.table{position:absolute;left:50%;bottom:-22px;width:112px;height:50px;transform:translateX(-50%);z-index:4;pointer-events:none}
+.table .top{position:absolute;left:0;right:0;top:16px;height:16px;border-radius:50%;background:radial-gradient(ellipse at 50% 30%,var(--champagne),var(--walnut));box-shadow:0 5px 7px rgba(0,0,0,.45)}
+.table .leg{position:absolute;left:50%;top:28px;width:8px;height:22px;transform:translateX(-50%);background:var(--walnut)}
+.bowl{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);width:36px;height:18px;border-radius:0 0 18px 18px;background:linear-gradient(var(--copper),var(--walnut))}
+.bowl::before{content:"";position:absolute;left:-3px;right:-3px;top:-10px;height:13px;
+  background:radial-gradient(circle at 18% 60%,var(--cream) 0 5px,transparent 5.5px),radial-gradient(circle at 50% 40%,var(--cream) 0 6px,transparent 6.5px),radial-gradient(circle at 82% 60%,var(--cream) 0 5px,transparent 5.5px)}
+/* the playable shelf */
+.cabcol{flex:0 0 clamp(168px,26vw,280px);position:relative;z-index:3}
+.minicab{--unit:.55;position:relative;padding:30px 8px 8px;background:var(--wood);background-size:900px 520px;border-radius:3px;
+  box-shadow:0 22px 34px -10px rgba(0,0,0,.65),inset 0 2px 0 rgba(228,198,163,.3)}
+@media(max-width:767px){
+  .pit{display:block;padding:150px 14px 34px;min-height:0}
+  .pit .floor{display:none}
+  .pit-row{flex-direction:column;align-items:center;gap:64px}
+  .sofa{flex:none;width:100%;max-width:340px;min-width:0}
+  .sofa::after{content:"";position:absolute;left:-40px;right:-40px;bottom:-34px;height:34px;z-index:0;background:var(--wood);background-size:900px 520px;box-shadow:inset 0 3px 0 rgba(228,198,163,.28),inset 0 12px 16px rgba(0,0,0,.5)}
+  .biglamp{left:-12%;width:122%}
+  .cabcol{flex:none;width:min(100%,340px)}
+  .cabcol::after{content:"";position:absolute;left:-60px;right:-60px;bottom:-34px;height:34px;z-index:-1;background:var(--wood);background-size:900px 520px;box-shadow:inset 0 3px 0 rgba(228,198,163,.28),inset 0 12px 16px rgba(0,0,0,.5)}
+}
 .minicab .plate{position:absolute;left:8px;top:7px;font-size:10px;padding:4px 9px 3px}
 .minicab .shelfset{padding:0 4px;box-shadow:inset 0 8px 14px rgba(0,0,0,.7),inset 0 0 0 2px rgba(0,0,0,.4)}
 .minicab .board{height:6px;margin:0 -4px;box-shadow:0 4px 6px rgba(0,0,0,.5)}
-.minicab .row-items{padding:6px 2px 0;gap:1px;min-height:calc(206px*var(--unit))}
-.minicab .spine{pointer-events:none}
+.minicab .row-items{padding:6px 2px 0;gap:1px;min-height:calc(196px*var(--unit))}
+.minicab .spine{touch-action:none;cursor:grab;user-select:none}
+.minicab .spine:hover,.minicab .spine:focus-visible{transform:translateY(-9px)}
 .minicab .sp-title,.minicab .sp-cap,.minicab .sp-foot{display:none}
-.minicab .go{display:block;margin:10px 0 0;text-align:center;font:700 12px var(--font);letter-spacing:.04em;color:var(--espresso);background:var(--brass);padding:7px 6px;border-radius:2px}
+.minicab .spine.pulled{transform:translateY(-15px) scale(1.06);z-index:6;filter:brightness(1.15);box-shadow:inset 1px 0 0 rgba(255,255,255,.16),0 0 16px 3px color-mix(in srgb,var(--gold) 55%,transparent)}
+.minicab .spine.dragging{cursor:grabbing;z-index:20;transition:none;filter:brightness(1.2);box-shadow:0 12px 20px rgba(0,0,0,.6)}
+.minicab .spine.drop{box-shadow:0 0 0 2px var(--champagne)}
+.minicab.shuf .spine{animation:hop .7s var(--ease) both;animation-delay:calc(var(--i)*14ms)}
+@keyframes hop{0%{transform:translateY(0)}40%{transform:translateY(-22px) rotate(-3deg)}100%{transform:translateY(0)}}
+.minitip{position:absolute;z-index:30;pointer-events:none;background:var(--cream);color:var(--espresso);font:600 12px/1.3 var(--font);padding:6px 9px;border-radius:3px;box-shadow:0 6px 12px rgba(0,0,0,.45);white-space:nowrap;opacity:0;transform:translate(-50%,-100%);transition:opacity .15s}
+.minitip.on{opacity:1}
+.minibar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 26px}
+.minibar .hint{margin:0;max-width:52ch}
+.mini-tools{display:flex;gap:8px;flex-wrap:wrap}
 .ptabs{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .ptab{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border-radius:40px;box-shadow:inset 0 0 0 1px var(--line);transition:all .2s}
 .ptab .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 15px var(--display);color:var(--espresso);background:var(--pc)}
@@ -725,7 +769,10 @@ textarea.txt{resize:vertical;min-height:80px;font-size:16px;line-height:1.4}
 
 /* ---------- v0.4: couples-only, Tonight clarity ---------- */
 .howto{margin:0 0 22px;border:1px solid var(--line);border-radius:3px;padding:12px 16px;background:var(--surface)}
-.howto summary{cursor:pointer;font-weight:700}
+.howto-h{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;font:700 16px/1.2 var(--font);text-align:left;padding:2px 0}
+.howto-h .chev{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s var(--ease)}
+.howto.open .chev{transform:rotate(180deg)}
+.howto-b{margin-top:6px}
 .howto ol{margin:10px 0 2px 18px;list-style:decimal;color:var(--ink-soft);display:grid;gap:6px;font-size:14px}
 .howto b{color:var(--ink)}
 .onnow{display:grid;grid-template-columns:54px 1fr;gap:14px;align-items:center;padding:14px;margin-bottom:20px;border-radius:3px;background:var(--oxblood);color:var(--cream)}
@@ -897,12 +944,12 @@ const S={
   screen:'shelf', filter:'all', sort:'recent', view:'shelf',
   open:null, flip:false, caseOpen:false,
   us:'sam', usual:'sam',
-  cases:[], tonight:[], mine:[], tab:'ours', howtoOpen:true, sub:null, progress:{id:'hacks-s1',ep:4}, vetoes:{you:false}, pick:null, pickMode:'both', mood:null, mins:null,
+  cases:[], tonight:[], mine:[], order:[], dim:false, tab:'ours', howtoOpen:true, sub:null, progress:{id:'hacks-s1',ep:4}, vetoes:{you:false}, pick:null, pickMode:'both', mood:null, mins:null,
   pending:[{caseId:'eternal-sunshine',wi:2,who:'sam',theirs:4,mine:null,done:false}],
   draft:null, landed:null,
   theme:'dark', rm:false
 };
-function saveState(){tryLS.set(KEY,JSON.stringify({cases:S.cases,tonight:S.tonight,mine:S.mine,progress:S.progress,pending:S.pending,theme:S.theme,rm:S.rm,user:S.user,authed:S.authed,view:S.view,usual:S.usual,people:PEOPLE}))}
+function saveState(){tryLS.set(KEY,JSON.stringify({cases:S.cases,tonight:S.tonight,mine:S.mine,order:S.order,howtoOpen:S.howtoOpen,progress:S.progress,pending:S.pending,theme:S.theme,rm:S.rm,user:S.user,authed:S.authed,view:S.view,usual:S.usual,people:PEOPLE}))}
 function loadState(){
   const raw=tryLS.get(KEY);
   S.cases=JSON.parse(JSON.stringify(SEED_CASES));
@@ -911,7 +958,7 @@ function loadState(){
   if(!raw)return;
   try{
     const d=JSON.parse(raw);
-    if(d.cases)S.cases=d.cases; if(d.tonight)S.tonight=d.tonight; if(d.mine)S.mine=d.mine; if(d.progress)S.progress=d.progress; if(d.pending)S.pending=d.pending;
+    if(d.cases)S.cases=d.cases; if(d.tonight)S.tonight=d.tonight; if(d.mine)S.mine=d.mine; if(d.order)S.order=d.order; if(typeof d.howtoOpen==='boolean')S.howtoOpen=d.howtoOpen; if(d.progress)S.progress=d.progress; if(d.pending)S.pending=d.pending;
     if(d.theme)S.theme=d.theme; if(typeof d.rm==='boolean')S.rm=d.rm; if(d.user)S.user={mode:'couple',...d.user}; if(d.authed)S.authed=d.authed; if(d.view)S.view=d.view; if(d.usual)S.usual=d.usual;
     if(d.people)Object.keys(d.people).forEach(k=>{if(!PEOPLE[k])PEOPLE[k]=d.people[k]});
   }catch(e){}
@@ -1203,14 +1250,13 @@ function fillShelf(el,list,opts={}){
     const prop=opts.props&&chunk.length<per?PROPS[(r+(opts.pofs||0))%PROPS.length]:'';
     h+=`<div class="row"><div class="row-items ${chunk.length?'':'bare'}">${chunk.map(c=>spine(c,{dim:!match(c)})).join('')}${prop}</div><div class="board"></div></div>`;
   }
-  if(opts.mini)h=h.replace(/<button /g,'<span ').replace(/<\/button>/g,'</span>').replace(/ data-open="[^"]*"/g,'').replace(/ aria-label="[^"]*"/g,'');
   el.innerHTML=h;
 }
 function layoutShelves(){
   $$('.shelfset').forEach(el=>{
     const k=el.dataset.set;
     if(k==='bg'){fillBackwall();return}
-    if(k==='mini'){fillShelf(el,SETS.mini||[],{minRows:3,maxRows:3,max:11,mini:true});return}
+    if(k==='mini'){fillMini();return}
     if(k==='shared'){fillShelf(el,SETS.shared||[],{minRows:4,max:el.clientWidth>700?99:13,props:true,pofs:0});return}
     if(k==='us'){fillShelf(el,SETS.us||[],{minRows:2});return}
     fillShelf(el,SETS[k]||[],{tv:k==='shows',minRows:k==='films'?4:3,max:k==='films'?(el.clientWidth>700?99:13):k==='shows'?4:5,props:k==='films',pofs:0});
@@ -1285,18 +1331,24 @@ function viewUs(){
   const snack=topSnack(ws.map(x=>x.w));
   const long=shared.slice().sort((a,b)=>(b.type==='tv'?b.eps*b.min:b.min)-(a.type==='tv'?a.eps*a.min:a.min))[0];
   const stub=(kk,b,s)=>`<div class="stub"><div class="k">${kk}</div><b>${esc(b)}</b><span>${esc(s)}</span></div>`;
-  SETS.us=sortCases(shared); SETS.mini=SETS.us;
+  SETS.us=sortCases(shared); SETS.mini=miniList();
   const hrs=Math.round(ws.reduce((n,x)=>n+minutesOf(x.c,x.w),0)/60);
   return `<section>
     <div class="head"><div><h1 class="display">Together</h1><p class="sub">You and ${esc(p.n)}. Each of you keeps your own shelf. This is the one you share.</p></div></div>
-    <div class="pit">
-      <i class="pend"></i>
+    <div class="pit${S.dim?' dim':''}" id="pit">
       <div class="pit-row">
-        <div class="sofa" aria-hidden="true"><div class="sb"></div><div class="ss"></div>
-          <span class="seatp" style="left:27%;--pc:${V(S.user.colour||'--copper')}"><span class="av">${esc(S.user.name[0])}</span><span class="nm">You</span></span>
-          <span class="seatp" style="left:64%;--pc:${pcol(k)}"><span class="av">${esc(p.n[0])}</span><span class="nm">${esc(p.n)}</span></span></div>
-        <a class="minicab" href="#together/shelf" aria-label="Open our Shared Shelf, ${shared.length} titles"><span class="plate">Our shelf · ${shared.length}</span><div class="shelfset" data-set="mini"></div><span class="go">Open our shelf →</span></a>
+        <div class="sofa">
+          <div class="biglamp">${BIGLAMP}<button class="lampbtn" data-act="lamp" aria-label="${S.dim?'Turn the lamp on':'Turn the lamp off'}"></button></div>
+          <div class="sb"></div><div class="ss"></div><i class="throw"></i>
+          <button class="seatp" data-act="say" data-who="you" style="left:27%;--pc:${V(S.user.colour||'--copper')}"><span class="av">${esc(S.user.name[0])}</span><span class="nm">You</span></button>
+          <button class="seatp" data-act="say" data-who="${k}" style="left:64%;--pc:${pcol(k)}"><span class="av">${esc(p.n[0])}</span><span class="nm">${esc(p.n)}</span></button>
+          <i class="pool"></i>
+          <div class="table"><i class="top"></i><i class="leg"></i><span class="bowl"></span></div>
+        </div>
+        <div class="cabcol"><div class="minicab" id="minicab"><span class="plate">Our shelf · ${shared.length}</span><div class="shelfset" data-set="mini"></div></div><div class="minitip" id="minitip" aria-hidden="true"></div></div>
       </div><div class="floor"></div></div>
+    <div class="minibar"><p class="hint">Drag a spine to rearrange the shelf. Click one to open its case. Click the lamp to dim the lights.</p>
+      <div class="mini-tools"><button class="btn ghost small" data-act="miniShuffle">Shuffle</button><button class="btn ghost small" data-act="miniPull">Pull one out</button><a class="btn small" href="#together/shelf">Open the full shelf</a></div></div>
     <div class="us-head"><h2 class="display">You &amp; ${esc(p.n)}</h2><span class="cap">${shared.length} titles · ${hrs} hours · since ${fmt(p.since).replace(/^\d+ /,'')}</span></div>
     <p class="sub">The Usual · <b style="color:var(--ink)">${esc(p.ritual||'No ritual named yet')}</b> <button class="link" data-act="ritual" data-id="${k}">Rename</button></p>
     ${pend.map(x=>pendingHTML(x)).join('')}
@@ -1324,6 +1376,61 @@ function viewShared(){
     <div class="chips filters" role="group" aria-label="Filter">${fl.map(([k2,l])=>`<button class="chip" data-filter="${k2}" aria-pressed="${S.filter===k2}">${l}</button>`).join('')}<span class="count">${n} of ${list.length}</span></div>
     ${body}</section>`;
 }
+const BIGLAMP=`<svg viewBox="0 0 460 330" aria-hidden="true"><defs>
+  <linearGradient id="brassG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4C6A3"/><stop offset=".5" stop-color="#D8B596"/><stop offset="1" stop-color="#B77D55"/></linearGradient>
+  <linearGradient id="shadeG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5E6D2"/><stop offset=".6" stop-color="#E4C6A3"/><stop offset="1" stop-color="#D8B596"/></linearGradient>
+  <linearGradient id="coneG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E4C6A3" stop-opacity=".34"/><stop offset="1" stop-color="#E4C6A3" stop-opacity="0"/></linearGradient></defs>
+  <path class="cone" d="M214 100 L286 100 L430 324 L70 324 Z" fill="url(#coneG)"/>
+  <ellipse cx="34" cy="324" rx="34" ry="6" fill="rgba(0,0,0,.45)"/><rect x="8" y="314" width="52" height="9" rx="3" fill="url(#brassG)"/>
+  <path d="M34 316 C34 70 110 20 240 62" fill="none" stroke="url(#brassG)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M190 96 Q250 8 310 96 Z" fill="url(#shadeG)"/><rect x="186" y="94" width="128" height="7" rx="3" fill="url(#brassG)"/>
+  <ellipse class="bulb" cx="250" cy="102" rx="30" ry="8" fill="#fff4d6"/></svg>`;
+function miniList(){
+  const base=sortCases(sharedWith(S.usual));
+  if(!S.order.length)return base;
+  return base.slice().sort((a,b)=>{const ia=S.order.indexOf(a.id),ib=S.order.indexOf(b.id); if(ia<0&&ib<0)return 0; if(ia<0)return -1; if(ib<0)return 1; return ia-ib});
+}
+function fillMini(){
+  const el=$('.shelfset[data-set="mini"]'); if(!el)return;
+  SETS.mini=miniList(); fillShelf(el,SETS.mini,{minRows:2,maxRows:4,max:12});
+  $$('.spine',el).forEach((sp,i)=>sp.style.setProperty('--i',i));
+}
+function reorderMini(a,b){
+  const ids=miniList().map(c=>c.id), from=ids.indexOf(a), to=ids.indexOf(b); if(from<0||to<0)return;
+  ids.splice(from,1); ids.splice(to,0,a); S.order=ids; saveState(); fillMini();
+}
+const SAYS=['Pass the popcorn.','Five more minutes, then we pick.','You are sitting on the good blanket.','Who has the remote?','That trailer was long.'];
+let sayI=0, DR=null;
+document.addEventListener('pointerdown',e=>{
+  const sp=e.target.closest&&e.target.closest('.minicab .spine'); if(!sp)return;
+  DR={sp,id:sp.dataset.open,x:e.clientX,y:e.clientY,moving:false,over:null};
+});
+document.addEventListener('pointermove',e=>{
+  if(!DR)return; const dx=e.clientX-DR.x, dy=e.clientY-DR.y;
+  if(!DR.moving&&Math.hypot(dx,dy)>8){DR.moving=true;DR.sp.classList.add('dragging');const tp=$('#minitip');if(tp)tp.classList.remove('on');try{DR.sp.setPointerCapture(e.pointerId)}catch(_){}}
+  if(!DR.moving)return;
+  DR.sp.style.transform=`translate(${dx}px,${dy-10}px)`;
+  DR.sp.style.pointerEvents='none'; const t=document.elementFromPoint(e.clientX,e.clientY); DR.sp.style.pointerEvents='';
+  const tsp=t&&t.closest&&t.closest('.minicab .spine');
+  $$('.minicab .spine.drop').forEach(x=>x.classList.remove('drop'));
+  if(tsp&&tsp!==DR.sp){tsp.classList.add('drop');DR.over=tsp.dataset.open}else DR.over=null;
+});
+function endDrag(){
+  if(!DR)return; const d=DR; DR=null;
+  if(!d.moving)return;
+  S.dragEnd=performance.now(); d.sp.classList.remove('dragging'); d.sp.style.transform='';
+  if(d.over&&d.over!==d.id){reorderMini(d.id,d.over);toast('Rearranged.')}else fillMini();
+}
+document.addEventListener('pointerup',endDrag); document.addEventListener('pointercancel',endDrag);
+document.addEventListener('pointerover',e=>{
+  const tip=$('#minitip'); if(!tip)return;
+  const sp=e.target.closest&&e.target.closest('.minicab .spine');
+  if(!sp||DR&&DR.moving){tip.classList.remove('on');return}
+  const c=caseById(sp.dataset.open); if(!c)return;
+  const col=$('.cabcol'), r=sp.getBoundingClientRect(), cr=col.getBoundingClientRect(), rt=lastR(c);
+  tip.textContent=heading(c)+(rt?' · '+num(rt)+'★':'');
+  tip.style.left=(r.left-cr.left+r.width/2)+'px'; tip.style.top=(r.top-cr.top-4)+'px'; tip.classList.add('on');
+});
 function pendingHTML(x){
   const c=caseById(x.caseId), w=c.w[x.wi];
   return `<article class="envelope" data-pend="${S.pending.indexOf(x)}"><div class="seal" aria-hidden="true">U</div>
@@ -1400,10 +1507,11 @@ function viewTonight(){
   const ours=S.tab==='ours', nm_=PEOPLE[S.usual].n;
   return `<section><div class="head"><div><h1 class="display">Tonight</h1><p class="sub">Two lists and a picker. Our list is shared with ${esc(nm_)}. My list is just yours.</p></div></div>
    ${dc?`<div class="onnow"><div>${cover(dc)}</div><div class="txt"><b>Tonight: ${esc(heading(dc))}</b><span>You picked it. Log it when you finish.</span></div><div class="acts"><button class="btn" data-act="log" data-id="${dc.id}">We finished it</button><button class="btn ghost" data-act="clearDraft">Not this one</button></div></div>`:''}
-   <details class="howto" ${S.howtoOpen?'open':''}><summary>How Tonight works</summary><ol>
+   <section class="howto ${S.howtoOpen?'open':''}"><button class="howto-h" data-act="toggleHowto" aria-expanded="${S.howtoOpen}" aria-controls="howto-b"><span>How Tonight works</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+     <div class="howto-b" id="howto-b" ${S.howtoOpen?'':'hidden'}><ol>
      <li><b>Our list</b> is shared: either of you can add to it. <b>My list</b> is only yours, and ${esc(nm_)} keeps their own. If you both have the same title, it counts as “both said yes”.</li>
      <li>Choose a way to pick, then press <b>Pick for us</b>. You see the film’s blurb and can add it to a list, or skip it with your veto.</li>
-     <li><b>Watch this tonight</b> makes it tonight’s pick. When you finish, tap <b>We finished it</b> to log it.</li></ol></details>
+     <li><b>Watch this tonight</b> makes it tonight’s pick. When you finish, tap <b>We finished it</b> to log it.</li></ol></div></section>
    <div class="tonight">
     <div>
       <div class="tv"><div class="tv-screen" style="min-height:300px"><div class="tv-in" id="tv-in">${tvContent()}</div></div>
@@ -1628,6 +1736,7 @@ function applyTheme(){
   document.documentElement.classList.toggle('rm',S.rm);
 }
 document.addEventListener('click',e=>{
+  if(S.dragEnd&&performance.now()-S.dragEnd<350&&e.target.closest&&e.target.closest('.minicab')){return}
   const t=e.target.closest('[data-w],[data-tab],[data-mode2],[data-modeset],[data-sw],[data-go],[data-open],[data-act],[data-view],[data-filter],[data-us],[data-lw],[data-lwhen],[data-lat],[data-lm],[data-rmsn],[data-pickt],[data-mode],[data-mood],[data-mins],[data-theme-set],[data-colour],[data-addt],[data-logt],.stars button');
   if(!t){ if(e.target.id==='scrim'){closeLayer()} return }
   const d=t.dataset;
@@ -1672,6 +1781,11 @@ document.addEventListener('click',e=>{
     case 'clearDraft':S.draft=null;saveState();refreshNav();renderView();break;
     case 'removeFrom':if(d.list==='mine')S.mine=S.mine.filter(x=>x!==d.id);else S.tonight=S.tonight.filter(x=>x.id!==d.id);saveState();renderView();break;
     case 'addToList':openSearch('add');break;
+    case 'lamp':{S.dim=!S.dim;const p=$('#pit');if(p)p.classList.toggle('dim',S.dim);t.setAttribute('aria-label',S.dim?'Turn the lamp on':'Turn the lamp off');toast(S.dim?'Lights down.':'Lights up.');break}
+    case 'say':{const b=t.closest('.seatp');$$('.bubble').forEach(x=>x.remove());const el=document.createElement('span');el.className='bubble';el.textContent=SAYS[(sayI++)%SAYS.length];b.appendChild(el);setTimeout(()=>el.remove(),2600);break}
+    case 'miniShuffle':{const ids=(SETS.mini||[]).map(c=>c.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}S.order=ids;saveState();fillMini();const m=$('#minicab');if(m){m.classList.add('shuf');setTimeout(()=>m.classList.remove('shuf'),1200)}break}
+    case 'miniPull':{const list=SETS.mini||[];if(!list.length)break;const c=list[Math.floor(Math.random()*list.length)];$$('.minicab .spine.pulled').forEach(x=>x.classList.remove('pulled'));const sp=$('.minicab .spine[data-open="'+c.id+'"]');if(sp)sp.classList.add('pulled');toast('How about '+heading(c)+'?');break}
+    case 'toggleHowto':{S.howtoOpen=!S.howtoOpen;saveState();const sec=$('.howto');if(sec){sec.classList.toggle('open',S.howtoOpen);const b=$('.howto-b',sec);if(b)b.hidden=!S.howtoOpen;t.setAttribute('aria-expanded',S.howtoOpen)}break}
     case 'ritual':{const v=prompt('Name your Usual (for example, Friday nights)',PEOPLE[d.id].ritual||'');if(v!==null){PEOPLE[d.id].ritual=v.trim();saveState();renderView()}break}
     case 'makeUsual':S.usual=d.id;saveState();toast(nm(d.id)+' is now Your Usual');renderView();break;
     case 'invite':{const link=location.origin+location.pathname+'#invite-'+slug(S.user.handle);(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(link):Promise.reject()).then(()=>toast('Invite link copied'),()=>toast('Invite link: '+link));break}

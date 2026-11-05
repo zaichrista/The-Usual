@@ -67,6 +67,14 @@ img,svg{display:block;max-width:100%}
 .serif{font-family:var(--serif)}
 
 /* ---------- buttons ---------- */
+#gate{position:fixed;inset:0;z-index:1000;background:var(--bg);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
+#gate[hidden]{display:none}
+#gate .gate-card{width:100%;max-width:400px}
+#gate h1{font:italic 300 clamp(40px,9vw,56px)/1 var(--serif);margin:0 0 6px}
+#gate .gate-sub{margin:0 0 28px;color:var(--soft)}
+#gate label{display:block;margin-top:14px}
+#gate input{width:100%}
+#gate .setrow{margin-top:18px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;padding:.85em 1.35em;border-radius:2px;
   font:600 13px/1 var(--sans);letter-spacing:.05em;background:var(--ink);color:var(--bg);transition:transform .15s var(--ease),opacity .2s}
 .btn:hover{transform:translateY(-1px)}
@@ -475,6 +483,7 @@ img,svg{display:block;max-width:100%}
 <main id="view" tabindex="-1"></main>
 
 <div class="scrim for-panel" id="scrim" hidden data-act="close-panel"></div>
+<div id="gate" role="dialog" aria-modal="true" aria-label="Sign in" hidden></div>
 <div id="layer"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <noscript><p style="padding:24px">The Usual needs JavaScript to build your shelf.</p></noscript>
@@ -741,18 +750,34 @@ async function activateCloudLibrary(id,preferRemote=true){
   }).subscribe();
   cloudMessage='Synced across devices.';
 }
+function gateOpen(){return !(SB&&cloudUser&&cloudLibrary&&cloudReady)}
+function renderGate(){
+  const g=$('#gate');if(!g)return;
+  if(!gateOpen()){g.hidden=true;g.innerHTML='';document.body.style.overflow='';return}
+  document.body.style.overflow='hidden';
+  const inner=SB?cloudSettingsHTML():`<section class="field"><p class="fine">${esc(cloudMessage||'Connecting…')}</p></section>`;
+  const active=document.activeElement;
+  if(g.contains(active)&&active.tagName==='INPUT'&&g.dataset.sig===inner)return;
+  g.dataset.sig=inner;
+  g.innerHTML=`<div class="gate-card"><h1>The Usual</h1><p class="gate-sub">A private library. Sign in to open it.</p>${inner}</div>`;
+  g.hidden=false;
+}
+function refreshCloudUI(){
+  renderGate();
+  if(!gateOpen()&&$('#layer').innerHTML.includes('cloud-controls'))openSettings();
+}
 async function initSupabase(){
-  if(!window.supabase?.createClient){cloudMessage='Could not load the Supabase client.';return}
+  if(!window.supabase?.createClient){cloudMessage='Could not load the sign-in service. Check your connection and reload.';renderGate();return}
   SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
   const {data}=await SB.auth.getSession();
   cloudUser=data.session?.user||null;
   if(cloudUser)await findCloudLibrary();
   SB.auth.onAuthStateChange((_event,session)=>{
     cloudUser=session?.user||null;
-    if(!cloudUser){cloudReady=false;cloudLibrary=null;cloudMessage='Signed out.';return}
+    if(!cloudUser){cloudReady=false;cloudLibrary=null;cloudMessage='Signed out.';refreshCloudUI();return}
     setTimeout(()=>findCloudLibrary(),0);
   });
-  if($('#layer').innerHTML.includes('cloud-controls'))openSettings();
+  refreshCloudUI();
 }
 async function findCloudLibrary(){
   if(!SB||!cloudUser)return;
@@ -760,7 +785,7 @@ async function findCloudLibrary(){
   if(error){cloudMessage='Could not check library membership: '+error.message;return}
   if(data)await activateCloudLibrary(data.library_id,true);
   else{cloudLibrary=null;cloudReady=false;cloudMessage='Create a library or join with an invite code.'}
-  if($('#layer').innerHTML.includes('cloud-controls'))openSettings();
+  refreshCloudUI();
 }
 function cloudSettingsHTML(){
   let body='';
@@ -773,10 +798,10 @@ function cloudSettingsHTML(){
 async function cloudAuthSubmit(form,mode){
   const email=$('#cloud-email').value.trim(),password=$('#cloud-password').value;
   const result=mode==='signup'?await SB.auth.signUp({email,password}):await SB.auth.signInWithPassword({email,password});
-  if(result.error){cloudMessage=result.error.message;openSettings();return}
+  if(result.error){cloudMessage=result.error.message;refreshCloudUI();return}
   if(mode==='signup'&&!result.data.session)cloudMessage='Check your email to confirm your account, then sign in.';
   else cloudMessage='Signed in. Create a library or join with an invite code.';
-  cloudUser=result.data.user||cloudUser;openSettings();if(cloudUser)await findCloudLibrary();
+  cloudUser=result.data.user||cloudUser;refreshCloudUI();if(cloudUser)await findCloudLibrary();
 }
 
 /* ============================================================
@@ -1498,8 +1523,8 @@ document.addEventListener('click',e=>{
   const t=e.target;
   const cloud=t.closest('[data-cloud]');
   if(cloud){e.preventDefault();(async()=>{
-    if(cloud.dataset.cloud==='signout'){await SB.auth.signOut();cloudReady=false;cloudLibrary=null;cloudUser=null;cloudMessage='Signed out.';cloudInvite='';openSettings()}
-    if(cloud.dataset.cloud==='invite'){const {data,error}=await SB.rpc('create_library_invite');cloudMessage=error?error.message:'Invite code is ready.';cloudInvite=data||'';openSettings()}
+    if(cloud.dataset.cloud==='signout'){await SB.auth.signOut();cloudReady=false;cloudLibrary=null;cloudUser=null;cloudMessage='Signed out.';cloudInvite='';refreshCloudUI()}
+    if(cloud.dataset.cloud==='invite'){const {data,error}=await SB.rpc('create_library_invite');cloudMessage=error?error.message:'Invite code is ready.';cloudInvite=data||'';refreshCloudUI()}
   })();return}
   const sp=t.closest('#cavity .sp[data-id]'); if(sp){openEntry(sp.dataset.id);return}
   const q=t.closest('.quote[data-id]'); if(q){openEntry(q.dataset.id);return}
@@ -1581,13 +1606,13 @@ document.addEventListener('submit',e=>{
   if(form.id==='cloud-auth'){e.preventDefault();cloudAuthSubmit(form,e.submitter?.dataset.mode||'signin');return}
   if(form.id==='cloud-create'){e.preventDefault();(async()=>{
     const {data,error}=await SB.rpc('create_library',{library_name:$('#cloud-library-name').value.trim()||'Our library'});
-    if(error){cloudMessage=error.message;openSettings();return}
-    await activateCloudLibrary(data,false);route();openSettings();
+    if(error){cloudMessage=error.message;refreshCloudUI();return}
+    await activateCloudLibrary(data,false);route();refreshCloudUI();
   })();return}
   if(form.id==='cloud-join'){e.preventDefault();(async()=>{
     const {data,error}=await SB.rpc('join_library',{invite_code:$('#cloud-invite-code').value.trim()});
-    if(error){cloudMessage=error.message;openSettings();return}
-    await activateCloudLibrary(data,true);route();openSettings();
+    if(error){cloudMessage=error.message;refreshCloudUI();return}
+    await activateCloudLibrary(data,true);route();refreshCloudUI();
   })();return}
 });
 document.addEventListener('keydown',e=>{
@@ -1660,6 +1685,7 @@ window.addEventListener('hashchange',()=>{ if(S.open)closeEntry(); route() });
 load();
 applyTheme();
 route();
+cloudMessage='Connecting…';renderGate();
 initSupabase();
 </script>
 </body>

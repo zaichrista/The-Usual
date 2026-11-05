@@ -10,10 +10,10 @@ This backend keeps the existing library shape (`items`, `people`, and library di
 4. In **Authentication → URL Configuration**, add the website's final HTTPS origin to **Site URL** and **Redirect URLs**. For local development, add the local origin too.
 5. In **Authentication → Providers**, leave Email enabled. Choose whether new accounts must confirm their email; if enabled, configure the email provider and redirect URL before inviting other people.
 
-## Finish connecting the website
+## Connect the website
 
-The app still needs the project URL and publishable key to connect. Provide those two values (they are designed for browser use) and the deployed website URL. Do not share a database password, `service_role` key, or email provider secret. Once supplied, the app can be wired to sign-in, library creation, invite creation/joining, and cloud loading/saving while retaining the current shelf and watch-history interface.
+The app is configured with the project URL and publishable key. The publishable key is intended for browser use; database access is restricted by the row level security policies in `schema.sql`. The app uses email/password sign-in and includes create-library, invite-code, and join-library controls in **Settings**.
 
 ## First use
 
-The first person creates an account and library. From the library settings, they create an invite code and give it to the other person. That person signs in and joins with the code. Both accounts then read and edit the same shelf on any device. The current prototype data is in browser storage; migration/import needs to be done from the browser that holds the shelf after the account and library are connected.
+The first person creates an account and library. Creating the library uploads the current browser's shelf. From Settings, they create an invite code and give it to the other person. That person creates an account, signs in, and joins with the code. Joining loads the shared library over any local shelf on that device. Both accounts then read and edit the same shelf across devices. The existing JSON export remains available as a backup.

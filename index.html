@@ -707,6 +707,77 @@ function load(){
     if(d.isort)S.isort=d.isort;
   }catch(e){S.items=seedItems()}
 }
+function cloudContent(){return {items:S.items,people:S.people,lib:S.lib,partner:S.partner,filter:S.filter,sort:S.sort,isort:S.isort}}
+function applyCloudContent(d){
+  if(!d||typeof d!=='object')return;
+  if(Array.isArray(d.items))S.items=d.items.map(norm);
+  if(d.people)S.people={...S.people,...d.people};
+  if(d.lib)S.lib={...S.lib,...d.lib};
+  if(d.partner)S.partner=d.partner;
+  if(d.filter)S.filter=d.filter;
+  if(d.sort)S.sort=d.sort;
+  if(d.isort)S.isort=d.isort;
+  tryLS.set(KEY,JSON.stringify(cloudContent()));
+}
+function queueCloudSave(){
+  if(!SB||!cloudReady||!cloudLibrary||!cloudUser)return;
+  clearTimeout(cloudTimer);
+  cloudTimer=setTimeout(async()=>{
+    const {error}=await SB.from('library_state').upsert({library_id:cloudLibrary,content:cloudContent(),updated_by:cloudUser.id,updated_at:new Date().toISOString()},{onConflict:'library_id'});
+    if(error){cloudMessage='Cloud save failed: '+error.message;}
+  },500);
+}
+async function activateCloudLibrary(id,preferRemote=true){
+  cloudReady=false; cloudLibrary=id;
+  const {data,error}=await SB.from('library_state').select('content').eq('library_id',id).maybeSingle();
+  if(error){cloudMessage='Could not load your shared library: '+error.message;return}
+  if(preferRemote&&data&&data.content&&Object.keys(data.content).length)applyCloudContent(data.content);
+  cloudReady=true;
+  if(!preferRemote||!data||!data.content||!Object.keys(data.content).length)queueCloudSave();
+  if(cloudChannel)SB.removeChannel(cloudChannel);
+  cloudChannel=SB.channel('library-'+id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'library_state',filter:'library_id=eq.'+id},payload=>{
+    if(payload.new.updated_by===cloudUser?.id)return;
+    applyCloudContent(payload.new.content);applyTheme();route();
+  }).subscribe();
+  cloudMessage='Synced across devices.';
+}
+async function initSupabase(){
+  if(!window.supabase?.createClient){cloudMessage='Could not load the Supabase client.';return}
+  SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+  const {data}=await SB.auth.getSession();
+  cloudUser=data.session?.user||null;
+  if(cloudUser)await findCloudLibrary();
+  SB.auth.onAuthStateChange((_event,session)=>{
+    cloudUser=session?.user||null;
+    if(!cloudUser){cloudReady=false;cloudLibrary=null;cloudMessage='Signed out.';return}
+    setTimeout(()=>findCloudLibrary(),0);
+  });
+  if($('#layer').innerHTML.includes('cloud-controls'))openSettings();
+}
+async function findCloudLibrary(){
+  if(!SB||!cloudUser)return;
+  const {data,error}=await SB.from('library_members').select('library_id').eq('user_id',cloudUser.id).maybeSingle();
+  if(error){cloudMessage='Could not check library membership: '+error.message;return}
+  if(data)await activateCloudLibrary(data.library_id,true);
+  else{cloudLibrary=null;cloudReady=false;cloudMessage='Create a library or join with an invite code.'}
+  if($('#layer').innerHTML.includes('cloud-controls'))openSettings();
+}
+function cloudSettingsHTML(){
+  let body='';
+  if(!SB)return `<section class="field"><span class="lab">Account and sync</span><p class="fine">Connecting to Supabase…</p></section>`;
+  if(!cloudUser)body=`<form id="cloud-auth" class="field cloud-controls"><span class="lab">Account and sync</span><label for="cloud-email">Email</label><input id="cloud-email" type="email" autocomplete="email" required><label for="cloud-password">Password</label><input id="cloud-password" type="password" autocomplete="current-password" minlength="8" required><div class="setrow"><button class="btn" type="submit" data-mode="signin">Sign in</button><button class="btn line" type="submit" data-mode="signup">Create account</button></div><p class="fine" id="cloud-message" aria-live="polite">${esc(cloudMessage||'Your library will sync across devices.')}</p></form>`;
+  else if(!cloudLibrary)body=`<section class="field cloud-controls"><span class="lab">Account and sync</span><p class="fine">Signed in as ${esc(cloudUser.email||'your account')}. ${esc(cloudMessage)}</p><form id="cloud-create"><label for="cloud-library-name">Create a shared library</label><input id="cloud-library-name" value="${esc(S.lib.a+(S.lib.b?' & '+S.lib.b:''))}" maxlength="80"><div class="setrow"><button class="btn" type="submit">Create library</button></div></form><form id="cloud-join"><label for="cloud-invite-code">Join with an invite code</label><input id="cloud-invite-code" autocomplete="one-time-code" required><div class="setrow"><button class="btn line" type="submit">Join library</button></div></form><button type="button" class="tlink" data-cloud="signout">Sign out</button></section>`;
+  else body=`<section class="field cloud-controls"><span class="lab">Account and sync</span><p class="fine">Signed in as ${esc(cloudUser.email||'your account')}. ${esc(cloudMessage||'Synced across devices.')}</p><div class="setrow"><button type="button" class="btn line" data-cloud="invite">Create invite code</button>${cloudInvite?`<code>${esc(cloudInvite)}</code>`:''}<button type="button" class="tlink" data-cloud="signout">Sign out</button></div><p class="fine">Invite codes are valid for seven days. Share one with the person joining this library.</p></section>`;
+  return body;
+}
+async function cloudAuthSubmit(form,mode){
+  const email=$('#cloud-email').value.trim(),password=$('#cloud-password').value;
+  const result=mode==='signup'?await SB.auth.signUp({email,password}):await SB.auth.signInWithPassword({email,password});
+  if(result.error){cloudMessage=result.error.message;openSettings();return}
+  if(mode==='signup'&&!result.data.session)cloudMessage='Check your email to confirm your account, then sign in.';
+  else cloudMessage='Signed in. Create a library or join with an invite code.';
+  cloudUser=result.data.user||cloudUser;openSettings();if(cloudUser)await findCloudLibrary();
+}
 
 /* ============================================================
    DERIVED
@@ -1402,6 +1473,7 @@ function openSettings(){
   openLayer(`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
     <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
     <h2 id="sh-h">The fine print.</h2>
+    ${cloudSettingsHTML()}
     <div class="two">
       <div class="field"><label for="s-a">Your name</label><input id="s-a" type="text" value="${esc(S.lib.a)}"></div>
       <div class="field"><label for="s-b">Who you watch with</label><input id="s-b" type="text" value="${esc(S.lib.b)}" placeholder="optional"></div>
@@ -1414,7 +1486,7 @@ function openSettings(){
       <button type="button" class="btn line" data-act="export">Take a copy (JSON)</button>
       <button type="button" class="btn line" data-act="example">Restore the example library</button>
       <button type="button" class="btn line" data-act="empty">Start with an empty shelf</button></div>
-      <p class="fine">Everything is kept in this browser only. Taking a copy is the way to keep it safe.</p></div>
+      <p class="fine">Signed-in shared libraries sync to Supabase. A JSON copy is still useful as a backup.</p></div>
     <div class="formfoot"><button type="button" class="btn" data-act="settings-done">Done</button></div>
   </div>`);
 }
@@ -1424,6 +1496,11 @@ function openSettings(){
    ============================================================ */
 document.addEventListener('click',e=>{
   const t=e.target;
+  const cloud=t.closest('[data-cloud]');
+  if(cloud){e.preventDefault();(async()=>{
+    if(cloud.dataset.cloud==='signout'){await SB.auth.signOut();cloudReady=false;cloudLibrary=null;cloudUser=null;cloudMessage='Signed out.';cloudInvite='';openSettings()}
+    if(cloud.dataset.cloud==='invite'){const {data,error}=await SB.rpc('create_library_invite');cloudMessage=error?error.message:'Invite code is ready.';cloudInvite=data||'';openSettings()}
+  })();return}
   const sp=t.closest('#cavity .sp[data-id]'); if(sp){openEntry(sp.dataset.id);return}
   const q=t.closest('.quote[data-id]'); if(q){openEntry(q.dataset.id);return}
   const tr=t.closest('.idx tbody tr[data-id]'); if(tr){openEntry(tr.dataset.id);return}
@@ -1498,7 +1575,21 @@ document.addEventListener('change',e=>{
   if(e.target.id==='f-season'){applySeason(+e.target.value);return}
   if(e.target.id==='sort'){S.sort=e.target.value;save();fillShelf()}
 });
-document.addEventListener('submit',e=>{if(e.target.id==='addform'){e.preventDefault();submitForm()}});
+document.addEventListener('submit',e=>{
+  const form=e.target;
+  if(form.id==='addform'){e.preventDefault();submitForm();return}
+  if(form.id==='cloud-auth'){e.preventDefault();cloudAuthSubmit(form,e.submitter?.dataset.mode||'signin');return}
+  if(form.id==='cloud-create'){e.preventDefault();(async()=>{
+    const {data,error}=await SB.rpc('create_library',{library_name:$('#cloud-library-name').value.trim()||'Our library'});
+    if(error){cloudMessage=error.message;openSettings();return}
+    await activateCloudLibrary(data,false);route();openSettings();
+  })();return}
+  if(form.id==='cloud-join'){e.preventDefault();(async()=>{
+    const {data,error}=await SB.rpc('join_library',{invite_code:$('#cloud-invite-code').value.trim()});
+    if(error){cloudMessage=error.message;openSettings();return}
+    await activateCloudLibrary(data,true);route();openSettings();
+  })();return}
+});
 document.addEventListener('keydown',e=>{
   const t=e.target;
   if(e.key==='Escape'){
@@ -1569,6 +1660,7 @@ window.addEventListener('hashchange',()=>{ if(S.open)closeEntry(); route() });
 load();
 applyTheme();
 route();
+initSupabase();
 </script>
 </body>
 </html>

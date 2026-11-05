@@ -39,6 +39,13 @@ alter table public.library_members enable row level security;
 alter table public.library_state enable row level security;
 alter table public.library_invites enable row level security;
 
+do $$ begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'library_state') then
+    execute 'alter publication supabase_realtime add table public.library_state';
+  end if;
+end $$;
+
 -- A SECURITY DEFINER helper avoids recursive RLS evaluation on library_members.
 create or replace function public.is_library_member(target_library uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
@@ -64,11 +71,11 @@ create policy "Members can read shared library state"
 
 create policy "Members can update shared library state"
   on public.library_state for insert to authenticated
-  with check (public.is_library_member(library_id));
+  with check (updated_by = auth.uid() and public.is_library_member(library_id));
 create policy "Members can replace shared library state"
   on public.library_state for update to authenticated
   using (public.is_library_member(library_id))
-  with check (public.is_library_member(library_id));
+  with check (updated_by = auth.uid() and public.is_library_member(library_id));
 
 create policy "Members can create invites"
   on public.library_invites for insert to authenticated

@@ -255,6 +255,16 @@ input::placeholder,textarea::placeholder{color:var(--mute)}
 .members li{background:var(--chip);border-radius:99px;padding:6px 8px 6px 14px;font-size:13.5px;display:flex;gap:6px;align-items:center}
 .members li button{width:22px;height:22px;border-radius:50%;color:var(--mute);font-size:16px;line-height:1}
 .invlist{list-style:none;padding:0;margin:10px 0}
+.invban{margin:0 0 18px;padding:16px;border-radius:18px;background:var(--ac);color:var(--ac-ink);box-shadow:var(--shadow);display:grid;gap:12px;animation:invpulse 2.4s ease-in-out infinite}
+.invban b.invh{display:flex;align-items:center;gap:8px;font-size:16px}
+.invban .invn{min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--ac-ink);color:var(--ac);font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.invban p{margin:0;font-size:14px;line-height:1.4}
+.invban .invwarn{font-size:12.5px;opacity:.85}
+.invban .setrow .btn{background:var(--ac-ink);color:var(--ac);border:0}
+.invban .setrow .btn.line{background:transparent;color:var(--ac-ink);border:1px solid currentColor}
+.invdot{position:absolute;top:8px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e5254b;color:#fff;font-size:11px;font-weight:700;font-style:normal;line-height:18px;text-align:center;box-shadow:0 0 0 2px var(--bg)}
+@keyframes invpulse{0%,100%{box-shadow:var(--shadow),0 0 0 0 color-mix(in srgb,var(--ac) 55%,transparent)}50%{box-shadow:var(--shadow),0 0 0 8px transparent}}
+@media (prefers-reduced-motion:reduce){.invban{animation:none}}
 .invrow{display:grid;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
 .joinbox{margin:10px 0;color:var(--ink2)}.joinbox summary{cursor:pointer;font-size:14px;padding:6px 0}
 details.more summary{cursor:pointer;font-weight:500;color:var(--link);font-size:14px;padding:8px 0}
@@ -440,7 +450,7 @@ dl{margin:32px 0 0}
   <a href="#/discover" data-nav="discover"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2 5.2-5.2 2 2-5.2z"/></svg><span>Discover</span></a>
   <button type="button" class="plus" data-act="add" aria-label="Add a film or series"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   <button type="button" data-act="tonight"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="9" cy="9" r=".9" fill="currentColor"/><circle cx="15" cy="15" r=".9" fill="currentColor"/><circle cx="12" cy="12" r=".9" fill="currentColor"/></svg><span>Tonight</span></button>
-  <a href="#/me" data-nav="me"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.7"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></svg><span>Profile</span></a>
+  <a href="#/me" data-nav="me"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.7"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></svg><span>Profile</span><i class="invdot" id="navdot" hidden></i></a>
 </div></nav>
 
 <div id="detail" hidden role="dialog" aria-modal="true" aria-label="Title details"></div>
@@ -844,8 +854,20 @@ function renderGate(){
   g.innerHTML=`<div class="gate-card"><h1>The Usual</h1><p class="gate-sub">A shelf for two. Everything you’ve watched together, and what’s next.</p>${inner}</div>`;
   g.hidden=false;
 }
+function pendingInvites(){return cloudLibrary&&cloudInvites.length?cloudInvites:[]}
+function paintNavDot(){
+  const d=$('#navdot');if(!d)return;
+  const n=gateOpen()?0:pendingInvites().length;
+  d.hidden=!n;d.textContent=n>9?'9+':n;
+  const a=d.closest('a');if(a){if(n)a.setAttribute('aria-label','Profile, '+n+' pending invitation'+(n>1?'s':''));else a.removeAttribute('aria-label')}
+}
+function inviteBannerHTML(){
+  const inv=pendingInvites();if(!inv.length)return '';
+  const rows=inv.map(i=>`<div class="invrow" style="border:0;padding:0"><p><b>@${esc(i.from_username||'someone')}</b> invited you to share <i>${esc(i.library_name)}</i>.</p><span class="setrow"><button type="button" class="btn" data-cloud="accept-invite" data-id="${esc(i.id)}">Accept</button><button type="button" class="btn line" data-cloud="decline-invite" data-id="${esc(i.id)}">Not now</button></span></div>`).join('');
+  return `<section class="invban" role="alert" aria-label="Invitations"><b class="invh">${inv.length>1?'You have invitations':'You have an invitation'}<span class="invn">${inv.length}</span></b>${rows}<p class="invwarn">Accepting swaps your current shelf for the shared one.</p></section>`;
+}
 function refreshCloudUI(){
-  renderGate();
+  renderGate();paintNavDot();
   if(!gateOpen()&&(S.view==='me'||S.view==='settings')&&S.rendered===S.view)renderBase();
 }
 async function initSupabase(){
@@ -875,10 +897,12 @@ async function loadMembers(){
   const {data,error}=await SB.rpc('list_members'); if(!error&&Array.isArray(data))cloudMembers=data;
 }
 function syncInvitePoll(){
-  const need=SB&&cloudUser&&!cloudLibrary&&cloudProfile&&!cloudProfile.off&&cloudProfile.username;
+  const need=SB&&cloudUser&&cloudProfile&&!cloudProfile.off&&cloudProfile.username;
   if(need&&!invPoll){invPoll=setInterval(async()=>{
-    if(!cloudUser||cloudLibrary){syncInvitePoll();return}
-    await loadInvites();if(gateOpen())renderGate()},12000)}
+    if(!cloudUser){syncInvitePoll();return}
+    const before=cloudInvites.map(i=>i.id).join();
+    await loadInvites();
+    if(cloudInvites.map(i=>i.id).join()!==before)refreshCloudUI()},12000)}
   else if(!need&&invPoll){clearInterval(invPoll);invPoll=0}
 }
 function clearAccount(){mineReady=false;mineOff=false;cloudProfile=null;cloudInvites=[];cloudMembers=[];userHits=[];userQ='';syncInvitePoll()}
@@ -889,7 +913,8 @@ async function findCloudLibrary(){
   const {data,error}=await SB.from('library_members').select('library_id').eq('user_id',cloudUser.id).maybeSingle();
   if(error){cloudMessage='Could not check library membership: '+error.message;refreshCloudUI();return}
   if(data)await activateCloudLibrary(data.library_id,true);
-  else{cloudLibrary=null;cloudReady=false;cloudMessage='';await loadInvites()}
+  else{cloudLibrary=null;cloudReady=false;cloudMessage=''}
+  await loadInvites();
   await loadMine();
   if(S.view)renderBase();
   refreshCloudUI();syncInvitePoll();
@@ -1050,7 +1075,7 @@ function applyTheme(){
   paintNav();
 }
 mq.addEventListener&&mq.addEventListener('change',()=>{if(S.mode==='auto')applyTheme()});
-function paintNav(){$$('[data-nav]').forEach(a=>{if(a.dataset.nav===S.view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}
+function paintNav(){paintNavDot();$$('[data-nav]').forEach(a=>{if(a.dataset.nav===S.view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}
 function lock(){document.body.style.overflow=($('#layer').innerHTML||!$('#detail').hidden||!$('#gate').hidden)?'hidden':''}
 
 let toastT;
@@ -1380,7 +1405,7 @@ function viewProfile(){
   const who=S.pperson||'me',P=profileFor(who);
   const seg=pr?`<div class="switchrow"><div class="seg" role="group" aria-label="Whose profile">${[['me','You'],['them',pr.name]].map(([k,l])=>`<button type="button" data-act="pperson" data-v="${k}" aria-pressed="${who===k}">${esc(l)}</button>`).join('')}</div></div>`:'';
   const top=P.top.length?`<div class="top5">${P.top.map((it,n)=>`<button type="button" class="t5" data-act="open" data-id="${esc(it.id)}"><span class="t5c">${coverHTML(smallPoster(it))}<i>${n+1}</i></span><span class="t5t">${esc(it.t)}</span></button>`).join('')}</div>`:'<p class="fine">Nothing rated yet.</p>';
-  $('#view').innerHTML=`${topHTML('Profile',null,topBtns())}${seg}
+  $('#view').innerHTML=`${topHTML('Profile',null,topBtns())}${inviteBannerHTML()}${seg}
   <section class="pro">
     <div class="pro-id"><span class="avatar big">${esc((P.name||'?').slice(0,1).toUpperCase())}</span><div><h2>${esc(P.name)}</h2><p class="fine" style="margin:4px 0 0">${P.handle?'@'+esc(P.handle)+' · ':''}${P.pron?esc(P.pron)+' · ':''}${P.last?'Updated '+fmtShort(P.last):'No watches yet'}</p></div></div>
     <p class="about">${esc(P.about)}</p>
@@ -2003,7 +2028,7 @@ document.addEventListener('click',e=>{
     if(cloud.dataset.cloud==='accept-invite'||cloud.dataset.cloud==='decline-invite'){
       const accept=cloud.dataset.cloud==='accept-invite';
       const {data,error}=await SB.rpc('respond_invite',{invite_id:cloud.dataset.id,accept});
-      if(error){cloudMessage=error.message;await loadInvites();refreshCloudUI();return}
+      if(error){cloudMessage=error.message;toast(error.message);await loadInvites();refreshCloudUI();return}
       if(accept&&data){cloudInvites=[];await activateCloudLibrary(data,true);renderBase();cloudMessage='';syncInvitePoll()}
       else{cloudMessage='';await loadInvites()}
       refreshCloudUI();return}

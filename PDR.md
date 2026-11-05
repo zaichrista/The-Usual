@@ -1,11 +1,26 @@
 # The Usual — Product Design Requirements (PDR)
 
-**Version:** 0.2 · **Date:** 2026-11-05 · **Owner:** Zai
-**Build status:** NOT STARTED. No code is written until the owner gives the go-ahead.
+**Version:** 0.4 · **Date:** 2026-11-05 · **Owner:** Zai
+**Build status:** Front-end prototype built (`index.html`, mock data, no backend). Supabase, TMDB and real auth are not started.
 
 > Status key: **[LOCKED]** = decided, build to it. **[DEFAULT]** = recommended, assumed unless overruled. **[LATER]** = explicitly not in the first build.
 
-### Changelog from v0.1
+### Changelog v0.4 (from v0.3)
+- **Couples only.** The product is for two people. Solo, Duo and Long-Distance personas are removed (§3, §4.1). People you watch with who are not your partner are **Guest companions**.
+- **Tonight rebuilt around two lists**: **Our list** (shared) and **My list** (private to you). The picker shows the film's blurb, explains each mode, and has separate actions for *Watch this tonight*, *Add to Our list* and *Save to My list* (§6.7).
+- **Together hero redesigned**: a quiet sofa with no pattern, and **our shelf in miniature** beside it. Click it to open the full Shared Shelf at `/together/shelf` (§6.6).
+- **Shelf layout fix**: the cabinet now lays itself out from the space it actually has, so it holds together when the case panel is open (§8.9).
+
+### Changelog v0.3 (from v0.2)
+- **Vocabulary restored** to the original set: Companion, Shared Shelf, The Usual, The Order, Sealed Take, Boxset, Rotation (§4). The tab is **Together** again.
+- **Personas are product terms**: onboarding asks "How do you watch?" with Solo, The Couple, The Duo, Long-Distance Pair (§4.1, §6.1).
+- **One typeface**: a single grotesk in different weights. No serif, no script, no condensed (§8.3).
+- **Welcome screen**: the TV sits centre stage with the room (a wall of shelves, a lamp) behind it (§6.1).
+- **Eyebrow headers removed** from screens; labels only where a form needs them (§8.1).
+- **Shelves tightened**: consistent row height, objects stand on boards, spine text fits (§8.4).
+- **Site map and architecture added** (§7).
+
+### Changelog v0.2 (from v0.1)
 - New 9-colour palette adopted (§8.2); dark ("Espresso") is the home theme.
 - **Auth is email + password**, stored in Supabase (§6.1). Magic link removed.
 - **TV shows are in v1** (§6.14). A season is a case, like a DVD season set.
@@ -38,38 +53,47 @@ Every film or season you watch becomes a **case on your shelf**, a warm, tactile
 6. **Nothing shouts.** Calm motion, no streaks, no guilt notifications.
 7. **Plain words.** If a new user has to ask what a label means, rename it.
 
-## 3. Audience [LOCKED]
+## 3. Audience [LOCKED, narrowed in v0.4]
 
-| Persona | Description | Core need |
-|---|---|---|
-| **The Couple** (primary) | Partners with a regular movie night | A shared record of their nights; pick something without arguing |
-| **The Duo** | Best friends / siblings / roommates with a ritual | Same, with a "we've watched N together" history |
-| **The Solo Cinephile** | Letterboxd-style logger who sometimes watches with others | A better-looking diary; tag who they watched with |
-| **The Long-Distance Pair** | Watching in sync over a call | Shared shelf and planning from afar |
+**Couples.** Two people who watch films together, most commonly partners, who want a shared record of those nights and an easier way to choose the next one.
 
-v1 optimises for the Couple and the Duo. Groups of 3+ work via multiple companion tags but get no special design.
+| Who | Need |
+|---|---|
+| **The couple** (the only account type) | A shared shelf of what they have watched together; a private shelf each; a shared list and a fair way to pick the next film |
+| **The person with a guest** | Occasionally watching with family or friends. These are **Guest companions**: a name on a case, no account, no shelf |
 
-## 4. Vocabulary [LOCKED, simplified]
+Out of scope for v1: solo-first accounts, groups of three or more, long-distance features such as synchronised play. Nothing in the data model prevents adding them later.
 
-Rule: use words people already know. Anything "clever" must be self-explanatory in context, and the first-run UI explains each term once, inline.
+## 4. Vocabulary [LOCKED, restored in v0.3]
 
-| Term shown to users | Meaning | Replaces (v0.1) |
-|---|---|---|
-| **Shelf** | Your collection of cases | (same) |
-| **Case** | One film, or one season of a show, shown as a DVD case | (same) |
-| **Watch** | One viewing. First time = "Watch"; again = **"Rewatch"** | (same + Rewatch) |
-| **Rewatch** | A repeat viewing of something already on your shelf. Always labelled | new |
-| **With** | The person or people you watched with | "Companion" |
-| **Us** | The shared space between you and a person you've linked with | "Shared Shelf / Together" |
-| **Tonight** | Your shared "to watch" list and the "help us pick" tool | (same) |
-| **Snacks** | What you ate and drank during the watch | "The Order" |
-| **Secret ratings** | You each rate privately, then reveal together | "Sealed Take" |
-| **Your Usual** | The one person you pin as your main watch partner | "The Usual" (as a pair concept) |
-| **Guest** | A person you watched with who has no account yet | "Guest companion" |
-| **Lists** | Hand-made groups of films | "Boxset" ([LATER]) |
-| **Year in Review** | End-of-year summary ([LATER]) | "Rotation" |
+The original vocabulary is back. To keep it friendly, each term is explained once in context (first use, plus a tooltip), and every term is a normal English word.
 
-Internally (code, database) we may keep the old names; user-facing copy uses only the table above.
+| Term | Meaning |
+|---|---|
+| **Case** | One film, or one season of a show, shown as a DVD case. The atomic unit. |
+| **Shelf** | Your collection of cases. |
+| **Watch** | One viewing. |
+| **Rewatch** | A repeat viewing of something already on your shelf. Always labelled, never silent. |
+| **Companion** | The person you watched with. A registered user (own account, own shelf) or a Guest. |
+| **Guest companion** | A person with no account yet: a name on your cases. |
+| **Together** | The area of the app for your Companions and what you share with each. |
+| **Shared Shelf** | The merged shelf of two linked users: everything watched together. |
+| **The Usual** | A pair's designated ritual, with its own name ("Sunday nights") and its own Shared Shelf and stats. |
+| **Your Usual** | The one Companion you pin as your main watch partner. |
+| **Tonight** | The shared "to watch" list and the picker. |
+| **The Order** | What you ate and drank during the watch. |
+| **Sealed Take** | Each person rates privately; the ratings are revealed together. |
+| **Boxset** | A hand-made group of films ([LATER]). |
+| **Rotation** | The year in review, e.g. "Your Rotation, 2026" ([LATER] as a shareable card; the stats view exists in v1). |
+| **Mood match / Roulette / Both said yes** | The three ways Tonight picks a title. |
+
+### 4.1 Couples only
+There is no "How do you watch?" step. An account has **at most one linked partner** (**Your Usual**). Anyone else you watch with is a Guest companion. Onboarding invites your partner (skippable); until they accept, Together shows an invite state and the app works as a private diary.
+
+| Added in v0.4 | Meaning |
+|---|---|
+| **Our list** | The shared to-watch list. Either of you can add or remove. |
+| **My list** | Your private to-watch list. Your partner keeps their own. Titles on both My lists count as "Both said yes". |
 
 ## 5. Scope
 
@@ -78,8 +102,8 @@ Internally (code, database) we may keep the old names; user-facing copy uses onl
 - Search and metadata for **movies and TV** (TMDB)
 - **Log a Watch** incl. **Rewatch** handling, with person, date, rating, note, snacks, setting, mood
 - **DVD-case shelf** UI (shelf view, grid view, flip-open case)
-- **Us** space: shared shelf between two linked accounts
-- **Secret ratings** and reveal
+- **Together** space: shared shelf between two linked accounts
+- **Sealed Take** and reveal
 - **Tonight**: shared list + "help us pick"
 - Title detail page with watch history
 - Simple stats on profile and per pair
@@ -114,17 +138,21 @@ Public follower counts, algorithmic "trending", ads, selling user data, streaks 
 
 **Where data lives:** everything (accounts, profiles, cases, watches, queue, notifications) is in the same **Supabase Postgres** project. Profile details sit in our own `profiles` table linked to the auth user ID. Row-level security makes each user's data private to them and the people they've explicitly linked with.
 
-**Onboarding (3 short steps, all skippable):**
-1. Display name + `@handle`
+**Welcome screen:** a wood-cased TV centred in the viewport, with the room behind it (a wall of shelves full of spines, an arc lamp). The tagline and sign-in are on the TV screen itself, so the first thing a visitor sees is the product, not a form below a hero.
+
+**Onboarding (3 short steps, on the TV):**
+1. Display name, `@handle`, email, password
 2. Pick a spine colour (from the palette)
-3. "Who do you usually watch with?" Invite one person by link/email, or skip.
+3. **Invite your partner** by link or email, or skip
 
 **Profile:** display name, handle, avatar, short bio, privacy setting.
 **Account deletion and full data export (JSON/CSV)** in Settings. [LOCKED]
 
-### 6.2 Linking with people ("With" and "Us") [LOCKED]
+### 6.2 Linking with your partner [LOCKED]
 
-- **Everyone who links has their own account, their own shelf, their own ratings.** Linking creates a mutual connection and unlocks the shared **Us** space; it never merges accounts.
+**v0.4:** an account links to **one** partner. The text below about "people" applies to that one link plus Guest companions.
+
+- **Everyone who links has their own account, their own shelf, their own ratings.** Linking creates a mutual connection and unlocks the shared **Together** space; it never merges accounts.
 - **Invite** by shareable link, handle or email. Both sides must accept.
 - **Guests:** for people without an account, type a name ("Mum", "Jess"). Guests appear on your cases but have no shelf. If the guest later signs up, you can invite them to claim those past cases; nothing transfers without their consent.
 - Pin one person as **Your Usual**.
@@ -141,7 +169,7 @@ One sheet. Only the title is required. Order top to bottom:
 3. **When** (default Today; Last night; date picker)
 4. **Rating** (half-stars, 0.5–5, optional)
 5. **Note** (500-character soft limit, optional)
-6. **Snacks** (free text chips with suggestions from your past snacks)
+6. **The Order** (free text chips with suggestions from your past snacks)
 7. **Where** (Couch · Cinema · Outdoors · Video call · Bed · Other)
 8. **Mood** (up to 3: cosy, tense, laughed, cried, fell asleep, rewatch-worthy, never again)
 
@@ -168,28 +196,45 @@ Drafts autosave locally.
 - **Sort:** date watched, rating, title, release year, person. **Filter:** movies/shows, person, year, genre, rating, where, mood, Rewatches only.
 - **Wear:** cases you've rewatched look slightly more handled (softer corners, faint scuffs). Decorative only. [DEFAULT]
 
-### 6.5 Secret ratings [LOCKED]
+### 6.5 Sealed Take [LOCKED]
 - After a watch with a linked person, each of you gets a private prompt: rating + one-line take.
 - Neither sees the other's until **both submit**, or 48 hours pass, or either taps "Reveal now".
 - Reveal moment: the two takes appear side by side on the case back. Copy is warm and a little wry ("You were half a star apart"), never judgemental.
 - Optional, skippable, off-switchable in Settings.
 
-### 6.6 Us (shared space) [LOCKED]
-- Per linked person: everything watched together, both of your ratings, shared snacks and moods.
-- Header: "You & Sam · 47 titles · since March 2025".
-- Highlights: first watch together · most-rewatched · biggest disagreement · favourite snack · longest watch.
-- Either person can add to the shared shelf; the other receives it and, if relevant, a secret-rating prompt.
-- Also home to the **Secret ratings inbox** (anything waiting for you).
+### 6.6 Together and the Shared Shelf [LOCKED]
+- **Hero:** a calm room: a plain sofa with the two of you on it, one pendant light, a wood floor. **Our shelf in miniature** stands beside the sofa with a brass "Open our shelf" plate. Clicking it opens the full Shared Shelf.
+- **Shared Shelf page** (`/together/shelf`): the full cabinet (or grid) of every case you have watched together, with Films / Shows / Rewatches filters. Opening a case shows both ratings.
+- Header: "You & Sam", titles, hours, "since March 2025", and **The Usual** ritual name ("Sunday nights", renamable).
+- **Sealed Take** card appears here when your partner has sealed theirs and you have not.
+- Highlights as ticket stubs: first one, most rewatched, biggest disagreement, usual order, longest sit.
+- Either person can add a case to the Shared Shelf; the other receives it and, if relevant, a Sealed Take prompt.
 
-### 6.7 Tonight [LOCKED]
-- **Shared list:** both people add titles; each shows who added it.
-- **Help us pick** (three modes, one screen):
-  1. *We both want these*: overlaps first.
-  2. *Surprise us*: random from the list with a disc-spin animation.
-  3. *In the mood*: choose a mood and time available; suggestions come from TMDB genres/runtime and your list.
-- **One veto each** per round.
-- Choosing a title starts a draft Watch that you finish logging afterwards.
-- For shows, Tonight can also hold **"Currently watching together"** with a simple "up to S2 E4" marker.
+### 6.7 Tonight [LOCKED, rebuilt in v0.4]
+
+**Goal:** make it obvious what the lists are, what the picker does, and what each button commits you to.
+
+**Two lists**
+- **Our list**: shared with your partner. Either of you can add or remove. Each row shows who added it.
+- **My list**: only you can see it. Your partner has their own. A title that is on both My lists gets a "Partner wants this too" marker on yours (and nothing else about their list is revealed).
+- Add to either list from Tonight, from a case, or from the picker. A title can be moved from My list to Our list.
+
+**Picker** (one screen, three modes, each explained in a sentence under the switch)
+1. **Both said yes**: titles on both My lists, or that you both added to Our list.
+2. **Roulette**: a random title from Our list.
+3. **Mood match**: choose a mood and how long you have; searches both lists plus a few suggestions.
+
+**What you see when it picks:** cover, title, year, director, runtime, genres, **the blurb**, and why it was chosen.
+
+**What each button does** (shown under the result, with a one-line explainer)
+- **Watch this tonight**: makes it tonight's pick. A banner appears ("Tonight: Parasite"); **We finished it** opens the log sheet with it filled in; **Not this one** clears it.
+- **Add to Our list** / **Save to My list**: keeps it for later without choosing it.
+- **Veto**: skips it and picks again. One veto each per round; **Start a new round** resets.
+- **Another**: picks again with no veto spent.
+
+**Other**
+- A collapsible "How Tonight works" is open by default for new users and remembers when closed.
+- **Currently watching together** keeps a simple "up to S1 E4" marker for shows.
 - No calendar integration in v1.
 
 ### 6.8 Title page [LOCKED]
@@ -197,7 +242,7 @@ Drafts autosave locally.
 - **Your history:** your watches and Rewatches, who with, your notes.
 - **Together history:** when you've watched it with a linked person.
 - Actions: **Log a Watch**, **Add to Tonight**.
-- No public reviews. A linked person's rating is visible only through Us/secret-rating reveal.
+- No public reviews. A linked person's rating is visible only through Us/Sealed Take reveal.
 
 ### 6.9 Profile and stats [LOCKED]
 - Public profile **off by default**; linked people see what you choose to share. Opt-in public URL.
@@ -214,7 +259,7 @@ Drafts autosave locally.
 
 ### 6.12 Notifications [LOCKED]
 - In-app, email, and push when installed.
-- Only these: invite received, secret-rating request, reveal ready, someone added to Tonight.
+- Only these: invite received, Sealed Take request, reveal ready, someone added to Tonight.
 - Never: "log your movie", streak nudges, marketing without opt-in. Each type individually toggleable.
 
 ### 6.13 Privacy and safety [LOCKED]
@@ -237,27 +282,83 @@ Shows are in v1. The DVD metaphor is a natural fit: **a season is a case, like a
 - **Stats:** counted in hours and as "seasons" separately from films.
 - Data source: TMDB TV endpoints (shows, seasons, episode counts).
 
-## 7. Information architecture [LOCKED, simplified]
+## 7. Information architecture, site map and architecture
 
-Goal: fewest taps to the two things people do most, which are **log something** and **look at the shelf**, with the intimate part (Us) always one tap away.
+### 7.1 Navigation [LOCKED]
+Goal: fewest taps to the two things people do most, which are **log something** and **look at the shelf**, with the intimate part (Together) always one tap away.
+
+- **Mobile:** bottom bar `Shelf · Together · (+) · Tonight`. Search and the profile avatar live in the top bar.
+- **Desktop:** left rail with the same four items; a persistent search field; the open case docks on the right.
+- Maximum two taps to any main screen; one tap to start a log.
+
+### 7.2 Site map
 
 ```
-Top bar (always):   [The Usual wordmark]        [Search]  [Avatar → Me]
-Bottom bar (mobile) / left rail (desktop):
+SIGNED OUT
+/                       Welcome: the TV, centre stage
+ ├─ sign in
+ ├─ forgot password
+ └─ create account (on the TV, 3 steps)
+      details → spine colour → invite your partner
 
-   Shelf        Us        ( + )        Tonight
+SIGNED IN
+/shelf                  Shelf (cabinet view · grid view; filter, sort)
+ └─ /shelf/:caseId      Case dock (front · open · back · disc · watch history)
+/together               Together: you and your partner (sofa, our shelf in miniature, Sealed Take, highlights)
+ └─ /together/shelf      Our shelf: the full Shared Shelf (cabinet or grid)
+/tonight                Tonight: Our list · My list · picker (Both said yes / Roulette / Mood match) · tonight's pick · currently watching
+/me                     Me: Rotation (stats) · settings · import · export · sign out
+/title/:type/:id        Title page (movie or show, all seasons you own) [production route]
 
-Shelf   → shelf / grid views → case (opens)
-Us      → people you're linked with → shared shelf per person
-          → secret ratings waiting for you
-+       → Log a Watch (sheet)
-Tonight → shared list → help us pick
-Me      → profile, stats, settings, import/export
+GLOBAL (available everywhere)
+(+)  Log a Watch        sheet; includes the Rewatch prompt
+/    Search             overlay: your shelf · elsewhere (TMDB) · Companions
+     Toasts, notifications
+
+LATER
+/boxsets · /boxsets/:id        Boxsets
+/rotation/:year                 Rotation share card
+/u/:handle                      Opt-in public profile
 ```
 
-- Three tabs plus one central button. Search and profile live in the top bar so the bar stays calm.
-- Maximum two taps to reach any main screen; maximum one tap to start a log.
-- Intimacy cues in the structure: **Us** has equal billing with your own Shelf; the "Your Usual" person is pre-selected as "With" in the log sheet.
+In the prototype the case dock and sheets are overlays on one page; in production each gets a real URL so back/forward and shareable links work.
+
+### 7.3 Application architecture [DEFAULT]
+
+```
+ Browser (mobile web / desktop web / installed PWA)
+   Next.js App Router, TypeScript, Tailwind tokens from §8.2
+   ├─ Server components: title pages, shelf shell (fast first paint)
+   ├─ Client components: case 3D, Log sheet, Tonight picker, Sealed Take reveal
+   └─ Service worker: offline shell, push notifications
+        │                              │
+        ▼                              ▼
+ Next.js route handlers / server actions        TMDB API (search, titles, seasons)
+   ├─ validate input (zod)                       └─ cached in `titles` / `seasons`;
+   ├─ call TMDB, cache results                      images hotlinked from TMDB CDN
+   ├─ enforce rules the database cannot
+   │    (Rewatch decision, Sealed Take reveal timing)
+   └─ send email via Resend
+        │
+        ▼
+ Supabase
+   ├─ Auth (email + password; verification; reset)
+   ├─ Postgres  ← source of truth, with row-level security on every table
+   ├─ Realtime  ← Sealed Take "both submitted" and Tonight list updates
+   └─ Storage   ← avatars only
+```
+
+**Key decisions**
+1. **Postgres is the source of truth; RLS is the privacy model.** A Watch is readable only by the case owner and Companions tagged on it with an active link. The client can never be trusted to filter.
+2. **A Case is per user.** Two people who watch together each own a Case and a Watch; they are linked by `watch_people`. That is why unlinking never deletes anyone's memories, and why the Shared Shelf is a *query*, not a copy.
+3. **Rewatch is a server rule**, derived from existing Watches on the Case, never typed by the user.
+4. **Sealed Take** values stay hidden until both rows exist (or 48 h pass). The reveal is computed server-side; the client only receives the partner's value after the condition is met.
+5. **TMDB is cached, not mirrored.** Store the fields we show; refresh on a schedule; respect attribution and licensing (§10.4).
+6. **Realtime only where it earns its keep:** Sealed Take reveals, Tonight list edits, invite acceptance.
+7. **Covers:** posters from TMDB; a generated cover (palette plus title type) when one is missing. The 3D case is CSS transforms, no WebGL.
+
+### 7.4 Prototype architecture (what exists today)
+One `index.html`: CSS tokens and components, an in-memory store persisted to `localStorage`, string-template views, hash routing, and event delegation. Mock data stands in for Supabase and TMDB. Each function (cover, spine, case, shelf layout, log sheet, Sealed Take, picker) maps to a production component, so the prototype is the design reference, not throwaway.
 
 ## 8. Visual and interaction design
 
@@ -281,7 +382,7 @@ Me      → profile, stats, settings, import/export
 - Irregularity: spines of slightly different heights and thicknesses, cases leaning, rewatched cases a little worn.
 - Hand-set typography with a clear hierarchy and generous whitespace.
 - Copy that sounds like a person: short, dry, specific.
-- Iridescence is a **material**, not a background: only on disc surfaces, a foil edge on a case, and the secret-rating reveal. It never fills a page or a button.
+- Iridescence is a **material**, not a background: only on disc surfaces, a foil edge on a case, and the Sealed Take reveal. It never fills a page or a button.
 
 ### 8.2 Colour palette [LOCKED, provided by owner]
 
@@ -314,12 +415,15 @@ Me      → profile, stats, settings, import/export
 - Brushed Copper on Cinema Cream ≈ 2.8:1 — **fails for text**; in light mode use Oxblood for accent text and Copper for non-text only.
 - Oxblood on Cinema Cream ≈ 9:1 — good for text and buttons.
 
-### 8.3 Typography [DEFAULT, final choice made in the prototype]
-- **Display:** a warm, characterful serif that feels like film titling, not a trend font. Candidates to test: *Gloock* and *Young Serif*. No Playfair Display (overused).
-- **Interface/body:** a humanist sans with some personality. Candidates: *Figtree*, *Familjen Grotesk*, *Public Sans*. Not Inter.
-- **Spines:** a condensed sans in tracked caps (e.g. *Barlow Condensed*), like printed spine labels.
-- **Handwritten:** a restrained script only on snack and note snippets, used sparingly.
-- Final selection happens during the case prototype; the choice is locked after the owner approves.
+### 8.3 Typography [LOCKED in v0.3]
+**One grotesk, many weights. No serif, no script, no condensed.**
+- Family: **Schibsted Grotesk** (variable, weights 400–900, with italic). It is one CSS variable, so it can be swapped in one line if we find a better match.
+- Titles and display: 700–800, tight tracking (about −0.03em).
+- Body: 400–500.
+- Labels, tabs, buttons: 600, small, uppercase, moderate tracking.
+- Spines: 700 uppercase, sized to fit the spine (long titles get taller spines instead of tiny text).
+- Handwritten notes: the same family in italic 500, never a script face.
+- Rating and numbers: 700.
 
 ### 8.4 The case component [LOCKED]
 - Front ratio about 135 × 190 mm; film spine ~14 mm; **season-set spine slightly thicker** to differ from a film.
@@ -333,7 +437,7 @@ Me      → profile, stats, settings, import/export
 
 ### 8.5 Motion [LOCKED]
 - 250–450 ms, gentle easing, slight overshoot only when a case lands on the shelf.
-- Signature moments: case slides onto shelf, case opens, disc spin (Surprise us), seal-break on secret-rating reveal.
+- Signature moments: case slides onto shelf, case opens, disc spin (Surprise us), seal-break on Sealed Take reveal.
 - Optional soft sounds (case click, disc whir), off by default.
 
 ### 8.6 Layout fundamentals
@@ -346,6 +450,9 @@ In voice and drawn from the world: an empty shelf with one lamp: "Nothing here y
 Warm, brief, a little wry; never saccharine. Examples: "Pick tonight's." · "You two disagreed on this one." · "Same again?" · "Rewatch ×3. Good taste, or a bad habit."
 
 ### 8.9 Mobile-first AND desktop [LOCKED]
+
+**Container-aware layout (v0.4):** the shelf cabinet lays itself out from the width it actually has, not from the screen width. Wide: open doors left and right of the main cabinet, slightly angled. Medium (for example, beside an open case panel): one full-width cabinet with Shows and Lately side by side beneath it. Narrow: everything stacked.
+
 
 Both are first-class. Design the phone first, then design the desktop deliberately; never just scale the phone up.
 
@@ -395,7 +502,7 @@ Both are first-class. Design the phone first, then design the desktop deliberate
 ```
 auth.users        (managed by Supabase: email, hashed password)
 profiles          id (= auth.users.id), handle, display_name, avatar_url, bio, spine_colour, is_public, created_at
-links             id, user_a, user_b, status(pending|active|blocked), a_pins_b, b_pins_a, created_at
+links             id, user_a, user_b, status(pending|active|blocked), a_pins_b, b_pins_a, ritual_name ("Sunday nights"), created_at
 guests            id, owner_id, name, colour, claimed_by_user_id?
 titles            tmdb_id, media_type(movie|tv), title, year, poster_path, runtime, genres[], cached_at
 seasons           title_tmdb_id, season_number, name, episode_count, poster_path
@@ -403,7 +510,8 @@ cases             id, owner_id, tmdb_id, media_type, season_number?, created_at 
 watches           id, case_id, kind(first|rewatch), watched_on, where, snacks[], mood[], note, rating, is_solo
 watch_people      id, watch_id, user_id?, guest_id?
 secret_ratings    id, watch_id, author_id, rating, note, submitted_at, revealed_at
-tonight_items     id, link_id|owner_id, tmdb_id, media_type, season_number?, added_by, vetoed_by?, progress_season?, progress_episode?
+watchlist_items   id, list(ours|mine), owner_id, link_id? (ours only), tmdb_id, media_type, season_number?, added_by, created_at
+tonight_state     link_id, picked_tmdb_id?, vetoes_used, progress_season?, progress_episode?
 notifications     id, user_id, type, payload, read_at
 ```
 - **Row-level security:** a watch is readable only by the case owner and people tagged on it who have an active link.
@@ -434,7 +542,7 @@ Kept for planning, deliberately not implemented now.
 |---|---|
 | New users who link a person in week 1 | ≥ 40% |
 | Watches logged with another person | ≥ 60% |
-| Secret ratings completed by both | ≥ 70% of requested |
+| Sealed Take completed by both | ≥ 70% of requested |
 | Median time to log a Watch | < 25 s |
 | Week-4 retention of linked pairs | ≥ 35% |
 | Letterboxd import usage | ≥ 15% of sign-ups |
@@ -445,7 +553,7 @@ Kept for planning, deliberately not implemented now.
 | 0 – Design | Type + colour testing, **case prototype** (film + season), desktop and mobile layouts, copy | Owner signs off the case prototype |
 | 1 – Foundations | Supabase project, auth (email + password), profiles, TMDB search (movies + TV) | Can sign up, sign in, search |
 | 2 – Core loop | Log a Watch, **Rewatch logic**, shelf + case UI | Can log, rewatch, and view shelf |
-| 3 – Us | Linking, shared shelf, secret ratings | Two testers complete a full reveal |
+| 3 – Us | Linking, shared shelf, Sealed Takes | Two testers complete a full reveal |
 | 4 – Tonight | Shared list, help us pick, show progress | A pair can choose a title |
 | 5 – Polish | Letterboxd import, stats, a11y pass, desktop pass, PWA | Audit passes |
 | 6 – Private beta | 20–50 pairs | Baseline metrics |
@@ -473,5 +581,5 @@ Kept for planning, deliberately not implemented now.
 ## 16. Definition of done for v1
 - All items in §5.1 shipped and passing QA on mobile and desktop.
 - AA accessibility audit passed.
-- A real pair can: sign up → link → pick something in Tonight → log it → exchange secret ratings → see the case on their Us shelf, in under five minutes, without help.
+- A real pair can: sign up → link → pick something in Tonight → log it → exchange Sealed Takes → see the case on their Us shelf, in under five minutes, without help.
 - Every screen passes the §8.1 "avoid" checklist.

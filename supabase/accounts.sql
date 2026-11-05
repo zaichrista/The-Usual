@@ -153,3 +153,23 @@ grant execute on function public.send_invite(uuid) to authenticated;
 grant execute on function public.my_invites() to authenticated;
 grant execute on function public.respond_invite(uuid, boolean) to authenticated;
 grant execute on function public.list_members() to authenticated;
+
+-- 4. A private shelf for each account --------------------------------------
+-- The Together shelf lives in library_state (shared). "Mine" lives here, readable only by its owner.
+create table if not exists public.user_state (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  content jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+alter table public.user_state enable row level security;
+
+drop policy if exists "Read own shelf" on public.user_state;
+create policy "Read own shelf" on public.user_state
+  for select to authenticated using (user_id = auth.uid());
+drop policy if exists "Create own shelf" on public.user_state;
+create policy "Create own shelf" on public.user_state
+  for insert to authenticated with check (user_id = auth.uid());
+drop policy if exists "Update own shelf" on public.user_state;
+create policy "Update own shelf" on public.user_state
+  for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+grant select, insert, update on public.user_state to authenticated;

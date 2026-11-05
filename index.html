@@ -92,8 +92,6 @@ img,svg{display:block;max-width:100%}
 .masthead{border-bottom:1px solid var(--ink);background:var(--bg);position:relative;z-index:20}
 .mast-main{display:flex;align-items:center;gap:16px 30px;padding:16px 0 14px;flex-wrap:wrap}
 .brand{display:flex;align-items:baseline;gap:6px 16px;margin-right:auto;flex-wrap:wrap}
-#libname{font:italic 400 18px/1 var(--serif);color:var(--soft)}
-#libname:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
 .iconbtn{position:relative;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--soft);transition:background .2s,color .2s;padding:0}
 .iconbtn:hover{background:var(--bg2);color:var(--ink)}
 .iconbtn svg{grid-area:1/1;transition:transform .55s var(--ease),opacity .3s}
@@ -110,7 +108,6 @@ img,svg{display:block;max-width:100%}
 .mainnav a:hover,.mainnav button:hover{color:var(--ink)}
 .mainnav [aria-current="page"]{color:var(--ink);border-color:var(--ink)}
 @media (max-width:640px){
-  #libname{display:none}
   .mast-main{padding:12px 0 10px}
   .mainnav{order:3;width:100%;gap:22px;border-top:1px solid var(--rule);padding-top:8px}
 }
@@ -525,6 +522,25 @@ body.selecting .sp{cursor:pointer}
 .members{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 6px}
 .members li{padding:8px 14px;border-radius:999px;background:var(--bg2);font:600 14px/1 var(--sans)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+.shelfsw{display:flex;gap:28px;margin:0 0 6px}
+.shelfsw button{font:600 14px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:14px 0;border-bottom:2px solid transparent}
+.shelfsw button:hover{color:var(--ink)}
+.shelfsw button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.opt{text-transform:none;letter-spacing:0;font-weight:400}
+.sits{display:grid;gap:8px}
+.sitrow{display:flex;gap:14px;align-items:center}
+.sitn{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:600 13px/1 var(--sans);flex:none}
+.sitrow input{width:auto;min-width:11em}
+.lg-sit{display:block;font:400 13px/1.4 var(--sans);color:var(--soft);margin-top:2px}
+details.more>summary{cursor:pointer;font:600 14px/1 var(--sans);color:var(--soft);padding:12px 0;list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"+ "}
+details.more[open]>summary::before{content:"\2212 "}
+details.more>summary:hover{color:var(--ink)}
+details.more>.field{margin-top:14px}
+.members li button{margin-left:6px;font-size:16px;line-height:1;color:var(--soft);padding:2px 4px}
+.members li button:hover{color:var(--danger)}
+.remove-row{display:flex;gap:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -534,7 +550,7 @@ body.selecting .sp{cursor:pointer}
   <div class="wrap">
     <div class="mast-main">
       <div class="brand"><a class="wordmark" href="#/" aria-label="The Usual — home">The <em>Usual</em></a>
-        <button type="button" id="libname" data-act="settings" aria-label="Library settings"></button></div>
+</div>
       <nav class="mainnav" aria-label="Primary">
         <a href="#/" data-nav="shelf">Shelf</a>
         <a href="#/index" data-nav="index">Index</a>
@@ -757,7 +773,7 @@ function norm(it){
   if(!it.added)it.added=it.watches.length?it.watches.map(w=>w.d).sort()[0]:TODAY;
   return it;
 }
-const CATALOGUE=()=>{const m=new Map();[...seedItems(),...CAT_EXTRA.map(norm)].forEach(i=>{if(!m.has(i.id))m.set(i.id,i)});return [...m.values()]};
+const CATALOGUE=()=>{const m=new Map();[...seedItems(),...CAT_EXTRA.map(norm)].forEach(i=>{if(!m.has(i.id))m.set(i.id,norm({...i,watches:[],note:''}))});return [...m.values()]};
 
 /* ============================================================
    STATE
@@ -765,41 +781,85 @@ const CATALOGUE=()=>{const m=new Map();[...seedItems(),...CAT_EXTRA.map(norm)].f
 const KEY='the-usual-v4';
 const S={
   items:[],
-  people:{tim:{n:'Tim',c:'--blue'},jess:{n:'Jess',c:'--mauve'},mum:{n:'Mum',c:'--champagne'}},
-  lib:{a:'Zai',b:'Tim'},partner:'tim',
+  people:{},store:{mine:[],together:[]},shelf:'together',
   theme:document.documentElement.dataset.theme||'light',
   view:'shelf',filter:'all',sort:'added',q:'',isort:{k:'title',d:1},
   cs:{ry:-24,rx:5,open:false},open:null,add:null,landed:null,order:[],cat:null,sel:null
 };
-function save(){
-  tryLS.set(KEY,JSON.stringify({items:S.items,people:S.people,lib:S.lib,partner:S.partner,filter:S.filter,sort:S.sort,isort:S.isort}));
-  queueCloudSave();
+function syncStore(){S.store[S.shelf]=S.items}
+function persistLocal(){
+  syncStore();
+  tryLS.set(KEY,JSON.stringify({v:5,mine:S.store.mine,together:S.store.together,shelf:S.shelf,people:S.people,filter:S.filter,sort:S.sort,isort:S.isort}));
+}
+function save(){persistLocal();queueCloudSave();queueMineSave()}
+/* The seeded guests (Tim, Jess, Mum) are gone from every account. People are added by hand now. */
+const SEEDED_GUESTS=['tim','jess','mum'];
+function scrubGuests(){
+  let changed=false;
+  SEEDED_GUESTS.forEach(k=>{if(S.people[k]){delete S.people[k];changed=true}});
+  [S.store.mine,S.store.together].forEach(arr=>arr.forEach(it=>(it.watches||[]).forEach(w=>{
+    if((w.who||[]).some(k=>SEEDED_GUESTS.includes(k))){w.who=w.who.filter(k=>!SEEDED_GUESTS.includes(k));changed=true}})));
+  if(changed)S.dirty=true;
+  return changed;
 }
 function load(){
+  S.store={mine:[],together:[]};
   const raw=tryLS.get(KEY);
-  if(!raw){S.items=[];return}
-  try{
+  if(raw){try{
     const d=JSON.parse(raw);
-    S.items=Array.isArray(d.items)?d.items.map(norm):[];
-    if(d.people)S.people={...S.people,...d.people};
-    if(d.lib)S.lib={...S.lib,...d.lib};
-    if(d.partner)S.partner=d.partner;
+    const tog=Array.isArray(d.together)?d.together:(Array.isArray(d.items)?d.items:[]);
+    S.store.together=tog.map(norm);
+    S.store.mine=Array.isArray(d.mine)?d.mine.map(norm):[];
+    if(d.shelf==='mine'||d.shelf==='together')S.shelf=d.shelf;
+    if(d.people&&typeof d.people==='object')S.people=d.people;
     if(d.filter)S.filter=d.filter;
     if(d.sort)S.sort=d.sort;
     if(d.isort)S.isort=d.isort;
-  }catch(e){S.items=[]}
+  }catch(e){}}
+  S.items=S.store[S.shelf];
+  if(scrubGuests())persistLocal();
 }
-function cloudContent(){return {items:S.items,people:S.people,lib:S.lib,partner:S.partner,filter:S.filter,sort:S.sort,isort:S.isort}}
+function useShelf(k){
+  if(k===S.shelf)return;
+  syncStore();S.shelf=k;S.items=S.store[k];
+  S.open=null;S.sel=null;S.q='';
+  persistLocal();
+}
+function cloudContent(){syncStore();return {items:S.store.together,people:S.people}}
 function applyCloudContent(d){
   if(!d||typeof d!=='object')return;
-  if(Array.isArray(d.items))S.items=d.items.map(norm);
-  if(d.people)S.people={...S.people,...d.people};
-  if(d.lib)S.lib={...S.lib,...d.lib};
-  if(d.partner)S.partner=d.partner;
-  if(d.filter)S.filter=d.filter;
-  if(d.sort)S.sort=d.sort;
-  if(d.isort)S.isort=d.isort;
-  tryLS.set(KEY,JSON.stringify(cloudContent()));
+  if(Array.isArray(d.items)){S.store.together=d.items.map(norm);if(S.shelf==='together')S.items=S.store.together}
+  if(d.people&&typeof d.people==='object')S.people={...S.people,...d.people};
+  scrubGuests();
+  persistLocal();
+}
+/* the private shelf: one row per account, readable only by its owner */
+let mineReady=false, mineOff=false, mineTimer=null;
+function queueMineSave(){
+  if(!SB||!cloudUser||!mineReady)return;
+  clearTimeout(mineTimer);
+  mineTimer=setTimeout(async()=>{
+    syncStore();
+    const {error}=await SB.from('user_state').upsert({user_id:cloudUser.id,content:{items:S.store.mine},updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    if(error)mineOff=true;
+  },700);
+}
+async function loadMine(){
+  if(!SB||!cloudUser)return;
+  const {data,error}=await SB.from('user_state').select('content').eq('user_id',cloudUser.id).maybeSingle();
+  if(error){mineOff=true;mineReady=false;return}
+  mineOff=false;
+  const remote=data&&data.content&&Array.isArray(data.content.items)?data.content.items:[];
+  if(remote.length){S.store.mine=remote.map(norm);if(S.shelf==='mine')S.items=S.store.mine}
+  mineReady=true;
+  scrubGuests();persistLocal();
+  if(!remote.length&&S.store.mine.length||S.dirty){S.dirty=false;queueMineSave()}
+}
+function claimLocal(){
+  const owner=tryLS.get('the-usual-owner');
+  if(owner&&owner!==cloudUser.id){S.store={mine:[],together:[]};S.people={};S.shelf='together';S.items=S.store.together}
+  tryLS.set('the-usual-owner',cloudUser.id);
+  persistLocal();
 }
 function queueCloudSave(){
   if(!SB||!cloudReady||!cloudLibrary||!cloudUser)return;
@@ -815,6 +875,7 @@ async function activateCloudLibrary(id,preferRemote=true){
   if(error){cloudMessage='Could not load your shared library: '+error.message;return}
   if(preferRemote&&data&&data.content&&Object.keys(data.content).length)applyCloudContent(data.content);
   cloudReady=true; await loadMembers();
+  if(S.dirty){S.dirty=false;queueCloudSave()}
   if(!preferRemote||!data||!data.content||!Object.keys(data.content).length)queueCloudSave();
   if(cloudChannel)SB.removeChannel(cloudChannel);
   cloudChannel=SB.channel('library-'+id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'library_state',filter:'library_id=eq.'+id},payload=>{
@@ -872,14 +933,17 @@ function syncInvitePoll(){
     await loadInvites();if(gateOpen())renderGate()},12000)}
   else if(!need&&invPoll){clearInterval(invPoll);invPoll=0}
 }
-function clearAccount(){cloudProfile=null;cloudInvites=[];cloudMembers=[];userHits=[];userQ='';syncInvitePoll()}
+function clearAccount(){mineReady=false;mineOff=false;cloudProfile=null;cloudInvites=[];cloudMembers=[];userHits=[];userQ='';syncInvitePoll()}
 async function findCloudLibrary(){
   if(!SB||!cloudUser)return;
+  claimLocal();
   await loadAccount();
   const {data,error}=await SB.from('library_members').select('library_id').eq('user_id',cloudUser.id).maybeSingle();
   if(error){cloudMessage='Could not check library membership: '+error.message;refreshCloudUI();return}
   if(data)await activateCloudLibrary(data.library_id,true);
   else{cloudLibrary=null;cloudReady=false;cloudMessage='';await loadInvites()}
+  await loadMine();
+  if(S.view)route();
   refreshCloudUI();syncInvitePoll();
 }
 function userResultsHTML(){
@@ -926,7 +990,9 @@ const lastDate=it=>{const w=lastW(it);return w?w.d:''};
 const latestR=it=>{const w=wsorted(it).filter(x=>x.r);return w.length?w[w.length-1].r:null};
 const rewatches=it=>Math.max(0,it.watches.length-1);
 const nm=k=>S.people[k]?S.people[k].n:k;
-const withText=w=>w.who.length?'With '+w.who.map(nm).join(' & '):'Just you';
+const sitCount=w=>w.sit&&w.sit.length>1?w.sit.length:1;
+const withShort=w=>{const g=w.who.map(nm).join(' & ');return S.shelf==='together'?(g||'Together'):(g||'Just you')};
+const withText=w=>{const g=w.who.map(nm).join(' & ');return S.shelf==='together'?(g?'Together, with '+g:'Together'):(g?'With '+g:'Just you')};
 const heading=it=>it.type==='series'?`${it.t}, season ${it.s}`:it.t;
 const kindText=it=>it.type==='series'?`Series · Season ${it.s}`:'Film';
 const minsOf=it=>it.type==='series'?(it.eps||1)*(it.min||0):(it.min||0);
@@ -997,7 +1063,6 @@ function spineHTML(it,o={}){
    SHELL
    ============================================================ */
 function paintMast(){
-  $('#libname').textContent=`the library of ${S.lib.a}${S.lib.b?' & '+S.lib.b:''}`;
   const tb=$('#btn-theme');tb.setAttribute('aria-label',S.theme==='dark'?'Evening light. Switch to daylight':'Daylight. Switch to evening');tb.title=S.theme==='dark'?'Switch to daylight':'Switch to evening';
   $$('[data-nav]').forEach(a=>{if(a.dataset.nav===S.view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
 }
@@ -1048,16 +1113,20 @@ function deckText(){
   if(!seen)return hl('waiting',`${cap(words(wait))} ${wait===1?'title':'titles'}, <em>all still in the wrapper.</em>`);
   return `${hl('all',`${cap(words(seen))} ${seen===1?'title':'titles'}`)} on the shelf${wait?`, <em>${hl('waiting',`and ${words(wait)} still in the wrapper.`)}</em>`:'.'}`;
 }
+function shelfSwitchHTML(){
+  return `<div class="shelfsw" role="group" aria-label="Which shelf"><button type="button" data-act="shelf" data-v="mine" aria-pressed="${S.shelf==='mine'}">Mine</button><button type="button" data-act="shelf" data-v="together" aria-pressed="${S.shelf==='together'}">Together</button></div>`;
+}
 function sinceText(){
   if(!S.items.length)return 'Nothing kept yet.';
   const first=S.items.map(i=>i.added).sort()[0];
-  return `Kept by ${esc(S.lib.a)}${S.lib.b?' &amp; '+esc(S.lib.b):''} since ${fmtMonth(first)}.`;
+  return `${S.shelf==='together'?'Kept together':'Kept'} since ${fmtMonth(first)}.`;
 }
 function viewShelf(){
   $('#view').innerHTML=`<div class="wrap">
     <div class="stage">
       <div class="rail">
         <div class="rail-main">
+          ${shelfSwitchHTML()}
           <section class="deck"><h1 id="deck-h">${deckText()}</h1><p>${sinceText()}</p></section>
           ${controlsHTML()}
           <button type="button" class="tlink pull" data-act="pull">Pull one out at random</button>
@@ -1153,7 +1222,7 @@ function fillBelow(){
   el.innerHTML=(S.items.length?`
     <div class="figures">
       <div class="fig"><b>${seen.length}</b><span>On the shelf</span></div>
-      <div class="fig"><b>${all.length}</b><span>Evenings</span></div>
+      <div class="fig"><b>${all.reduce((a,x)=>a+sitCount(x.w),0)}</b><span>Evenings</span></div>
       <div class="fig"><b>${Math.round(mins/60)}</b><span>Hours together</span></div>
       <div class="fig"><b>${re}</b><span>Returns</span></div>
     </div>`:'')+
@@ -1173,7 +1242,8 @@ function refreshHeader(){
 function viewIndex(){
   const cols=[['title','Title'],['year','Year'],['format','Format'],['last','Last watched'],['with','With'],['rating','Rating']];
   $('#view').innerHTML=`<div class="wrap">
-    <section class="deck"><h1>Everything we keep, <em>in plain type.</em></h1></section>
+    ${shelfSwitchHTML()}
+    <section class="deck"><h1>Everything ${S.shelf==='together'?'we':'I'} keep, <em>in plain type.</em></h1></section>
     ${controlsHTML()}
     <table class="idx"><thead><tr>${cols.map(([k,l])=>`<th scope="col" class="${['format','with'].includes(k)?'hide-s':''}" ${S.isort.k===k?`aria-sort="${S.isort.d>0?'ascending':'descending'}"`:''}><button type="button" data-isort="${k}">${l}${S.isort.k===k?(S.isort.d>0?' ↑':' ↓'):''}</button></th>`).join('')}</tr></thead><tbody id="idx-body"></tbody></table>
     <div class="below" id="below"></div>
@@ -1190,7 +1260,7 @@ function fillIndex(){
   $('#idx-body').innerHTML=list.map(i=>{const w=lastW(i),r=latestR(i);return `<tr data-id="${esc(i.id)}" tabindex="0" class="${S.open===i.id?'open':''}">
     <td class="t">${esc(i.t)}<small>${i.status==='waiting'?'Waiting in the wrapper':esc(i.dir||'')}</small></td>
     <td class="n">${i.y||''}</td><td class="hide-s">${i.type==='series'?'Series · S'+i.s:'Film'}</td>
-    <td class="n">${w?fmt(w.d):'—'}</td><td class="hide-s">${w?(w.who.length?esc(w.who.map(nm).join(' & ')):'Just you'):'—'}</td>
+    <td class="n">${w?fmt(w.d):'—'}</td><td class="hide-s">${w?esc(withShort(w)):'—'}</td>
     <td>${r?starsHTML(r):'—'}</td></tr>`}).join('')||`<tr><td colspan="6" style="padding:30px 0;cursor:default"><span class="serif" style="font-size:26px;font-style:italic">Nothing here yet.</span></td></tr>`;
   applyFind();
 }
@@ -1330,12 +1400,12 @@ function renderPanel(){
         <p class="byline">Added ${fmt(it.added)}. Its case, synopsis and details stay sealed until you’ve watched it.</p>
         <div class="pn-acts"><button class="btn" type="button" data-act="log" data-id="${esc(it.id)}">We watched it</button></div>`
       :`<div class="facts">
-          <div><b>${ws.length}</b><span>${ws.length===1?'Evening':'Evenings'}</span></div>
+          <div><b>${ws.reduce((a,w)=>a+sitCount(w),0)}</b><span>${ws.reduce((a,w)=>a+sitCount(w),0)===1?'Evening':'Evenings'}</span></div>
           <div><b>${latestR(it)?rtxt(latestR(it)):'—'}</b><span>Latest rating</span></div>
           <div><b>${hrs}</b><span>Hours</span></div>
         </div>
         <ol class="ledger">${ws.map((w,i)=>{const gi=it.watches.indexOf(w);return `<li>
-          <div class="lg-d"><span class="lg-k">${i===0?'First watch':'Rewatch'}</span><time datetime="${w.d}">${fmt(w.d)}</time></div>
+          <div class="lg-d"><span class="lg-k">${i===0?'First watch':'Rewatch'}</span><time datetime="${w.d}">${fmt(w.d)}</time>${sitCount(w)>1?`<span class="lg-sit">${cap(words(sitCount(w)))} sittings, from ${fmt(w.sit[0])}</span>`:''}</div>
           <div class="lg-b"><p class="lg-who"><span>${esc(withText(w))}</span>${w.r?starsHTML(w.r):''}</p>
             ${w.note?`<p class="lg-note">“${esc(w.note)}”</p>`:''}${w.ate?`<p class="lg-ate">On the table: ${esc(w.ate)}</p>`:''}</div>
           <button type="button" class="lg-x" data-act="rmwatch" data-i="${gi}">Remove this evening</button></li>`}).join('')}</ol>
@@ -1346,7 +1416,7 @@ function renderPanel(){
       <div class="preview">${spineHTML(it,{static:true})}
         <div class="swatches" role="group" aria-label="Spine colour">${SP.map((c,i)=>`<button type="button" class="sw" style="--sb:var(${c.bg})" data-act="col" data-c="${i}" aria-label="${c.n}" aria-pressed="${it.col%SP.length===i}" title="${c.n}"></button>`).join('')}</div></div>
     </section>
-    <div class="remove-row"><button type="button" class="btn line danger" data-act="remove" data-id="${esc(it.id)}">Remove from my shelf</button></div>
+    <div class="remove-row"><button type="button" class="btn line" data-act="move" data-id="${esc(it.id)}">Move to ${S.shelf==='together'?'my shelf':'Together'}</button><button type="button" class="btn line danger" data-act="remove" data-id="${esc(it.id)}">Remove</button></div>
   </div>`;
   p.scrollTop=0;
   const again=kept&&$(`[data-act="${kept}"]`,p);
@@ -1380,6 +1450,31 @@ function removeItems(ids){
     gone.forEach(x=>S.items.splice(Math.min(x.i,S.items.length),0,x.it));save();refreshView()}});
 }
 function removeItem(id){removeItems([id])}
+function moveItem(id){
+  const it=byId(id); if(!it)return;
+  const from=S.shelf, to=from==='together'?'mine':'together';
+  syncStore();
+  if(S.store[to].some(i=>i.id===id||(i.tmdb&&i.tmdb===it.tmdb&&i.s===it.s))){toast('That one is already on the other shelf.');return}
+  const at=S.items.indexOf(it);
+  S.items=S.items.filter(i=>i.id!==id);S.store[from]=S.items;S.store[to].push(it);
+  save();if(S.open===id){S.open=null;closeEntry()}refreshView();
+  toast(`Moved to ${to==='mine'?'your shelf':'Together'}.`,{label:'Undo',fn:()=>{
+    S.store[to]=S.store[to].filter(i=>i.id!==id);
+    const arr=S.store[from];arr.splice(Math.min(at,arr.length),0,it);
+    if(S.shelf===from)S.items=S.store[from];else S.items=S.store[S.shelf];
+    save();refreshView()}});
+}
+function addPerson(name){
+  const n=name.trim().slice(0,40);if(!n)return null;
+  const k=n.toLowerCase().replace(/[^a-z0-9]/g,'')||('p'+Date.now());
+  if(!S.people[k]){const cols=['--mauve','--blue','--champagne','--copper','--gold'];S.people[k]={n,c:cols[Object.keys(S.people).length%cols.length]}}
+  save();return k;
+}
+function removePerson(k){
+  delete S.people[k];
+  [S.store.mine,S.store.together].forEach(arr=>arr.forEach(it=>it.watches.forEach(w=>{w.who=(w.who||[]).filter(x=>x!==k)})));
+  save();refreshView(true);
+}
 function startSelect(){if(S.open)closeEntry();S.sel=new Set();paintSel()}
 function endSelect(){S.sel=null;paintSel()}
 function toggleSel(id){if(!S.sel)return;if(S.sel.has(id))S.sel.delete(id);else S.sel.add(id);paintSel()}
@@ -1437,7 +1532,7 @@ function paintAdd(){
   if(a.tab==='search'){
     pane=`<div class="field"><label class="sr" for="sh-q">Title</label>
         <input id="sh-q" class="bigfield" type="text" autocomplete="off" placeholder="Start typing a title" aria-controls="sh-res" value="${esc(a.q)}"></div>
-      <div class="addrow">${statusSegHTML(a)}<span class="fine">Tap a title to add it. Keep going, or press Done.</span></div>
+      <div class="addrow">${statusSegHTML(a)}<span class="fine">Tap a title to add it.</span></div>
       <ul id="sh-res" class="results" role="listbox" aria-label="Results"></ul>
       <div class="setrow"><button type="button" class="btn" data-act="sheet-close">Done</button></div>`;
   }else{
@@ -1485,7 +1580,7 @@ function resultsHTML(q){
     <span class="cover" style="--cb:var(--bg2);--ci:var(--ink);display:grid;place-items:center;font:400 26px var(--serif);border:1px dashed var(--rule)">+</span>
     <span><b>Add “${esc(nm)}” by hand</b><small>${live?'Not on TMDB':'Not in the starter catalogue'}</small></span><em></em></button></li>`};
   const doneRow=(r,k)=>`<li><div class="res done">${coverHTML(smallPoster(norm(r)))}<span><b>${esc(r.t)}</b><small>${a.status==='waiting'?'Saved for later':'Added'} · ${r.y||''}</small></span>
-    <em><button type="button" class="tlink" data-act="add-details" data-k="${esc(k)}">Add details</button><button type="button" class="tlink" data-act="undo-add" data-k="${esc(k)}">Undo</button></em></div></li>`;
+    <em>${a.status==='seen'?`<button type="button" class="tlink" data-act="add-details" data-k="${esc(k)}">Rate</button>`:''}<button type="button" class="tlink" data-act="undo-add" data-k="${esc(k)}">Undo</button></em></div></li>`;
   let h='';
   if(live){
     const doneIds=Object.values(a.done||{}).map(d=>d.id);
@@ -1536,7 +1631,7 @@ function quickAdd(m,status,date){
   const dup=findDup(m); if(dup)return {dup};
   const tv=m.type==='series';
   const id=m.tmdb?'tmdb-'+m.tmdb+(tv?'-s'+(m.s||1):''):'m-'+title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+(tv?'-s'+(m.s||1):'')+'-'+Math.random().toString(36).slice(2,6);
-  const who=S.lib.b&&S.people[S.partner]?[S.partner]:[];
+  const who=[];
   const it=norm({id,t:title,y:m.y||0,type:m.type||'film',s:m.s,eps:m.eps,min:m.min||0,dir:m.dir||'',gen:m.gen||[],syn:m.syn||'',short:m.short,
     status,watches:status==='seen'?[Wt(date||TODAY,who,null,'','')]:[],added:TODAY,poster:m.poster||'',tmdb:m.tmdb||'',note:''});
   S.items.push(it);
@@ -1544,7 +1639,7 @@ function quickAdd(m,status,date){
 }
 async function pickTmdb(i){
   const a=S.add, r=a&&a.tres[i]; if(!r||a.busy[r.tmdb])return;
-  const have=owned(r); if(have&&!a.done[r.tmdb]){startForm(have,have.id);return}
+  const have=owned(r); if(have&&!a.done[r.tmdb]){openRate(have.id,{wi:null,back:a});return}
   a.busy[r.tmdb]=1; paintResults();
   let meta=r; try{meta=await tmdbDetails(r)}catch(e){}
   delete a.busy[r.tmdb];
@@ -1552,7 +1647,9 @@ async function pickTmdb(i){
   const res=quickAdd(meta,a.status);
   if(res.dup){toast(`${res.dup.t} is already on your shelf.`);paintResults();return}
   save(); a.done[r.tmdb]={id:res.item.id,meta};
-  paintResults(); refreshView(true);
+  refreshView(true);
+  if(a.status==='seen'){openRate(res.item.id,{wi:0,back:a});return}
+  paintResults();
   const q=$('#sh-q'); if(q){q.focus({preventScroll:true});q.select()}
 }
 function undoAdd(k){
@@ -1560,9 +1657,8 @@ function undoAdd(k){
   S.items=S.items.filter(i=>i.id!==d.id); delete a.done[k]; save(); paintResults(); refreshView(true);
 }
 function addDetails(k){
-  const a=S.add, d=a&&a.done[k]; if(!d)return;
-  S.items=S.items.filter(i=>i.id!==d.id); save(); refreshView(true);
-  startForm(d.meta,null);
+  const a=S.add, d=a&&a.done[k]; if(!d||!byId(d.id))return;
+  openRate(d.id,{wi:0,back:a});
 }
 
 /* ---------- paste a list ---------- */
@@ -1650,12 +1746,77 @@ async function impConfirm(){
   if(S.view==='index')viewIndex();else viewShelf();
   toast(`Added ${added} ${added===1?'title':'titles'}${skipped?`, skipped ${skipped} already there`:''}.`);
 }
+function sittingsHTML(d){
+  const multi=d.sit.length>1;
+  return `<span class="lab">${multi?'Sittings':'When'}</span>
+    <div class="sits">${d.sit.map((x,i)=>`<div class="sitrow">${multi?`<span class="sitn">${i+1}</span>`:''}<input type="date" class="f-sit" data-i="${i}" value="${esc(x)}" max="${TODAY}" aria-label="${multi?'Sitting '+(i+1):'Date watched'}">${multi?`<button type="button" class="tlink" data-act="rmsit" data-i="${i}" aria-label="Remove sitting ${i+1}">Remove</button>`:''}</div>`).join('')}</div>
+    <div class="chips">${multi?'':`<button type="button" class="chip" data-act="date" data-v="0">Tonight</button><button type="button" class="chip" data-act="date" data-v="-1">Last night</button>`}<button type="button" class="chip" data-act="addsit">+ Another sitting</button></div>
+    ${multi?'':`<p class="fine">Watched it over more than one night? Add each sitting.</p>`}`;
+}
+function paintSits(){const el=$('#f-when');if(el&&S.add&&S.add.step==='rate')el.innerHTML=sittingsHTML(S.add.d)}
+function openRate(id,opt){
+  opt=opt||{}; const it=byId(id); if(!it)return;
+  const w=opt.wi!=null?it.watches[opt.wi]:null;
+  S.add={step:'rate',id,wi:w?opt.wi:null,back:opt.back||null,
+    d:{sit:w?(w.sit&&w.sit.length?w.sit.slice():[w.d]):[TODAY],who:w?(w.who||[]).slice():[],r:w?(w.r||0):0,note:w?(w.note||''):'',ate:w?(w.ate||''):''}};
+  renderRate();
+}
+function renderRate(){
+  const a=S.add, it=byId(a.id), d=a.d; if(!it)return;
+  const together=S.shelf==='together', persons=Object.entries(S.people);
+  const again=a.wi==null&&it.watches.length>0;
+  openLayer(`<form class="sheet" id="rateform" role="dialog" aria-modal="true" aria-labelledby="sh-h" novalidate>
+    <button type="button" class="sh-x" data-act="rate-skip" aria-label="Close">×</button>
+    <div class="metaline"><div id="f-cover">${coverHTML(smallPoster(it))}</div><div><h2 id="sh-h">How was it?</h2><p class="byline" style="margin-top:6px">${esc(heading(it))} · ${it.y||''}${again?' · another time through':''}</p></div></div>
+    <div class="field"><span class="lab">Your rating</span>
+      <div class="rate"><span class="stars" id="f-rate" role="slider" tabindex="0" aria-label="Rating out of five" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${d.r}" style="--p:${d.r/5*100}%">★★★★★</span><output id="f-rout">${d.r?rtxt(d.r):''}</output><button type="button" class="tlink" data-act="norate">Clear</button></div></div>
+    <div class="field"><label for="f-note">A line to remember it by <span class="opt">optional</span></label><textarea id="f-note" rows="2" placeholder="What did you say afterwards?">${esc(d.note)}</textarea></div>
+    <div class="field" id="f-when">${sittingsHTML(d)}</div>
+    <details class="more"><summary>More details</summary>
+      <div class="field"><span class="lab">${together?'Anyone else there?':'Who was there'}</span>
+        <div class="chips" id="f-who">
+          ${together?'':`<button type="button" class="chip" data-act="who" data-v="" aria-pressed="${!d.who.length}">Just me</button>`}
+          ${persons.map(([k,p])=>`<button type="button" class="chip" data-act="who" data-v="${esc(k)}" aria-pressed="${d.who.includes(k)}">${esc(p.n)}</button>`).join('')}
+          <button type="button" class="chip" data-act="newwho">+ Someone</button>
+          <input id="f-newwho" type="text" hidden placeholder="A name, then Enter" aria-label="New person's name" style="border:0;border-bottom:1px solid var(--soft);background:transparent;font:italic 400 19px var(--serif);width:12em">
+        </div></div>
+      <div class="field"><label for="f-ate">What was on the table</label><input id="f-ate" type="text" value="${esc(d.ate)}" placeholder="tea, a bad idea involving cheese"></div>
+    </details>
+    <div class="formfoot"><button type="submit" class="btn accent">Save</button><button type="button" class="tlink" data-act="rate-skip">${a.wi==null&&!a.back?'Cancel':'Skip for now'}</button></div>
+  </form>`);
+  setTimeout(()=>{const r=$('#f-rate');r&&r.focus({preventScroll:true})},30);
+}
+function syncRate(){
+  const a=S.add; if(!a||a.step!=='rate')return;
+  const g=id=>{const e=$(id);return e?e.value:undefined};
+  a.d.note=g('#f-note')??a.d.note; a.d.ate=g('#f-ate')??a.d.ate;
+  $$('.f-sit').forEach(el=>{a.d.sit[+el.dataset.i]=el.value||TODAY});
+}
+function submitRate(){
+  syncRate();
+  const a=S.add, it=byId(a.id), d=a.d; if(!it)return;
+  const sit=[...new Set(d.sit.filter(Boolean))].sort(); const last=sit[sit.length-1]||TODAY;
+  const w=Wt(last,d.who.slice(),d.r||null,(d.note||'').trim(),(d.ate||'').trim());
+  if(sit.length>1)w.sit=sit;
+  if(a.wi!=null&&it.watches[a.wi])it.watches[a.wi]=w;else it.watches.push(w);
+  it.status='seen';
+  save();
+  const back=a.back;
+  if(back){S.add=back;paintAdd()}else closeLayer();
+  if(S.open===it.id)renderPanel();
+  refreshView(true);
+  if(!back)toast(it.watches.length>1?`Logged. That’s ${words(it.watches.length)} times with ${it.t}.`:`${it.t} is on the shelf.`);
+}
+function rateSkip(){
+  const back=S.add&&S.add.back;
+  if(back){S.add=back;paintAdd()}else closeLayer();
+}
 function startForm(meta,existingId){
   const ex=existingId?byId(existingId):null;
   const base=ex||norm(meta);
   const watched=ex?true:true;
   S.add={step:'form',meta:{...base},exist:ex?ex.id:null,manual:!!meta.manual,
-    d:{status:ex&&ex.status==='waiting'?'seen':'seen',date:TODAY,who:S.lib.b&&S.people[S.partner]?[S.partner]:[],r:0,note:'',ate:'',col:ex?ex.col:base.col,why:''}};
+    d:{status:ex&&ex.status==='waiting'?'seen':'seen',date:TODAY,who:[],r:0,note:'',ate:'',col:ex?ex.col:base.col,why:''}};
   renderForm();
 }
 function renderForm(){
@@ -1798,10 +1959,10 @@ function openSettings(){
     <button type="button" class="sh-x" data-act="sheet-close" aria-label="Close">×</button>
     <h2 id="sh-h">Settings</h2>
     <div class="field"><span class="lab">Account</span>${cloudSettingsHTML()}</div>
-    <div class="two">
-      <div class="field"><label for="s-a">Your name</label><input id="s-a" type="text" value="${esc(S.lib.a)}"></div>
-      <div class="field"><label for="s-b">Who you watch with</label><input id="s-b" type="text" value="${esc(S.lib.b)}" placeholder="optional"></div>
-    </div>
+    <div class="field"><span class="lab">People you watch with</span>
+      ${Object.keys(S.people).length?`<ul class="members" aria-label="People">${Object.entries(S.people).map(([k,p])=>`<li>${esc(p.n)} <button type="button" data-act="rmperson" data-k="${esc(k)}" aria-label="Remove ${esc(p.n)}">×</button></li>`).join('')}</ul>`:''}
+      <div class="addrow"><label class="sr" for="s-newp">Add a name</label><input id="s-newp" type="text" maxlength="40" placeholder="Add a name" style="border:0;border-bottom:1px solid var(--soft);background:transparent;font:italic 400 19px var(--serif);width:12em;padding:6px 0"><button type="button" class="btn line" data-act="addperson">Add</button></div>
+      <p class="fine">They appear as choices when you log a watch. Your Together shelf already counts the two of you.</p></div>
     ${TMDB_BAKED?'':`<div class="field"><label for="s-key">TMDB key</label>
       <input id="s-key" type="password" autocomplete="off" spellcheck="false" placeholder="paste an API key or a read access token" value="${esc(TMDB.key())}">
       <div class="setrow"><button type="button" class="btn line" data-act="key-save">Save and test</button></div></div>`}
@@ -1810,7 +1971,7 @@ function openSettings(){
       <button type="button" class="btn line" data-act="art">Find missing posters</button>
       <button type="button" class="btn line" data-act="export">Download a backup</button></div>
       <p class="fine" id="s-msg" aria-live="polite"></p>
-      <button type="button" class="tlink danger" data-act="empty" style="justify-self:start">Clear the shelf and start again</button></div>
+      <button type="button" class="tlink danger" data-act="empty" style="justify-self:start">Clear this shelf and start again</button>${mineOff?'<p class="fine">Your private shelf is saved on this device only until the database update (accounts.sql) has been run.</p>':''}</div>
     <div class="formfoot"><button type="button" class="btn" data-act="settings-done">Done</button></div>
   </div>`);
 }
@@ -1845,6 +2006,13 @@ document.addEventListener('click',e=>{
   const act=b.dataset.act;
   switch(act){
     case 'add': openAdd();break;
+    case 'shelf': if(b.dataset.v!==S.shelf){if(S.open)closeEntry();useShelf(b.dataset.v);route()}break;
+    case 'move': moveItem(b.dataset.id);break;
+    case 'addperson': {const i=$('#s-newp');if(i&&i.value.trim()){addPerson(i.value);openSettings()}break}
+    case 'rmperson': removePerson(b.dataset.k);openSettings();break;
+    case 'addsit': if(S.add&&S.add.step==='rate'){syncRate();const l=S.add.d.sit[S.add.d.sit.length-1]||TODAY;const n=addDays(l,1);S.add.d.sit.push(n>TODAY?TODAY:n);paintSits()}break;
+    case 'rmsit': if(S.add&&S.add.step==='rate'){syncRate();S.add.d.sit.splice(+b.dataset.i,1);if(!S.add.d.sit.length)S.add.d.sit=[TODAY];paintSits()}break;
+    case 'rate-skip': rateSkip();break;
     case 'select-toggle': if(S.sel)endSelect();else startSelect();break;
     case 'sel-all': if(S.sel){$$('.sp[data-id]:not(.dim),.idx tbody tr[data-id]:not(.dim)').forEach(el=>S.sel.add(el.dataset.id));paintSel()}break;
     case 'sel-remove': if(S.sel&&S.sel.size){const ids=[...S.sel];endSelect();removeItems(ids)}break;
@@ -1873,11 +2041,11 @@ document.addEventListener('click',e=>{
       const el=$(`#cavity .sp[data-id="${CSS.escape(id)}"]`);if(el)el.scrollIntoView({block:'center',behavior:reduceMotion()?'auto':'smooth'});break}
     case 'remove': removeItem(b.dataset.id);break;
     case 'rmwatch': removeWatch(+b.dataset.i);break;
-    case 'log': {const it=byId(b.dataset.id);if(it){S.add=null;startForm(it,it.id)}break}
+    case 'log': {const it=byId(b.dataset.id);if(it){S.add=null;openRate(it.id,{wi:null})}break}
     case 'scrim': if(t===b)closeLayer();break;
     case 'sheet-close': case 'settings-done': closeLayer();break;
     case 'pick-tmdb': pickTmdb(+b.dataset.i);break;
-    case 'pick': {const c=byId(b.dataset.cid)||catalogue().find(x=>x.id===b.dataset.cid);if(!c)break;const have=byId(c.id);startForm(have||c,have?have.id:null);break}
+    case 'pick': {const c=byId(b.dataset.cid)||catalogue().find(x=>x.id===b.dataset.cid);if(!c)break;const have=byId(c.id);if(have)openRate(have.id,{wi:null,back:S.add});else startForm(c,null);break}
     case 'manual': startForm({id:'manual',t:b.dataset.q,y:0,type:'film',min:0,dir:'',gen:[],syn:'',col:hash(b.dataset.q)%SP.length,manual:true,watches:[]},null);break;
     case 'back': if(S.add&&S.add.exist){closeLayer()}else{closeLayer();openAdd()}break;
     case 'fmt': {syncForm();S.add.meta.type=b.dataset.v;$$('[data-act=fmt]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
@@ -1886,7 +2054,7 @@ document.addEventListener('click',e=>{
     case 'status': {S.add.d.status=b.dataset.v;$$('[data-act=status]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
       $('#f-seen').hidden=b.dataset.v!=='seen';$('#f-wait').hidden=b.dataset.v!=='waiting';
       $('#f-go').textContent=b.dataset.v==='seen'?'Put it on the shelf':'Put it in the wrapper';break}
-    case 'date': {const v=addDays(TODAY,+b.dataset.v);$('#f-date').value=v;S.add.d.date=v;break}
+    case 'date': {const v=addDays(TODAY,+b.dataset.v);if(S.add.step==='rate'){S.add.d.sit=[v];paintSits()}else{$('#f-date').value=v;S.add.d.date=v}break}
     case 'who': {const v=b.dataset.v,w=S.add.d.who;
       if(!v){w.length=0}else{const i=w.indexOf(v);i>=0?w.splice(i,1):w.push(v)}
       $$('#f-who [data-act=who]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v?w.includes(x.dataset.v):!w.length)));break}
@@ -1896,7 +2064,7 @@ document.addEventListener('click',e=>{
       $('#f-prev').innerHTML=spineHTML({...S.add.meta,col:i},{static:true});break}
     case 'key-save': saveKey();break;
     case 'art': fetchArt();break;
-    case 'export': {const blob=new Blob([JSON.stringify({exported:TODAY,lib:S.lib,people:S.people,items:S.items},null,2)],{type:'application/json'});
+    case 'export': {const blob=new Blob([JSON.stringify({exported:TODAY,people:S.people,mine:S.store.mine,together:S.store.together},null,2)],{type:'application/json'});
       const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`the-usual-${TODAY}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);break}
     case 'example': if(confirm('Replace your library with the example one? Your current shelf will be lost unless you took a copy.')){S.items=seedItems();save();closeLayer();closeEntry();route();toast('The example library is back.')}break;
     case 'empty': if(confirm('Clear the shelf and start again? This can’t be undone unless you took a copy.')){S.items=[];save();closeLayer();closeEntry();route();toast('A clean shelf. Start with the first one you loved.')}break;
@@ -1911,11 +2079,10 @@ document.addEventListener('input',e=>{
     userT=setTimeout(async()=>{const q=userQ.trim();if(q.length<3){userBusy=false;paintUsers();return}
       const {data,error}=await SB.rpc('search_users',{q});if(userQ.trim()!==q)return;
       userBusy=false;userHits=error?[]:(data||[]);paintUsers()},300)}
+  else if(t.classList&&t.classList.contains('f-sit')){S.add.d.sit[+t.dataset.i]=t.value||TODAY}
   else if(t.id==='imp-text'){S.add.imp.text=t.value}
   else if(t.id==='imp-date'){S.add.imp.date=t.value||TODAY}
   else if(t.id==='find'){S.q=t.value;applyFind()}
-  else if(t.id==='s-a'){S.lib.a=t.value.trim()||'You';save();paintMast();const b=$('.deck p:last-child');if(b&&S.view==='shelf')b.innerHTML=sinceText()}
-  else if(t.id==='s-b'){S.lib.b=t.value.trim();if(S.lib.b&&S.people[S.partner])S.people[S.partner].n=S.lib.b;save();paintMast();const b=$('.deck p:last-child');if(b&&S.view==='shelf')b.innerHTML=sinceText()}
   else if(t.closest('#addform')){syncForm(); if(t.id==='f-t'||t.id==='f-y'||t.id==='f-s'){const p=$('#f-prev');if(p)p.innerHTML=spineHTML({...S.add.meta,col:S.add.d.col},{static:true})}}
 });
 function applySeason(n){
@@ -1937,6 +2104,7 @@ document.addEventListener('change',e=>{
 document.addEventListener('submit',e=>{
   const form=e.target;
   if(form.id==='addform'){e.preventDefault();submitForm();return}
+  if(form.id==='rateform'){e.preventDefault();submitRate();return}
   if(form.id==='cloud-auth'){e.preventDefault();cloudAuthSubmit(form,e.submitter?.dataset.mode||'signin');return}
   if(form.id==='cloud-username'){e.preventDefault();(async()=>{
     const {data,error}=await SB.rpc('set_username',{new_name:$('#cloud-uname').value.trim()});
@@ -1944,7 +2112,7 @@ document.addEventListener('submit',e=>{
     cloudMessage='';cloudProfile={off:false,username:data};await loadInvites();refreshCloudUI();syncInvitePoll();
   })();return}
   if(form.id==='cloud-create'){e.preventDefault();(async()=>{
-    const {data,error}=await SB.rpc('create_library',{library_name:(S.lib.a+(S.lib.b?' & '+S.lib.b:'')).slice(0,80)||'Our library'});
+    const {data,error}=await SB.rpc('create_library',{library_name:(cloudProfile&&cloudProfile.username?cloudProfile.username+'’s library':'Our library').slice(0,80)});
     if(error){cloudMessage=error.message;refreshCloudUI();return}
     await activateCloudLibrary(data,false);route();refreshCloudUI();
   })();return}
@@ -1963,10 +2131,10 @@ document.addEventListener('keydown',e=>{
   }
   if(t.id==='f-newwho'&&e.key==='Enter'){
     e.preventDefault();const n=t.value.trim();if(!n)return;
-    const k=n.toLowerCase().replace(/[^a-z0-9]/g,'')||('p'+Date.now());
-    if(!S.people[k]){const cols=['--mauve','--blue','--champagne','--copper','--gold'];S.people[k]={n,c:cols[Object.keys(S.people).length%cols.length]}}
-    syncForm();const d=S.add.d;if(!d.who.includes(k))d.who.push(k);save();
-    const keep={...S.add};renderForm();return;
+    const k=addPerson(n);
+    if(S.add.step==='rate'){syncRate();if(!S.add.d.who.includes(k))S.add.d.who.push(k);renderRate();const m=$('details.more');if(m)m.open=true;return}
+    syncForm();const d=S.add.d;if(!d.who.includes(k))d.who.push(k);
+    renderForm();return;
   }
   if(t.id==='sh-q'&&e.key==='Enter'){const f=$('#sh-res button.res[data-act="pick-tmdb"]')||$('#sh-res button.res');if(f){e.preventDefault();f.click()}return}
   if(t.classList&&t.classList.contains('case-stage')){

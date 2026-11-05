@@ -624,6 +624,18 @@ details.more>summary{min-height:44px;display:flex;align-items:center}
   .rate .stars{font-size:40px;letter-spacing:6px}
   .sheet h2{font-size:32px}
 }
+
+/* ---------- where to watch ---------- */
+.avail .pv-l{font:600 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:12px 0 8px}
+.pvs{display:flex;flex-wrap:wrap;gap:8px}
+.pv{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 7px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--soft);
+  font:600 14px/1.2 var(--sans);color:var(--ink);text-decoration:none}
+.pv:hover{background:var(--bg2)}
+.pv img{width:30px;height:30px;border-radius:7px;flex:none}
+.pv.bob{display:grid;gap:2px;margin-top:14px;padding:10px 14px;border-radius:12px;background:var(--bg2);box-shadow:none;max-width:34em}
+.pv.bob b{letter-spacing:.04em}
+.pv.bob small{font:400 14px/1.4 var(--sans);color:var(--soft)}
+.pv-credit{margin-top:12px}
 </style>
 </head>
 <body>
@@ -728,6 +740,54 @@ async function tmdbSearch(q){
   const rank=r=>{const t=sortKey((r.media_type==='tv'?r.name:r.title)||'').replace(/[^a-z0-9]/g,'');
     return (t===nq?100:t.startsWith(nq)?30:0)+Math.min(r.popularity||0,150)*.4+((r.vote_count||0)>300?25:0)};
   return d.results.filter(r=>(r.media_type==='movie'||r.media_type==='tv')).sort((a,b)=>rank(b)-rank(a)).slice(0,10).map(tmdbToItem);
+}
+/* ---------- where to watch (TMDB / JustWatch) ---------- */
+const REGIONS=[['GB','United Kingdom'],['IE','Ireland'],['US','United States'],['CA','Canada'],['AU','Australia'],['NZ','New Zealand'],['DE','Germany'],['FR','France'],['ES','Spain'],['IT','Italy'],['NL','Netherlands'],['SE','Sweden']];
+const region=()=>tryLS.get('the-usual-region')||'GB';
+const provMem={};
+async function providersFor(it){
+  const rg=region();
+  let tid=it.tmdb;
+  if(!tid){const m=await matchEntry({t:it.t,y:it.y||0});if(!m||!m.item)return {none:true,rg};tid=m.item.tmdb}
+  const key=tid+'|'+rg;
+  if(provMem[key])return provMem[key];
+  let cache={};try{cache=JSON.parse(tryLS.get('the-usual-prov2')||'{}')}catch(e){}
+  if(cache[key]&&Date.now()-cache[key].t<864e5){provMem[key]=cache[key].v;return cache[key].v}
+  const [kind,id]=tid.split('-');
+  const d=await TMDB.get(`/${kind}/${id}/watch/providers`);
+  const r=(d.results||{})[rg];
+  const base=n=>n.replace(/ (Amazon|Apple TV) Channel$/,'');
+  const slim=a=>{const seen=new Set(),out=[];
+    [...(a||[])].sort((x,y)=>(base(x.provider_name)!==x.provider_name)-(base(y.provider_name)!==y.provider_name)).forEach(x=>{
+      const b=base(x.provider_name);if(seen.has(b))return;seen.add(b);
+      const via=b!==x.provider_name;out.push({n:via?b+' (via '+(/Amazon/.test(x.provider_name)?'Amazon':'Apple TV')+')':x.provider_name,l:x.logo_path||''})});
+    return out};
+  const v=r?{rg,link:r.link,stream:slim(r.flatrate),free:slim([...(r.free||[]),...(r.ads||[])]),rent:slim([...(r.rent||[]),...(r.buy||[])])}:{rg,none:true};
+  provMem[key]=v;cache[key]={t:Date.now(),v};
+  try{tryLS.set('the-usual-prov2',JSON.stringify(cache))}catch(e){}
+  return v;
+}
+const regionName=rg=>(REGIONS.find(x=>x[0]===rg)||[rg,rg])[1];
+function availHTML(v,compact){
+  const chip=x=>`<a class="pv" href="${esc(v.link||'https://www.justwatch.com')}" target="_blank" rel="noopener">${x.l?`<img src="https://image.tmdb.org/t/p/w92${esc(x.l)}" alt="" width="30" height="30" loading="lazy">`:''}<span>${esc(x.n)}</span></a>`;
+  const group=(label,arr)=>arr&&arr.length?`<p class="pv-l">${label}</p><div class="pvs">${arr.map(chip).join('')}</div>`:'';
+  let h='';
+  if(v&&v.err)h+=`<p class="fine">Couldn’t check streaming just now.</p>`;
+  else if(!v||v.none||(!v.stream.length&&!v.free.length&&!v.rent.length))h+=`<p class="fine">Not on any streaming service in the ${esc(regionName(v&&v.rg||region()))} right now.</p>`;
+  else{
+    h+=group('Streaming',v.stream)+group('Free',v.free);
+    if(v.rent.length)h+=`<p class="pv-l">Rent or buy</p><p class="fine">${esc(v.rent.map(x=>x.n).join(', '))}</p>`;
+  }
+  if(region()==='GB')h+=`<a class="pv bob" href="https://learningonscreen.ac.uk/ondemand/" target="_blank" rel="noopener"><span><b>BoB</b> · Box of Broadcasts</span><small>Free with a UK university login. Search for it there.</small></a>`;
+  return h+(compact?'':`<p class="fine pv-credit">Streaming data from JustWatch, via TMDB.</p>`);
+}
+async function fillAvail(it,sel,compact){
+  const el=$(sel); if(!el)return;
+  el.innerHTML=`<p class="fine">Checking where to watch…</p>`;
+  let v;
+  try{v=TMDB.on()?await providersFor(it):{none:true,rg:region()}}catch(e){v={err:true,rg:region()}}
+  const el2=$(sel); if(!el2||el2.dataset.for!==it.id)return;
+  el2.innerHTML=availHTML(v,compact);
 }
 async function tmdbDetails(it){
   const tid=it.tmdb.split('-')[1];
@@ -1337,7 +1397,7 @@ function fillBelow(){
     (pick.length?`<section class="margins" aria-label="Lines you wrote"><div class="quotes">
       ${pick.map(({i,w})=>`<button type="button" class="quote" data-id="${esc(i.id)}"><q>${esc(w.note)}</q><cite>${esc(heading(i))} · ${w.who.length?'with '+esc(w.who.map(nm).join(' & '))+' · ':''}${fmtMonth(w.d)}</cite></button>`).join('')}
     </div></section>`:'')+
-    `<div class="foot"><span>Film and series data and images from TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></div>`;
+    `<div class="foot"><span>Film and series data and images from TMDB. Streaming availability from JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</span></div>`;
 }
 function refreshHeader(){
   const h=$('#deck-h'); if(h)h.innerHTML=deckText();
@@ -1524,9 +1584,11 @@ function renderPanel(){
       <div class="preview">${spineHTML(it,{static:true})}
         <div class="swatches" role="group" aria-label="Spine colour">${SP.map((c,i)=>`<button type="button" class="sw" style="--sb:var(${c.bg})" data-act="col" data-c="${i}" aria-label="${c.n}" aria-pressed="${it.col%SP.length===i}" title="${c.n}"></button>`).join('')}</div></div>
     </section>
+    <section class="pn-sec avail" aria-label="Where to watch"><h3>Available at</h3><div id="avail" data-for="${esc(it.id)}"></div></section>
     <div class="remove-row"><button type="button" class="btn line" data-act="move" data-id="${esc(it.id)}">Move to ${S.shelf==='together'?'my shelf':'Together'}</button><button type="button" class="btn line danger" data-act="remove" data-id="${esc(it.id)}">Remove</button></div>
   </div>`;
   p.scrollTop=0;
+  fillAvail(it,'#avail');
   const again=kept&&$(`[data-act="${kept}"]`,p);
   if(again)again.focus({preventScroll:true});else if(!wasOpen){p.focus({preventScroll:true})}
 }
@@ -1884,8 +1946,10 @@ function paintTonight(spin){
       <div><p class="byline">${esc(kindText(it))}${it.y?' · '+it.y:''}${it.min?' · '+it.min+' min':''}${it.dir?' · '+esc(it.dir):''}</p>
       ${syn?`<p class="syn" style="font-size:16px;margin-top:8px">${esc(syn)}</p>`:''}
       ${it.note?`<p class="byline" style="margin-top:8px">“${esc(it.note)}”</p>`:''}</div></div>
+    <div class="avail"><p class="pv-l" style="margin-top:0">Available at</p><div id="t-avail" data-for="${esc(it.id)}"></div></div>
     <div class="formfoot"><button type="button" class="btn accent" data-act="tonight-yes" data-id="${esc(id)}">We watched it</button><button type="button" class="btn line" data-act="tonight-again">${t.pool.length>1?'Pick another':'Close'}</button></div>
   </div>`);
+  fillAvail(it,'#t-avail',true);
   if(t.pool.length<2){const b=$('[data-act=tonight-again]');if(b)b.setAttribute('data-act','sheet-close')}
   if(spin&&!reduceMotion()&&t.pool.length>1){
     const h=$('#sh-h');let n=0;
@@ -2122,6 +2186,9 @@ function openSettings(){
     ${TMDB_BAKED?'':`<div class="field"><label for="s-key">TMDB key</label>
       <input id="s-key" type="password" autocomplete="off" spellcheck="false" placeholder="paste an API key or a read access token" value="${esc(TMDB.key())}">
       <div class="setrow"><button type="button" class="btn line" data-act="key-save">Save and test</button></div></div>`}
+    <div class="field"><label for="s-region">Where you watch</label>
+      <select id="s-region">${REGIONS.map(([c,n])=>`<option value="${c}" ${region()===c?'selected':''}>${n}</option>`).join('')}</select>
+      <p class="fine">Decides which streaming services are shown on each title.</p></div>
     <div class="field"><span class="lab">Your shelf</span><div class="setrow">
       <button type="button" class="btn line" data-act="open-import">Import a list</button>
       <button type="button" class="btn line" data-act="art">Find missing posters</button>
@@ -2256,6 +2323,7 @@ function applySeason(n){
   if(pv)pv.innerHTML=spineHTML({...m,col:a.d.col},{static:true});
 }
 document.addEventListener('change',e=>{
+  if(e.target.id==='s-region'){tryLS.set('the-usual-region',e.target.value);toast('Streaming services will show for '+regionName(e.target.value)+'.');return}
   if(e.target.id==='f-season'){applySeason(+e.target.value);return}
   if(e.target.id==='imp-file'){const f=e.target.files&&e.target.files[0];if(!f||!S.add)return;
     f.text().then(tx=>{const ta=$('#imp-text');if(!ta)return;ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+tx;S.add.imp.text=ta.value});return}

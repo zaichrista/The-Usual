@@ -130,6 +130,9 @@ h1,h2,h3,p{margin:0}
 .cov .ph small{display:block;font-weight:400;color:var(--ink2);margin-top:4px;font-size:11px}
 .bd{position:absolute;top:6px;left:6px;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,.9);color:#1d1f1d;line-height:1.5}
 .bd.r{left:auto;right:6px}
+.pst{position:absolute;left:0;right:0;bottom:0;padding:16px 4px 6px;text-align:center;z-index:2;cursor:pointer;background:linear-gradient(transparent,rgba(0,0,0,.55));touch-action:manipulation}
+.pst .stars{font-size:19px;letter-spacing:2px;--line2:rgba(255,255,255,.5);filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+body.selecting .pst{display:none}
 .tile.wait .cov img{opacity:.5;filter:saturate(.6)}
 .tile.wait .cov{box-shadow:none;outline:1.5px dashed var(--line2);outline-offset:-1.5px}
 .tl-t{display:block;font-weight:500;font-size:13.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -221,7 +224,6 @@ body.selecting .row .chk{display:grid}
 
 /* stars + rating */
 .stars{display:inline-block;line-height:1;font-size:14px;letter-spacing:1px;background:linear-gradient(90deg,var(--star) var(--p,0%),var(--line2) var(--p,0%));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;user-select:none;-webkit-user-select:none}
-.heart{color:var(--deep);margin-left:6px}
 .rate{display:flex;align-items:center;gap:14px}
 .rate .stars{font-size:42px;letter-spacing:5px;touch-action:none;cursor:pointer;padding:4px 0}
 .rate output{font-weight:600;min-width:2.4ch;font-size:18px}
@@ -479,8 +481,8 @@ const tryLS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},se
 const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
 const TODAY=iso(new Date());
 const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)};
-const fmt=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-const fmtMonth=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+const fmt=d=>!d?'Undated':new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+const fmtMonth=d=>!d?'undated':new Date(d+'T12:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 const W20=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 const TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
 const words=n=>n<20?W20[n]:n<100?TENS[Math.floor(n/10)]+(n%10?'-'+W20[n%10]:''):String(n);
@@ -722,8 +724,9 @@ function seedItems(){
 function norm(it){
   it=JSON.parse(JSON.stringify(it));
   it.watches=it.watches||[];
+  if(it.status==='archive'){it.status='seen';if(!it.watches.length)it.watches=[Wt('',[],null)]}
   if(it.col==null||isNaN(it.col))it.col=hash(it.id)%SP.length;
-  if(!it.added)it.added=it.watches.length?it.watches.map(w=>w.d).sort()[0]:TODAY;
+  if(!it.added)it.added=it.watches.map(w=>w.d).filter(Boolean).sort()[0]||TODAY;
   return it;
 }
 const CATALOGUE=()=>{const m=new Map();[...seedItems(),...CAT_EXTRA.map(norm)].forEach(i=>{if(!m.has(i.id))m.set(i.id,norm({...i,watches:[],note:''}))});return [...m.values()]};
@@ -986,7 +989,7 @@ async function cloudAuthSubmit(form,mode){
    DERIVED
    ============================================================ */
 const byId=id=>S.items.find(i=>i.id===id);
-const wsorted=it=>it.watches.slice().sort((a,b)=>a.d.localeCompare(b.d));
+const wsorted=it=>it.watches.slice().sort((a,b)=>(a.d||'').localeCompare(b.d||''));
 const lastW=it=>{const w=wsorted(it);return w[w.length-1]};
 const lastDate=it=>{const w=lastW(it);return w?w.d:''};
 const latestR=it=>{const w=wsorted(it).filter(x=>x.r);return w.length?w[w.length-1].r:null};
@@ -1010,7 +1013,7 @@ function myKey(){return (cloudProfile&&cloudProfile.username)||'me'}
 function partnerOf(){const me=myKey();const m=(cloudMembers||[]).find(x=>x.username&&!x.is_me&&x.username!==me);return m?{key:m.username,name:cap(m.username)}:null}
 function rname(k){return k===myKey()?'You':cap(k)}
 function coupleLabel(){const ms=(cloudMembers||[]).filter(m=>m.username);return ms.length<2?'':ms.slice(0,2).map(m=>cap(m.username)).join(' & ')}
-const fmtShort=d=>{const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+const fmtShort=d=>{if(!d)return 'Undated';const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
 
 /* ============================================================
    v2 INTERFACE — everything below here is new.
@@ -1037,14 +1040,14 @@ const SORTFN={
   watched:(a,b)=>lastDate(b).localeCompare(lastDate(a)),
   rating:(a,b)=>(latestR(b)||0)-(latestR(a)||0)
 };
-const passFilter=it=>S.filter==='all'||(S.filter==='film'&&it.type==='film')||(S.filter==='series'&&it.type==='series')||(S.filter==='waiting'&&it.status==='waiting')||(S.filter==='archive'&&it.status==='archive');
+const passFilter=it=>S.filter==='all'||(S.filter==='film'&&it.type==='film')||(S.filter==='series'&&it.type==='series')||(S.filter==='waiting'&&it.status==='waiting')||(S.filter==='archive'&&it.status==='seen'&&it.watches.some(w=>!w.d));
 const visible=()=>S.items.filter(it=>passFilter(it)&&matches(it,S.q.trim()));
 function arranged(){
   const list=visible(), f=SORTFN[S.sort];
   const order=l=>f?l.slice().sort(f):l.slice().reverse();
   return {seen:order(list.filter(i=>i.status==='seen'||i.status==='archive')),wait:order(list.filter(i=>i.status==='waiting'))};
 }
-function counts(){return {all:S.items.length,film:S.items.filter(i=>i.type==='film').length,series:S.items.filter(i=>i.type==='series').length,waiting:S.items.filter(i=>i.status==='waiting').length,archive:S.items.filter(i=>i.status==='archive').length}}
+function counts(){return {all:S.items.length,film:S.items.filter(i=>i.type==='film').length,series:S.items.filter(i=>i.type==='series').length,waiting:S.items.filter(i=>i.status==='waiting').length,archive:S.items.filter(i=>i.status==='seen'&&i.watches.some(w=>!w.d)).length}}
 
 /* ---------- icons ---------- */
 const ic=(p,w=22,sw=1.7)=>`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -1095,7 +1098,7 @@ function coverHTML(it,extra=''){
 }
 const starsHTML=r=>`<span class="stars" style="--p:${(r||0)/5*100}%" role="img" aria-label="${r?r+' out of 5':'Not rated'}">★★★★★</span>`;
 function ratingsHTML(w){
-  const rs=w.rs&&Object.keys(w.rs).length?w.rs:null, heart=w.love?'<span class="heart" title="Loved it" aria-label="Loved it">♥</span>':'';
+  const rs=w.rs&&Object.keys(w.rs).length?w.rs:null, heart='';
   if(!rs)return w.r?`<span class="rbox"><span class="rrow">${starsHTML(w.r)}<b>${rtxt(w.r)}</b>${heart}</span></span>`:(heart?`<span class="rbox"><span class="rrow">${heart}</span></span>`:'');
   const keys=Object.keys(rs);
   let tag='';
@@ -1198,9 +1201,22 @@ function agoHTML(){
     <span class="ago-t"><small>${lead}</small><b>${esc(heading(it))}</b><em>${esc(withText(w))}</em>${w.note?`<q>${esc(w.note)}</q>`:''}</span></button>`;
 }
 const cols=()=>innerWidth>=720?4:3;
+function setPosterRate(id,v){
+  const it=byId(id);if(!it||it.status!=='seen'||!it.watches.length)return;
+  const w=lastW(it),k=myKey(),cur=rateOf(w,k,k)||0;
+  if(v===cur)v=0;
+  if(w.rs&&Object.keys(w.rs).length){if(v)w.rs[k]=v;else delete w.rs[k];const vals=Object.values(w.rs);w.r=vals.length?Math.round(vals.reduce((x,y)=>x+y,0)/vals.length*2)/2:null}
+  else w.r=v||null;
+  save();refreshView();
+}
+const posterStars=it=>{
+  if(it.status!=='seen'||!it.watches.length)return '';
+  const w=lastW(it),r=rateOf(w,myKey(),myKey())||0;
+  return `<span class="pst" data-act="pstars" data-id="${esc(it.id)}" role="slider" tabindex="0" aria-label="Your rating for ${esc(it.t)}, out of five" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${r}"><span class="stars" style="--p:${r/5*100}%">★★★★★</span></span>`;
+};
 function tileHTML(it){
   const r=latestR(it), wait=it.status==='waiting', arch=it.status==='archive', n=rewatches(it);
-  const badges=(it.type==='series'?`<span class="bd">S${it.s}</span>`:'')+(n?`<span class="bd r">×${n+1}</span>`:'')+`<span class="chk">${ICON.check}</span>`;
+  const badges=(it.type==='series'?`<span class="bd">S${it.s}</span>`:'')+(n?`<span class="bd r">×${n+1}</span>`:'')+`<span class="chk">${ICON.check}</span>`+posterStars(it);
   return `<button type="button" class="tile ${wait?'wait':''}" data-act="open" data-id="${esc(it.id)}" aria-label="${esc(heading(it))}, ${it.y||''}${wait?', to watch':arch?', undated':r?', rated '+r:''}">
     <div class="cw">${coverHTML(it,badges)}</div>
     <span class="tl-t">${esc(it.t)}</span>
@@ -1221,7 +1237,7 @@ function fillGrid(){
 }
 function fillBelow(){
   const el=$('#below');if(!el)return;
-  const notes=S.items.filter(i=>i.status==='seen').flatMap(i=>i.watches.map(w=>({i,w}))).filter(x=>x.w.note).sort((a,b)=>b.w.d.localeCompare(a.w.d));
+  const notes=S.items.filter(i=>i.status==='seen').flatMap(i=>i.watches.map(w=>({i,w}))).filter(x=>x.w.note).sort((a,b)=>(b.w.d||'').localeCompare(a.w.d||''));
   const pick=[],used=new Set();
   for(const n of notes){if(!used.has(n.i.id)){used.add(n.i.id);pick.push(n);if(pick.length===3)break}}
   el.innerHTML=(pick.length?`<section class="mem" aria-label="Lines you wrote"><h2>Lines you wrote</h2>${pick.map(({i,w})=>`<button type="button" class="quote" data-act="open" data-id="${esc(i.id)}"><q>${esc(w.note)}</q><cite>${esc(heading(i))} · ${w.who.length?'with '+esc(w.who.map(nm).join(' & '))+' · ':''}${fmtMonth(w.d)}</cite></button>`).join('')}</section>`:'')
@@ -1248,15 +1264,14 @@ const peakR=it=>Math.max(0,...it.watches.map(w=>Math.max(w.r||0,...Object.values
 function lovedBy(it,ks){
   const out=new Set();
   it.watches.forEach(w=>{
-    if(w.love)ks.forEach(k=>out.add(k));
-    if(w.rs&&Object.keys(w.rs).length){ks.forEach(k=>{if((w.rs[k]||0)>=4.5)out.add(k)})}
-    else if((w.r||0)>=4.5)ks.forEach(k=>out.add(k));
+    if(w.rs&&Object.keys(w.rs).length){ks.forEach(k=>{if((w.rs[k]||0)>=4)out.add(k)})}
+    else if((w.r||0)>=4)ks.forEach(k=>out.add(k));
   });
   if(!out.size)ks.forEach(k=>out.add(k));
   return out;
 }
 const hasMood=(it,m)=>!m||it.watches.some(w=>(w.mood||[]).includes(m));
-const isLoved=it=>it.status==='seen'&&(peakR(it)>=4.5||it.watches.some(w=>w.love));
+const isLoved=it=>it.status==='seen'&&peakR(it)>=4;
 async function seedTmdb(it){
   if(it.tmdb)return it.tmdb;
   try{const m=await matchEntry({t:it.t,y:it.y||0});return m&&m.item&&m.item.tmdb||''}catch(e){return ''}
@@ -1287,7 +1302,7 @@ function seedOk(sd,t,p){
   if(t==='them')return sd.shelf==='together'&&sd.who.has(p.key);
   return sd.shelf==='together'&&sd.who.has(myKey())&&sd.who.has(p.key);
 }
-const discSig=()=>{syncStore();return [S.store.together,S.store.mine].map(a=>a.filter(isLoved).map(i=>i.id+peakR(i)+i.watches.map(w=>(w.love?'l':'')+(w.mood||[]).join('')).join(',')).join('|')).join('||')+'#'+(partnerOf()?'p':'')};
+const discSig=()=>{syncStore();return [S.store.together,S.store.mine].map(a=>a.filter(isLoved).map(i=>i.id+peakR(i)+i.watches.map(w=>(w.mood||[]).join('')).join(',')).join('|')).join('||')+'#'+(partnerOf()?'p':'')};
 async function loadDiscover(){
   const seeds=discSeeds();
   const D=S.disc={seeds,recs:[],busy:true,err:'',sig:discSig()};
@@ -1298,7 +1313,7 @@ async function loadDiscover(){
   await Promise.all(seeds.map(async sd=>{
     try{
       const it=sd.it,tid=await seedTmdb(it);if(!tid)return;
-      const w=.6+peakR(it)/5*.4+(it.watches.some(x=>x.love)?.15:0);
+      const w=.6+peakR(it)/5*.4;
       (await recsFor(tid)).forEach(r=>{const k=r.kind+'-'+r.id;let e=agg.get(k);if(!e){e={r,k,seeds:[],who:new Set(),score:0};agg.set(k,e)}
         if(!e.seeds.some(x=>x.it.id===it.id)){e.seeds.push(sd);sd.who.forEach(x=>e.who.add(x));e.score+=w}});
     }catch(e){failed++}
@@ -1338,7 +1353,7 @@ function fillDiscover(){
   const list=(D.recs||[]).filter(e=>dseeds(e).length);
   if(D.busy){el.innerHTML='<p class="fine" style="margin-top:28px">Looking through your favourites…</p>';return}
   if(D.err){el.innerHTML=`<div class="hollow"><h2>${esc(D.err)}</h2></div>`;return}
-  if(!D.seeds.length){el.innerHTML=`<div class="hollow"><h2>Nothing to go on yet</h2><p>Rate something 4.5 stars or higher, or tap “Loved it” on a watch, and recommendations will appear here.</p></div>`;return}
+  if(!D.seeds.length){el.innerHTML=`<div class="hollow"><h2>Nothing to go on yet</h2><p>Rate something 4 stars or higher and recommendations will appear here.</p></div>`;return}
   el.innerHTML=(list.length?`<div class="dlist">${list.map(dcardHTML).join('')}</div>`:`<div class="hollow"><h2>Nothing here</h2><p>Try another taste or mood.</p></div>`)
     +'<p class="credit">Recommendations from TMDB.</p>';
 }
@@ -1366,7 +1381,7 @@ function profileFor(who){
   syncStore();
   const pr=partnerOf(),me=who==='me',key=me?myKey():(pr?pr.key:''),name=me?'You':(pr?pr.name:'They');
   const pool=(me?S.store.together.concat(S.store.mine):S.store.together).filter(i=>i.status==='seen');
-  const best=it=>Math.max(0,...it.watches.map(w=>Math.max(rateOf(w,key,me),w.love?4.75:0)));
+  const best=it=>Math.max(0,...it.watches.map(w=>rateOf(w,key,me)));
   const scored=pool.map(it=>({it,r:best(it)}));
   const top=scored.filter(x=>x.r>0).sort((a,b)=>b.r+b.it.watches.length*.05-(a.r+a.it.watches.length*.05)||lastDate(b.it).localeCompare(lastDate(a.it))).slice(0,5).map(x=>x.it);
   const mins=pool.reduce((a,i)=>a+i.watches.length*minsOf(i),0);
@@ -1650,7 +1665,7 @@ function quickAdd(m,status,date){
   const tv=m.type==='series';
   const id=m.tmdb?'tmdb-'+m.tmdb+(tv?'-s'+(m.s||1):''):'m-'+title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+(tv?'-s'+(m.s||1):'')+'-'+Math.random().toString(36).slice(2,6);
   const it=norm({id,t:title,y:m.y||0,type:m.type||'film',s:m.s,eps:m.eps,min:m.min||0,dir:m.dir||'',gen:m.gen||[],syn:m.syn||'',short:m.short,
-    status,watches:status==='seen'?[Wt(date||TODAY,[],null,'','')]:[],added:TODAY,poster:m.poster||'',tmdb:m.tmdb||'',note:''});
+    status:status==='archive'?'seen':status,watches:status==='seen'?[Wt(date||TODAY,[],null,'','')]:status==='archive'?[Wt('',[],null)]:[],added:TODAY,poster:m.poster||'',tmdb:m.tmdb||'',note:''});
   S.items.push(it);
   return {item:it};
 }
@@ -1795,9 +1810,11 @@ async function impConfirm(){
 /* ---------- rate / log a watch ---------- */
 function sittingsHTML(d){
   const multi=d.sit.length>1;
+  if(d.undated)return `<span class="lab">When</span>
+    <div class="chips"><button type="button" class="chip" data-act="undated" aria-pressed="true">Undated</button><button type="button" class="chip" data-act="date" data-v="0">Pick a date</button></div>`;
   return `<span class="lab">${multi?'Sittings':'When'}</span>
     <div class="field" style="margin:0">${d.sit.map((x,i)=>`<div class="setrow" style="flex-wrap:nowrap">${multi?`<span class="lab" style="width:16px">${i+1}</span>`:''}<input type="date" class="f-sit" data-i="${i}" value="${esc(x)}" max="${TODAY}" aria-label="${multi?'Sitting '+(i+1):'Date watched'}">${multi?`<button type="button" class="tlink" data-act="rmsit" data-i="${i}" aria-label="Remove sitting ${i+1}">Remove</button>`:''}</div>`).join('')}</div>
-    <div class="chips">${multi?'':`<button type="button" class="chip" data-act="date" data-v="0">Tonight</button><button type="button" class="chip" data-act="date" data-v="-1">Last night</button>`}<button type="button" class="chip" data-act="addsit">+ Another sitting</button></div>`;
+    <div class="chips">${multi?'':`<button type="button" class="chip" data-act="date" data-v="0">Tonight</button><button type="button" class="chip" data-act="date" data-v="-1">Last night</button>`}<button type="button" class="chip" data-act="addsit">+ Another sitting</button>${multi?'':`<button type="button" class="chip" data-act="undated" aria-pressed="false">Undated</button>`}</div>`;
 }
 function paintSits(){const el=$('#f-when');if(el&&S.add&&S.add.step==='rate')el.innerHTML=sittingsHTML(S.add.d)}
 function openRate(id,opt){
@@ -1805,7 +1822,7 @@ function openRate(id,opt){
   const w=opt.wi!=null?it.watches[opt.wi]:null;
   const rs=w?(w.rs&&Object.keys(w.rs).length?{...w.rs}:(w.r?{[myKey()]:w.r}:{})):{};
   S.add={step:'rate',id,wi:w?opt.wi:null,back:opt.back||null,
-    d:{sit:w?(w.sit&&w.sit.length?w.sit.slice():[w.d]):[TODAY],who:w?(w.who||[]).slice():[],rs,love:w?!!w.love:false,mood:w?(w.mood||[]).slice():[],note:w?(w.note||''):'',ate:w?(w.ate||''):''}};
+    d:{undated:!!(w&&!w.d),sit:w?(w.sit&&w.sit.length?w.sit.slice():[w.d||TODAY]):[TODAY],who:w?(w.who||[]).slice():[],rs,mood:w?(w.mood||[]).slice():[],note:w?(w.note||''):'',ate:w?(w.ate||''):''}};
   renderRate();
 }
 function renderRate(){
@@ -1817,7 +1834,6 @@ function renderRate(){
     <div class="metaline"><div style="width:64px;flex:none">${coverHTML(smallPoster(it))}</div><div><h2 id="sh-h">${partner?'How was it, you two?':'How was it?'}</h2><p class="byline">${esc(heading(it))} · ${it.y||''}${again?' · another time':''}</p></div></div>
     ${raters.map(r=>`<div class="field"><span class="lab">${esc(r.label)}</span>
       <div class="rate"><span class="stars" data-rk="${esc(r.k)}" role="slider" tabindex="0" aria-label="${esc(r.label)}, out of five" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${d.rs[r.k]||0}" style="--p:${(d.rs[r.k]||0)/5*100}%">★★★★★</span><output>${d.rs[r.k]?rtxt(d.rs[r.k]):''}</output><button type="button" class="tlink" data-act="norate" data-rk="${esc(r.k)}">Clear</button></div></div>`).join('')}
-    <div class="chips"><button type="button" class="chip" data-act="love" aria-pressed="${!!d.love}">♥ ${partner?'We loved it':'Loved it'}</button></div>
     <div class="field"><span class="lab">How did it feel?</span><div class="chips" id="f-mood">${MOODS.map(([k,l])=>`<button type="button" class="chip" data-act="mood" data-v="${k}" aria-pressed="${d.mood.includes(k)}">${l}</button>`).join('')}</div></div>
     <div class="field"><label class="lab" for="f-note">A line to remember it by</label><textarea id="f-note" rows="2" placeholder="${partner?'What did you two say afterwards?':'What did you say afterwards?'}">${esc(d.note)}</textarea></div>
     <div class="field" id="f-when">${sittingsHTML(d)}</div>
@@ -1843,11 +1859,11 @@ function syncRate(){
 function submitRate(){
   syncRate();
   const a=S.add, it=byId(a.id), d=a.d; if(!it)return;
-  const sit=[...new Set(d.sit.filter(Boolean))].sort(); const last=sit[sit.length-1]||TODAY;
+  const sit=d.undated?[]:[...new Set(d.sit.filter(Boolean))].sort(); const last=d.undated?'':(sit[sit.length-1]||TODAY);
   const rs={};Object.entries(d.rs).forEach(([k,v])=>{if(v>0)rs[k]=v});
   const vals=Object.values(rs), avg=vals.length?Math.round(vals.reduce((x,y)=>x+y,0)/vals.length*2)/2:null;
   const w=Wt(last,d.who.slice(),avg,(d.note||'').trim(),(d.ate||'').trim());
-  if(vals.length)w.rs=rs; if(d.love)w.love=true; if(d.mood.length)w.mood=d.mood.slice(); if(sit.length>1)w.sit=sit;
+  if(vals.length)w.rs=rs; if(d.mood.length)w.mood=d.mood.slice(); if(sit.length>1)w.sit=sit;
   if(a.wi!=null&&it.watches[a.wi])it.watches[a.wi]=w;else it.watches.push(w);
   it.status='seen';
   save();
@@ -2038,6 +2054,7 @@ document.addEventListener('click',e=>{
       refreshCloudUI();return}
     if(cloud.dataset.cloud==='invite'){const {data,error}=await SB.rpc('create_library_invite');cloudMessage=error?error.message:'Invite code is ready.';cloudInvite=data||'';refreshCloudUI()}
   })();return}
+  const ps=t.closest('[data-act="pstars"]'); if(ps){const st=ps.querySelector('.stars').getBoundingClientRect();if(S.sel)return;setPosterRate(ps.dataset.id,Math.min(5,Math.max(.5,Math.ceil((e.clientX-st.left)/st.width*10)/2)));return}
   const op=t.closest('[data-act="open"]'); if(op){if(S.sel)toggleSel(op.dataset.id);else openEntry(op.dataset.id);return}
   const f=t.closest('[data-filter]'); if(f){S.filter=f.dataset.filter;save();refreshView();return}
   const b=t.closest('[data-act]'); if(!b)return;
@@ -2095,10 +2112,10 @@ document.addEventListener('click',e=>{
     case 'imp-back': if(S.add){S.add.imp.stage='input';paintAdd()}break;
     case 'rate-skip': rateSkip();break;
     case 'mood': if(S.add&&S.add.step==='rate'){const m=S.add.d.mood,v=b.dataset.v,i=m.indexOf(v);if(i>=0)m.splice(i,1);else m.push(v);b.setAttribute('aria-pressed',String(i<0))}break;
-    case 'love': if(S.add&&S.add.step==='rate'){S.add.d.love=!S.add.d.love;b.setAttribute('aria-pressed',String(S.add.d.love))}break;
     case 'addsit': if(S.add&&S.add.step==='rate'){syncRate();const l=S.add.d.sit[S.add.d.sit.length-1]||TODAY;const n=addDays(l,1);S.add.d.sit.push(n>TODAY?TODAY:n);paintSits()}break;
     case 'rmsit': if(S.add&&S.add.step==='rate'){syncRate();S.add.d.sit.splice(+b.dataset.i,1);if(!S.add.d.sit.length)S.add.d.sit=[TODAY];paintSits()}break;
-    case 'date': {const v=addDays(TODAY,+b.dataset.v);if(S.add&&S.add.step==='rate'){S.add.d.sit=[v];paintSits()}break}
+    case 'date': {const v=addDays(TODAY,+b.dataset.v);if(S.add&&S.add.step==='rate'){S.add.d.undated=false;S.add.d.sit=[v];paintSits()}break}
+    case 'undated': if(S.add&&S.add.step==='rate'){syncRate();S.add.d.undated=true;paintSits()}break;
     case 'who': {const v=b.dataset.v,w=S.add.d.who;
       if(!v){w.length=0}else{const i=w.indexOf(v);i>=0?w.splice(i,1):w.push(v)}
       $$('#f-who [data-act=who]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v?w.includes(x.dataset.v):!w.length)));break}

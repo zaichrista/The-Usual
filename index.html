@@ -343,6 +343,7 @@ dl{margin:32px 0 0}
 .lg-top time{font-weight:600;letter-spacing:-.01em}
 .lg-k{font-size:12px;color:var(--mute)}
 .lg-w{color:var(--ink2);font-size:13.5px;margin-top:4px}
+.dhead{font-size:20px;font-weight:600;letter-spacing:-.02em;margin:22px 0 4px}
 .rsum{margin:22px 0 8px;display:grid;gap:12px;justify-items:center}.rsum .rt{margin:0}.rs-avg{display:grid;justify-items:center;gap:2px}.rs-l{font-size:12px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}.rs-each{display:grid;gap:6px;width:min(280px,100%)}.rs-row{display:flex;align-items:center;gap:10px}.rs-row .stars{font-size:16px;letter-spacing:2px}.rs-row b{font-size:14px}.rs-n{min-width:56px;font-size:13.5px;color:var(--mute)}.rs-none{font-size:13px;color:var(--mute)}
 .rbox{display:inline-grid;gap:4px;margin-top:10px}
 .rrow{display:flex;align-items:center;gap:8px}
@@ -1270,18 +1271,20 @@ function fillList(el){
 }
 
 /* ---------- discover: more like the ones you loved ---------- */
+const DISC_MIN=3.5;
 const peakR=it=>Math.max(0,...it.watches.map(w=>Math.max(w.r||0,...Object.values(w.rs||{}))));
 function lovedBy(it,ks){
   const out=new Set();
   it.watches.forEach(w=>{
-    if(w.rs&&Object.keys(w.rs).length){ks.forEach(k=>{if((w.rs[k]||0)>=4)out.add(k)})}
-    else if((w.r||0)>=4)ks.forEach(k=>out.add(k));
+    if(w.rs&&Object.keys(w.rs).length){ks.forEach(k=>{if((w.rs[k]||0)>=DISC_MIN)out.add(k)})}
+    else if((w.r||0)>=DISC_MIN)ks.forEach(k=>out.add(k));
   });
   if(!out.size)ks.forEach(k=>out.add(k));
   return out;
 }
 const hasMood=(it,m)=>!m||it.watches.some(w=>(w.mood||[]).includes(m));
-const isLoved=it=>it.status==='seen'&&peakR(it)>=4;
+const isLoved=it=>it.status==='seen'&&peakR(it)>=DISC_MIN;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 async function seedTmdb(it){
   if(it.tmdb)return it.tmdb;
   try{const m=await matchEntry({t:it.t,y:it.y||0});return m&&m.item&&m.item.tmdb||''}catch(e){return ''}
@@ -1291,7 +1294,7 @@ async function recsFor(tid){
   if(c[tid]&&Date.now()-c[tid].t<2592e5)return c[tid].v;
   const [kind,id]=tid.split('-');
   const d=await TMDB.get(`/${kind}/${id}/recommendations`,{language:'en-GB'});
-  const v=(d.results||[]).filter(r=>r.poster_path&&(r.vote_count||0)>=80).slice(0,20)
+  const v=(d.results||[]).filter(r=>r.poster_path&&(r.vote_count||0)>=80).slice(0,30)
     .map(r=>({id:r.id,kind,t:r.title||r.name||'',y:+(r.release_date||r.first_air_date||'0').slice(0,4),p:r.poster_path,v:r.vote_average||0,o:r.overview||''}));
   c[tid]={t:Date.now(),v};
   const keys=Object.keys(c);if(keys.length>60)delete c[keys.sort((a,b)=>c[a].t-c[b].t)[0]];
@@ -1303,7 +1306,7 @@ function discSeeds(){
   const p=partnerOf(),ks=p?[myKey(),p.key]:[myKey()],out=[];
   S.store.together.filter(isLoved).forEach(it=>out.push({it,shelf:'together',who:lovedBy(it,ks)}));
   S.store.mine.filter(isLoved).forEach(it=>out.push({it,shelf:'mine',who:lovedBy(it,[myKey()])}));
-  return out.sort((a,b)=>peakR(b.it)-peakR(a.it)||lastDate(b.it).localeCompare(lastDate(a.it))).slice(0,24);
+  return shuffle(out).slice(0,40);
 }
 function seedOk(sd,t,p){
   if(!p)return true;
@@ -1313,6 +1316,17 @@ function seedOk(sd,t,p){
   return sd.shelf==='together'&&sd.who.has(myKey())&&sd.who.has(p.key);
 }
 const discSig=()=>{syncStore();return [S.store.together,S.store.mine].map(a=>a.filter(isLoved).map(i=>i.id+peakR(i)+i.watches.map(w=>(w.mood||[]).join('')).join(',')).join('|')).join('||')+'#'+(partnerOf()?'p':'')};
+/* Random order, lightly favouring picks several of your titles point to, and never more than 3 in a row from one seed. */
+function mixRecs(list){
+  const w=list.map(e=>({e,k:Math.random()*(1+.35*e.seeds.length)})).sort((a,b)=>b.k-a.k).map(x=>x.e);
+  const out=[],rest=w.slice();
+  while(rest.length){
+    const last=out.slice(-3).map(e=>e.seeds[0].it.id);
+    let i=rest.findIndex(e=>!(last.length===3&&last.every(id=>id===e.seeds[0].it.id)));
+    if(i<0)i=0;out.push(rest.splice(i,1)[0]);
+  }
+  return out.slice(0,72);
+}
 async function loadDiscover(){
   const seeds=discSeeds();
   const D=S.disc={seeds,recs:[],busy:true,err:'',sig:discSig()};
@@ -1331,40 +1345,42 @@ async function loadDiscover(){
   if(S.disc!==D)return;
   const all=S.store.together.concat(S.store.mine),have=new Set(all.map(i=>i.tmdb).filter(Boolean));
   D.recs=[...agg.values()].filter(e=>!have.has(e.k)&&!all.some(i=>sortKey(i.t)===sortKey(e.r.t)&&Math.abs((i.y||0)-(e.r.y||0))<=1))
-    .map(e=>({...e,score:e.score+e.r.v/25})).sort((a,b)=>b.score-a.score).slice(0,48);
+    .map(e=>({...e,score:e.score+e.r.v/25}));
+  D.recs=mixRecs(D.recs);
   D.busy=false;if(failed===seeds.length)D.err='Couldn’t reach TMDB just now.';
   fillDiscover();
 }
 function viewDiscover(){
-  $('#view').innerHTML=`${topHTML('Discover','More like the ones you loved',topBtns())}
+  $('#view').innerHTML=`${topHTML('Discover','Picked from what you rated 3.5 and up',topBtns())}
     <div id="dtaste"></div>
     <div class="chiprow" style="margin-top:26px"><div class="chips scroll" id="dmoods" role="group" aria-label="Mood"></div></div>
     <div id="disc"></div>`;
-  if(!S.disc||S.disc.sig!==discSig())loadDiscover();else fillDiscover();
+  if(!S.disc||S.disc.sig!==discSig())loadDiscover();else{S.disc.recs=mixRecs(S.disc.recs);fillDiscover()}
 }
 function dseeds(e){const p=partnerOf();return e.seeds.filter(sd=>seedOk(sd,S.dtaste,p)&&hasMood(sd.it,S.dmood))}
 function dcardHTML(e){
   const r=e.r,tv=r.kind==='tv',it={poster:TMDB.poster(r.p,'w342'),t:r.t,y:r.y};
-  const by=dseeds(e).map(x=>x.it.t),pr=partnerOf(),who=pr?(e.who.has(myKey())&&e.who.has(pr.key)?'You both loved the same':e.who.has(pr.key)?pr.name+'’s pick':'Your pick'):'';
-  const why=by.length>1?`Because you loved ${esc(by[0])} and ${by.length>2?(by.length-1)+' more':esc(by[1])}`:`Because you loved ${esc(by[0])}`;
+  const by=dseeds(e).map(x=>x.it.t),pr=partnerOf(),who=pr?(e.who.has(myKey())&&e.who.has(pr.key)?'You both rated the same highly':e.who.has(pr.key)?pr.name+'’s pick':'Your pick'):'';
+  const why=by.length>1?`Because you rated ${esc(by[0])} highly and ${by.length>2?(by.length-1)+' more':esc(by[1])}`:`Because you rated ${esc(by[0])} highly`;
   return `<article class="dcard" data-k="${esc(e.k)}"><div class="dposter">${coverHTML(it)}</div>
     <div class="dbody"><h3>${esc(r.t)}</h3><p class="dmeta">${r.y||''} · ${tv?'Series':'Film'}</p>
-    <p class="dwhy">${why}</p>${who?`<p class="dwho">${esc(who)}</p>`:''}
+    <p class="dwhy">${why}</p>
     <div class="dact"><button type="button" class="chip" data-act="d-add" data-k="${esc(e.k)}">+ To watch</button></div></div></article>`;
 }
 function fillDiscover(){
   const el=$('#disc');if(!el)return;const D=S.disc;if(!D)return;
   const pr=partnerOf();
   if(!pr&&S.dtaste!=='all')S.dtaste='all';
-  const dt=$('#dtaste');if(dt)dt.innerHTML=pr?`<div class="seg wide" role="group" aria-label="Whose taste" style="margin-top:22px">${[['all','Us'],['me','You'],['them',pr.name],['both','Both agree']].map(([k,l])=>`<button type="button" data-act="d-taste" data-v="${k}" aria-pressed="${S.dtaste===k}">${esc(l)}</button>`).join('')}</div>`:'';
+  const head=pr?({them:`Movies ${pr.name} will love`,me:'Movies you will love',all:'Movies we will love'}[S.dtaste]):'Movies you will love';
+  const dt=$('#dtaste');if(dt)dt.innerHTML=pr?`<div class="seg wide" role="group" aria-label="Who is it for" style="margin-top:22px">${[['them',pr.name],['me','You'],['all','Us']].map(([k,l])=>`<button type="button" data-act="d-taste" data-v="${k}" aria-pressed="${S.dtaste===k}">${esc(l)}</button>`).join('')}</div>`:'';
   const seedMoods=new Set((D.seeds||[]).flatMap(sd=>sd.it.watches.flatMap(w=>w.mood||[])));
   const dm=$('#dmoods');if(dm)dm.innerHTML=seedMoods.size?MOODS.filter(m=>seedMoods.has(m[0])).map(([k,l])=>`<button type="button" class="chip" data-act="d-mood" data-v="${k}" aria-pressed="${S.dmood===k}">${l}</button>`).join(''):'';
   if(dm&&dm.parentElement)dm.parentElement.hidden=!seedMoods.size;
   const list=(D.recs||[]).filter(e=>dseeds(e).length);
   if(D.busy){el.innerHTML='<p class="fine" style="margin-top:28px">Looking through your favourites…</p>';return}
   if(D.err){el.innerHTML=`<div class="hollow"><h2>${esc(D.err)}</h2></div>`;return}
-  if(!D.seeds.length){el.innerHTML=`<div class="hollow"><h2>Nothing to go on yet</h2><p>Rate something 4 stars or higher and recommendations will appear here.</p></div>`;return}
-  el.innerHTML=(list.length?`<div class="dlist">${list.map(dcardHTML).join('')}</div>`:`<div class="hollow"><h2>Nothing here</h2><p>Try another taste or mood.</p></div>`)
+  if(!D.seeds.length){el.innerHTML=`<div class="hollow"><h2>Nothing to go on yet</h2><p>Rate something 3.5 stars or higher and recommendations will appear here.</p></div>`;return}
+  el.innerHTML=`<h2 class="dhead">${esc(head)}</h2>`+(list.length?`<div class="dlist">${list.map(dcardHTML).join('')}</div>`:`<div class="hollow"><h2>Nothing here yet</h2><p>${S.dtaste==='all'?'Rate more titles on the Us shelf at 3.5 or higher.':S.dtaste==='them'?'Needs more titles '+esc(pr?pr.name:'')+' has rated 3.5 or higher.':'Rate more titles at 3.5 or higher.'} Or try another mood.</p></div>`)
     +'<p class="credit">Recommendations from TMDB.</p>';
 }
 async function discoverAdd(k){

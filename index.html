@@ -343,6 +343,7 @@ dl{margin:32px 0 0}
 .lg-top time{font-weight:600;letter-spacing:-.01em}
 .lg-k{font-size:12px;color:var(--mute)}
 .lg-w{color:var(--ink2);font-size:13.5px;margin-top:4px}
+.rsum{margin:22px 0 8px;display:grid;gap:12px;justify-items:center}.rsum .rt{margin:0}.rs-avg{display:grid;justify-items:center;gap:2px}.rs-l{font-size:12px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}.rs-each{display:grid;gap:6px;width:min(280px,100%)}.rs-row{display:flex;align-items:center;gap:10px}.rs-row .stars{font-size:16px;letter-spacing:2px}.rs-row b{font-size:14px}.rs-n{min-width:56px;font-size:13.5px;color:var(--mute)}.rs-none{font-size:13px;color:var(--mute)}
 .rbox{display:inline-grid;gap:4px;margin-top:10px}
 .rrow{display:flex;align-items:center;gap:8px}
 .rrow .stars{font-size:14px;letter-spacing:2px}
@@ -770,7 +771,7 @@ function load(){
     if(d.people&&typeof d.people==='object')S.people=d.people;
     if(d.pronouns&&typeof d.pronouns==='object')S.pronouns=d.pronouns;
     if(Array.isArray(d.services))S.services=d.services;
-    if(d.filter)S.filter=d.filter;
+    if(d.filter&&d.filter!=='archive')S.filter=d.filter;
     if(d.sort)S.sort=d.sort;
     if(d.isort)S.isort=d.isort;
     if(d.layout==='list')S.layout='list';
@@ -1040,14 +1041,14 @@ const SORTFN={
   watched:(a,b)=>lastDate(b).localeCompare(lastDate(a)),
   rating:(a,b)=>(latestR(b)||0)-(latestR(a)||0)
 };
-const passFilter=it=>S.filter==='all'||(S.filter==='film'&&it.type==='film')||(S.filter==='series'&&it.type==='series')||(S.filter==='waiting'&&it.status==='waiting')||(S.filter==='archive'&&it.status==='seen'&&it.watches.some(w=>!w.d));
+const passFilter=it=>S.filter==='all'||(S.filter==='film'&&it.type==='film')||(S.filter==='series'&&it.type==='series')||(S.filter==='waiting'&&it.status==='waiting');
 const visible=()=>S.items.filter(it=>passFilter(it)&&matches(it,S.q.trim()));
 function arranged(){
   const list=visible(), f=SORTFN[S.sort];
   const order=l=>f?l.slice().sort(f):l.slice().reverse();
   return {seen:order(list.filter(i=>i.status==='seen'||i.status==='archive')),wait:order(list.filter(i=>i.status==='waiting'))};
 }
-function counts(){return {all:S.items.length,film:S.items.filter(i=>i.type==='film').length,series:S.items.filter(i=>i.type==='series').length,waiting:S.items.filter(i=>i.status==='waiting').length,archive:S.items.filter(i=>i.status==='seen'&&i.watches.some(w=>!w.d)).length}}
+function counts(){return {all:S.items.length,film:S.items.filter(i=>i.type==='film').length,series:S.items.filter(i=>i.type==='series').length,waiting:S.items.filter(i=>i.status==='waiting').length}}
 
 /* ---------- icons ---------- */
 const ic=(p,w=22,sw=1.7)=>`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -1097,6 +1098,15 @@ function coverHTML(it,extra=''){
   return `<div class="cov" style="--tint:${tint}"><div class="ph">${esc(it.t)}${it.y?`<small>${it.y}</small>`:''}</div>${it.poster?`<img src="${esc(it.poster)}" alt="Poster for ${esc(heading(it))}" loading="lazy" onerror="this.remove()">`:''}${extra}</div>`;
 }
 const starsHTML=r=>`<span class="stars" style="--p:${(r||0)/5*100}%" role="img" aria-label="${r?r+' out of 5':'Not rated'}">★★★★★</span>`;
+function ratingSummaryHTML(it,r){
+  const avg=r?`<div class="rt">${starsHTML(r)}<b>${rtxt(r)}</b></div>`:'';
+  const partner=S.shelf==='together'?partnerOf():null;
+  if(!partner||it.status!=='seen'||!it.watches.length)return avg;
+  const w=lastW(it), me=myKey();
+  const mine=rateOf(w,me,me)||0, theirs=rateOf(w,partner.key,false)||0;
+  const row=(n,v)=>`<div class="rs-row"><span class="rs-n">${esc(n)}</span>${v?`${starsHTML(v)}<b>${rtxt(v)}</b>`:'<span class="rs-none">Not rated yet</span>'}</div>`;
+  return `<div class="rsum">${avg?`<div class="rs-avg">${avg}<span class="rs-l">Average</span></div>`:''}<div class="rs-each">${row('You',mine)}${row(partner.name,theirs)}</div></div>`;
+}
 function ratingsHTML(w){
   const rs=w.rs&&Object.keys(w.rs).length?w.rs:null, heart='';
   if(!rs)return w.r?`<span class="rbox"><span class="rrow">${starsHTML(w.r)}<b>${rtxt(w.r)}</b>${heart}</span></span>`:(heart?`<span class="rbox"><span class="rrow">${heart}</span></span>`:'');
@@ -1149,7 +1159,7 @@ function shelfSwitchHTML(){
   return `<div class="seg" role="group" aria-label="Which shelf"><button type="button" data-act="shelf" data-v="together" aria-pressed="${S.shelf==='together'}">Us</button><button type="button" data-act="shelf" data-v="mine" aria-pressed="${S.shelf==='mine'}">Just me</button></div>`;
 }
 function chipsHTML(){
-  const c=counts(), tabs=[['all','All'],['film','Films'],['series','Series'],['waiting','To watch'],['archive','Undated']];
+  const c=counts(), tabs=[['all','All'],['film','Films'],['series','Series'],['waiting','To watch']];
   return tabs.map(([k,l])=>`<button type="button" class="chip" data-filter="${k}" aria-pressed="${S.filter===k}">${l}<i>${c[k]}</i></button>`).join('');
 }
 function fillChips(){const el=$('#chips');if(el)el.innerHTML=chipsHTML()}
@@ -1220,7 +1230,7 @@ function tileHTML(it){
   return `<button type="button" class="tile ${wait?'wait':''}" data-act="open" data-id="${esc(it.id)}" aria-label="${esc(heading(it))}, ${it.y||''}${wait?', to watch':arch?', undated':r?', rated '+r:''}">
     <div class="cw">${coverHTML(it,badges)}</div>
     <span class="tl-t">${esc(it.t)}</span>
-    <span class="tl-m">${wait?'To watch':arch?'Undated':(r?starsHTML(r).replace('class="stars"','class="stars"')+rtxt(r):'Watched')} · ${it.y||''}</span></button>`;
+    <span class="tl-m">${wait?'To watch':arch?'Undated':(r&&S.shelf!=='together'?starsHTML(r)+rtxt(r):'Watched')} · ${it.y||''}</span></button>`;
 }
 function fillGrid(){
   const el=$('#grid');if(!el)return;
@@ -1458,7 +1468,7 @@ function renderDetail(id,keep){
     <div class="dt-poster">${coverHTML(it)}</div>
     <h1>${esc(it.t)}</h1>
     <p class="kind">${esc(kindText(it))}${it.y?' · '+it.y:''}</p>
-    ${r?`<div class="rt">${starsHTML(r)}<b>${rtxt(r)}</b></div>`:''}
+    ${ratingSummaryHTML(it,r)}
     ${it.gen&&it.gen.length?`<div class="genres">${it.gen.slice(0,4).map(g=>`<span>${esc(g)}</span>`).join('')}</div>`:''}
     ${facts.length?`<dl>${facts.map(([k,v])=>`<div class="kv"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`:''}
     ${it.syn?`<hr class="dash"><p class="syn">${esc(it.syn)}</p>`:''}

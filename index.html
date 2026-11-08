@@ -343,6 +343,16 @@ dl{margin:32px 0 0}
 .lg-top time{font-weight:600;letter-spacing:-.01em}
 .lg-k{font-size:12px;color:var(--mute)}
 .lg-w{color:var(--ink2);font-size:13.5px;margin-top:4px}
+.dinfo{cursor:pointer;text-align:left}
+.layer-scrim.mid{align-items:center;padding:20px}
+.sheet.dlg{max-width:440px;border-radius:30px;padding:24px 28px 26px;overflow-x:hidden;animation:dpop .35s var(--ease);box-shadow:0 20px 60px rgba(0,0,0,.28)}
+@keyframes dpop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+.dlg-top{display:flex;gap:16px;align-items:center;margin:0 40px 4px 0}
+.dlg-top .cov{width:72px;flex:none}
+.dlg-top h2{font-size:22px}
+.dlg-why{font-size:14px;color:var(--ink2);line-height:1.55;margin:18px 0 0}
+.dlg-syn{font-size:15px;line-height:1.6;margin:14px 0 22px}
+.dlg-h{font-size:12.5px;font-weight:500;color:var(--mute);letter-spacing:.02em;margin:22px 0 0}
 .dtop{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;margin:18px -2px 0;padding:2px 2px 6px;scrollbar-width:none}
 .dtop::-webkit-scrollbar{display:none}
 .dpick{flex:1 1 0;min-width:0;scroll-snap-align:start;display:flex;flex-direction:column;min-width:0}
@@ -541,14 +551,18 @@ async function tmdbSearch(q){
   let out=titles.slice(0,10);
   const extra=[];
   /* actor: credits of the best-matching person */
-  const person=d.results.find(r=>r.media_type==='person'&&r.known_for_department==='Acting'&&(r.popularity||0)>2);
+  const person=d.results.find(r=>r.media_type==='person'&&(r.known_for_department==='Acting'||r.known_for_department==='Directing')&&(r.popularity||0)>2);
   if(person&&q.trim().length>=3){
     try{
       const c=await TMDB.get(`/person/${person.id}/combined_credits`,{language:'en-GB'});
+      const dirs=(c.crew||[]).filter(x=>x.job==='Director'&&(x.media_type==='movie'||x.media_type==='tv')&&x.poster_path&&(x.vote_count||0)>50)
+        .sort((x,y)=>(y.vote_count||0)-(x.vote_count||0)).slice(0,12);
+      if(person.known_for_department==='Directing')extra.push(...dirs);
       const cr=(c.cast||[]).filter(x=>(x.media_type==='movie'||x.media_type==='tv')&&x.poster_path&&!/self|himself|herself/i.test(x.character||'')
         &&!(x.genre_ids||[]).some(g=>[10767,10763,10764,10766].includes(g))&&(x.vote_count||0)>50)
         .sort((x,y)=>(y.vote_count||0)-(x.vote_count||0)).slice(0,12);
       extra.push(...cr);
+      if(person.known_for_department!=='Directing')extra.push(...dirs.slice(0,4));
     }catch(e){}
   }
   /* genre: the best-loved titles in it */
@@ -1217,7 +1231,7 @@ function chipsHTML(){
 }
 function fillChips(){const el=$('#chips');if(el)el.innerHTML=chipsHTML()}
 function toolsHTML(sortHTML){
-  return `<div class="toolrow"><label class="find">${ICON.search}<span class="sr">Search</span><input id="find" type="search" autocomplete="off" placeholder="Title, actor or genre" value="${esc(S.q)}"></label>${sortHTML}</div>
+  return `<div class="toolrow"><label class="find">${ICON.search}<span class="sr">Search</span><input id="find" type="search" autocomplete="off" placeholder="Title, actor, director or genre" value="${esc(S.q)}"></label>${sortHTML}</div>
   <div class="chiprow"><div class="chips scroll" id="chips" role="group" aria-label="Show">${chipsHTML()}</div></div>`;
 }
 function sinceText(){
@@ -1414,8 +1428,8 @@ function dcardHTML(e){
   const r=e.r,tv=r.kind==='tv',it={poster:TMDB.poster(r.p,'w342'),t:r.t,y:r.y};
   const by=dseeds(e).map(x=>x.it.t),pr=partnerOf(),who=pr?(e.who.has(myKey())&&e.who.has(pr.key)?'You both rated the same highly':e.who.has(pr.key)?pr.name+'’s pick':'Your pick'):'';
   const why=by.length>1?`Because you rated ${esc(by[0])} highly and ${by.length>2?(by.length-1)+' more':esc(by[1])}`:`Because you rated ${esc(by[0])} highly`;
-  return `<article class="dcard" data-k="${esc(e.k)}"><div class="dposter">${coverHTML(it)}</div>
-    <div class="dbody"><h3>${esc(r.t)}</h3><p class="dmeta">${r.y||''} · ${tv?'Series':'Film'}</p>
+  return `<article class="dcard" data-k="${esc(e.k)}"><div class="dposter dinfo" data-act="d-info" data-k="${esc(e.k)}" role="button" tabindex="0" aria-label="Synopsis of ${esc(r.t)}">${coverHTML(it)}</div>
+    <div class="dbody"><h3 class="dinfo" data-act="d-info" data-k="${esc(e.k)}" role="button" tabindex="0">${esc(r.t)}</h3><p class="dmeta">${r.y||''} · ${tv?'Series':'Film'}</p>
     <p class="dwhy">${why}</p>
     <div class="dact"><button type="button" class="chip" data-act="d-add" data-k="${esc(e.k)}">+ To watch</button></div></div></article>`;
 }
@@ -1458,7 +1472,7 @@ function pickHTML(e){
   const r=e.r,tv=r.kind==='tv',it={poster:TMDB.poster(r.p,'w342'),t:r.t,y:r.y};
   const by=dseeds(e).map(x=>x.it.t);
   const why=by.length>1?`Because you rated ${esc(by[0])} and ${by.length>2?(by.length-1)+' more':esc(by[1])} highly`:`Because you rated ${esc(by[0])} highly`;
-  return `<article class="dpick" data-k="${esc(e.k)}">${coverHTML(it)}<h3>${esc(r.t)}</h3><p class="dmeta">${r.y||''} · ${tv?'Series':'Film'}</p><p class="dwhy">${why}</p>
+  return `<article class="dpick" data-k="${esc(e.k)}"><div class="dinfo" data-act="d-info" data-k="${esc(e.k)}" role="button" tabindex="0" aria-label="Synopsis of ${esc(r.t)}">${coverHTML(it)}</div><h3 class="dinfo" data-act="d-info" data-k="${esc(e.k)}" role="button" tabindex="0">${esc(r.t)}</h3><p class="dmeta">${r.y||''} · ${tv?'Series':'Film'}</p><p class="dwhy">${why}</p>
     <div class="dact"><button type="button" class="chip" data-act="d-add" data-k="${esc(e.k)}">+ To watch</button></div></article>`;
 }
 function fillDiscover(){
@@ -1479,7 +1493,22 @@ function fillDiscover(){
   el.innerHTML=top+(rest.length?`<h2 class="dhead" style="margin-top:36px">${esc(pe.length?'More to explore':head)}</h2>`:'')+(list.length?(rest.length?`<div class="dlist">${rest.map(dcardHTML).join('')}</div>`:''):`<div class="hollow"><h2>Nothing here yet</h2><p>${S.dtaste==='all'?'Rate more titles on the Us shelf at 3.5 or higher.':S.dtaste==='them'?'Needs more titles '+esc(pr?pr.name:'')+' has rated 3.5 or higher.':'Rate more titles at 3.5 or higher.'} Or try another mood.</p></div>`)
     +'<p class="credit">Recommendations from TMDB.</p>';
 }
+function discoverInfo(k){
+  const D=S.disc,e=D&&D.recs.find(x=>x.k===k);if(!e)return;
+  const r=e.r,tv=r.kind==='tv',it={poster:TMDB.poster(r.p,'w342'),t:r.t,y:r.y};
+  const by=dseeds(e).map(x=>x.it.t),pr=partnerOf();
+  const list=by.length>1?by.slice(0,-1).map(esc).join(', ')+' and '+esc(by[by.length-1]):esc(by[0]||'');
+  const who=pr?(e.who.has(myKey())&&e.who.has(pr.key)?' You both rated these highly.':e.who.has(pr.key)?` ${esc(pr.name)} rated ${by.length>1?'these':'it'} highly.`:''):'';
+  openLayer(`<div class="sheet dlg" role="dialog" aria-modal="true" aria-labelledby="sh-h">${xbtn()}
+    <div class="dlg-top">${coverHTML(it)}<div><h2 id="sh-h">${esc(r.t)}</h2><p class="byline">${r.y||''} · ${tv?'Series':'Film'}</p></div></div>
+    <p class="dlg-h">Why it’s recommended</p>
+    <p class="dlg-why" style="margin-top:6px">Because you rated ${list} highly.${who}</p>
+    <p class="dlg-h">Synopsis</p>
+    <p class="dlg-syn" style="margin-top:6px">${esc(r.o||'No synopsis available.')}</p>
+    <button type="button" class="btn accent block" data-act="d-add" data-k="${esc(r.kind+'-'+r.id)}">+ To watch</button></div>`,'mid');
+}
 async function discoverAdd(k){
+  if($('#layer').innerHTML)closeLayer();
   const D=S.disc,e=D&&D.recs.find(x=>x.k===k);if(!e)return;
   const pr=partnerOf(),target=pr?(S.dtaste==='me'?'mine':'together'):S.shelf;
   const r=e.r,base=tmdbToItem({id:r.id,media_type:r.kind,title:r.t,name:r.t,release_date:r.kind==='movie'?r.y+'-01-01':'',first_air_date:r.kind==='tv'?r.y+'-01-01':'',overview:r.o,poster_path:r.p});
@@ -1670,10 +1699,10 @@ function paintSel(){
 
 /* ---------- sheets ---------- */
 let lastFocus=null;
-function openLayer(html){
+function openLayer(html,cls=''){
   $('#toast').classList.remove('on');
   if(!$('#layer').innerHTML)lastFocus=document.activeElement;
-  $('#layer').innerHTML=`<div class="layer-scrim" data-act="scrim">${html}</div>`;
+  $('#layer').innerHTML=`<div class="layer-scrim ${cls}" data-act="scrim">${html}</div>`;
   lock();
 }
 function closeLayer(){
@@ -1691,14 +1720,14 @@ function openAdd(tab){
   paintAdd();
 }
 function statusSegHTML(a){
-  return `<div class="seg" role="group" aria-label="Add as"><button type="button" data-act="addstatus" data-v="seen" aria-pressed="${a.status==='seen'}">Watched</button><button type="button" data-act="addstatus" data-v="waiting" aria-pressed="${a.status==='waiting'}">To watch</button><button type="button" data-act="addstatus" data-v="archive" aria-pressed="${a.status==='archive'}">Undated</button></div>`;
+  return `<div class="seg" role="group" aria-label="Add as"><button type="button" data-act="addstatus" data-v="seen" aria-pressed="${a.status==='seen'}">Watched</button><button type="button" data-act="addstatus" data-v="waiting" aria-pressed="${a.status==='waiting'}">To watch</button></div>`;
 }
 function paintAdd(){
   const a=S.add; if(!a)return;
   const tabs=`<div class="seg wide" role="group" aria-label="How to add"><button type="button" data-act="addtab" data-v="search" aria-pressed="${a.tab==='search'}">Search</button><button type="button" data-act="addtab" data-v="import" aria-pressed="${a.tab==='import'}">Paste a list</button></div>`;
   let pane='';
   if(a.tab==='search'){
-    pane=`<div class="field"><label class="sr" for="sh-q">Title</label><input id="sh-q" class="bigfield" type="search" autocomplete="off" placeholder="Title, actor or genre" aria-controls="sh-res" value="${esc(a.q)}"></div>
+    pane=`<div class="field"><label class="sr" for="sh-q">Title</label><input id="sh-q" class="bigfield" type="search" autocomplete="off" placeholder="Title, actor, director or genre" aria-controls="sh-res" value="${esc(a.q)}"></div>
       <div class="addrow">${statusSegHTML(a)}<span class="fine" style="margin:0">Adding to <b>${S.shelf==='together'?'our shelf':'my shelf'}</b> · <button type="button" class="tlink" data-act="addshelf" style="display:inline">Switch</button></span></div>
       <ul id="sh-res" class="results" role="listbox" aria-label="Results"></ul>
       <div class="formfoot"><button type="button" class="btn line block" data-act="sheet-close">Done</button></div>`;
@@ -1709,7 +1738,7 @@ function paintAdd(){
         <textarea id="imp-text" class="imp-text" spellcheck="false" placeholder="Parasite (2019)&#10;Past Lives&#10;Severance&#10;The Godfather, 1972">${esc(im.text)}</textarea>
         <p class="fine">Adding the year helps when titles repeat. Letterboxd or spreadsheet CSV files work too.</p></div>
       <div class="addrow"><label class="btn line filebtn">Choose a file<input id="imp-file" type="file" accept=".txt,.csv,.tsv,.md,text/plain,text/csv" hidden></label>${statusSegHTML(a)}</div>
-      <div class="field" id="imp-date-wrap" ${a.status==='seen'?'':'hidden'}><label class="lab" for="imp-date">Watched on</label><input id="imp-date" type="date" value="${esc(im.date)}" max="${TODAY}"></div>
+      <div class="field" id="imp-date-wrap" ${a.status==='seen'?'':'hidden'}><label class="lab" for="imp-date">Watched on</label><input id="imp-date" type="date" value="${esc(im.date)}" max="${TODAY}" ${im.undated?'disabled':''}><div class="chips" style="margin-top:10px"><button type="button" class="chip" data-act="imp-undated" aria-pressed="${!!im.undated}">Undated</button></div></div>
       <div class="formfoot"><button type="button" class="btn accent block" data-act="imp-go">Find these titles</button></div>`;
     }else if(im.stage==='working'){
       pane=`<p class="fine" id="imp-prog" aria-live="polite" style="font-size:15px;margin:24px 0">${esc(im.msg)}</p>`;
@@ -1825,7 +1854,7 @@ function openManual(q){
       <div class="field"><span class="lab">Format</span><div class="seg wide" role="group"><button type="button" data-act="mfmt" data-v="film" aria-pressed="true">Film</button><button type="button" data-act="mfmt" data-v="series" aria-pressed="false">Series</button></div></div></div>
     <div class="two"><div class="field" id="m-sw" hidden><label class="lab" for="m-s">Season</label><input id="m-s" type="number" inputmode="numeric" min="1" max="60" value="1"></div>
       <div class="field"><label class="lab" for="m-d">Director or creator</label><input id="m-d" type="text" placeholder="optional"></div></div>
-    <div class="field"><span class="lab">Where does it go?</span><div class="seg wide" role="group"><button type="button" data-act="mstatus" data-v="seen" aria-pressed="${S.add.status==='seen'}">Watched</button><button type="button" data-act="mstatus" data-v="waiting" aria-pressed="${S.add.status==='waiting'}">To watch</button><button type="button" data-act="mstatus" data-v="archive" aria-pressed="${S.add.status==='archive'}">Undated</button></div></div>
+    <div class="field"><span class="lab">Where does it go?</span><div class="seg wide" role="group"><button type="button" data-act="mstatus" data-v="seen" aria-pressed="${S.add.status==='seen'}">Watched</button><button type="button" data-act="mstatus" data-v="waiting" aria-pressed="${S.add.status==='waiting'}">To watch</button></div></div>
     <div class="formfoot"><button type="submit" class="btn accent block">Add it</button><button type="button" class="tlink" data-act="manual-back">Back to search</button></div></form>`);
   setTimeout(()=>{const f=$('#m-t');f&&f.focus({preventScroll:true})},60);
 }
@@ -1915,7 +1944,7 @@ async function impConfirm(){
   if(!picks.length)return;
   a.imp.stage='working'; a.imp.msg=`Adding… 0 of ${picks.length}`; paintAdd();
   const queue=picks.slice(); let n=0, added=0, skipped=0;
-  const status=a.status, baseDate=a.imp.date||TODAY;
+  const status=a.status==='seen'&&a.imp.undated?'archive':a.status, baseDate=a.imp.date||TODAY;
   const worker=async()=>{while(queue.length){const r=queue.shift();
     let meta=r.item?{...r.item}:{t:r.e.t,y:r.e.y,type:'film'};
     if(r.item){try{meta=await tmdbDetails(r.item)}catch(e){}}
@@ -2204,6 +2233,7 @@ document.addEventListener('click',e=>{
     case 'log': {const it=byId(b.dataset.id);if(it){S.add=null;openRate(it.id,{wi:null})}break}
     case 'layout': if(b.dataset.v!==S.layout){S.layout=b.dataset.v;save();renderBase()}break;
     case 'pperson': S.pperson=b.dataset.v;viewProfile();break;
+    case 'd-info': discoverInfo(b.dataset.k);break;
     case 'd-shuffle': dshuffle(1);break;
     case 'd-back': dshuffle(-1);break;
     case 'd-taste': S.dtaste=b.dataset.v;fillDiscover();break;
@@ -2236,6 +2266,7 @@ document.addEventListener('click',e=>{
     case 'manual-back': {const back=S.add&&S.add.back;if(back){S.add=back;paintAdd()}else closeLayer();break}
     case 'mfmt': {S.add.m.type=b.dataset.v;$$('[data-act=mfmt]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#m-sw').hidden=b.dataset.v!=='series';break}
     case 'mstatus': {S.add.status=b.dataset.v;$$('[data-act=mstatus]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));break}
+    case 'imp-undated': if(S.add){const im=S.add.imp;im.undated=!im.undated;b.setAttribute('aria-pressed',String(im.undated));const d=$('#imp-date');if(d)d.disabled=im.undated}break;
     case 'imp-go': impFind();break;
     case 'imp-confirm': impConfirm();break;
     case 'imp-back': if(S.add){S.add.imp.stage='input';paintAdd()}break;
@@ -2319,6 +2350,7 @@ document.addEventListener('keydown',e=>{
   }
   if(t.id==='sh-q'&&e.key==='Enter'){const f=$('#sh-res button.res[data-act="pick-tmdb"]')||$('#sh-res button.res');if(f){e.preventDefault();f.click()}return}
   if(t.id==='dice'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();roll();return}
+  if(t.dataset&&t.dataset.act==='d-info'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.click();return}
   if(t.classList&&t.classList.contains('stars')&&t.dataset.rk&&S.add){
     const k=t.dataset.rk;
     if(e.key==='ArrowRight'||e.key==='ArrowUp'){e.preventDefault();setRate(Math.min(5,getRate(k)+.5),k)}

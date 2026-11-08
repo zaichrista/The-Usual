@@ -802,7 +802,14 @@ function persistLocal(){
   syncStore();
   tryLS.set(KEY,JSON.stringify({v:5,mine:S.store.mine,together:S.store.together,shelf:S.shelf,people:S.people,pronouns:S.pronouns,services:S.services,filter:S.filter,sort:S.sort,isort:S.isort,layout:S.layout}));
 }
-function save(){persistLocal();queueCloudSave();queueMineSave()}
+/* offline: edits made while the cloud isn't reachable are flagged, then pushed (not overwritten) on reconnect */
+let offlineMode=false;
+function save(){
+  persistLocal();
+  if(!(SB&&cloudReady&&cloudLibrary&&cloudUser))tryLS.set('the-usual-pend-t','1');
+  if(!(SB&&cloudUser&&mineReady))tryLS.set('the-usual-pend-m','1');
+  queueCloudSave();queueMineSave();
+}
 /* The seeded guests (Tim, Jess, Mum) are gone from every account. People are added by hand now. */
 const SEEDED_GUESTS=['tim','jess','mum'];
 function scrubGuests(){
@@ -857,7 +864,7 @@ function queueMineSave(){
   mineTimer=setTimeout(async()=>{
     syncStore();
     const {error}=await SB.from('user_state').upsert({user_id:cloudUser.id,content:{items:S.store.mine},updated_at:new Date().toISOString()},{onConflict:'user_id'});
-    if(error)mineOff=true;
+    if(error)mineOff=true;else tryLS.set('the-usual-pend-m','');
   },700);
 }
 async function loadMine(){
@@ -866,6 +873,7 @@ async function loadMine(){
   if(error){mineOff=true;mineReady=false;return}
   mineOff=false;
   const remote=data&&data.content&&Array.isArray(data.content.items)?data.content.items:[];
+  if(tryLS.get('the-usual-pend-m')){S.dirty=true;queueMineSave();return}
   if(remote.length){S.store.mine=remote.map(norm);if(S.shelf==='mine')S.items=S.store.mine}
   mineReady=true;
   scrubGuests();persistLocal();
@@ -882,13 +890,14 @@ function queueCloudSave(){
   clearTimeout(cloudTimer);
   cloudTimer=setTimeout(async()=>{
     const {error}=await SB.from('library_state').upsert({library_id:cloudLibrary,content:cloudContent(),updated_by:cloudUser.id,updated_at:new Date().toISOString()},{onConflict:'library_id'});
-    if(error){cloudMessage='Cloud save failed: '+error.message;}
+    if(error){cloudMessage='Cloud save failed: '+error.message;}else tryLS.set('the-usual-pend-t','');
   },500);
 }
 async function activateCloudLibrary(id,preferRemote=true){
   cloudReady=false; cloudLibrary=id;
   const {data,error}=await SB.from('library_state').select('content').eq('library_id',id).maybeSingle();
   if(error){cloudMessage='Could not load your shared library: '+error.message;return}
+  if(tryLS.get('the-usual-pend-t')){preferRemote=false;S.dirty=true}
   if(preferRemote&&data&&data.content&&Object.keys(data.content).length)applyCloudContent(data.content);
   cloudReady=true; await loadMembers();
   if(S.dirty){S.dirty=false;queueCloudSave()}
@@ -900,7 +909,7 @@ async function activateCloudLibrary(id,preferRemote=true){
   }).subscribe();
   cloudMessage='Synced across devices.';
 }
-function gateOpen(){return !(SB&&cloudUser&&cloudLibrary&&cloudReady)}
+function gateOpen(){return offlineMode?false:!(SB&&cloudUser&&cloudLibrary&&cloudReady)}
 function renderGate(){
   const g=$('#gate');if(!g)return;
   if(!gateOpen()){g.hidden=true;g.innerHTML='';lock();return}
@@ -929,11 +938,14 @@ function refreshCloudUI(){
   if(!gateOpen()&&(S.view==='me'||S.view==='settings')&&S.rendered===S.view)renderBase();
 }
 async function initSupabase(){
+  if(!window.supabase?.createClient&&tryLS.get('the-usual-owner')){offlineMode=true;renderGate();return}
   if(!window.supabase?.createClient){cloudMessage='Could not load the sign-in service. Check your connection and reload.';renderGate();return}
   SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-  const {data}=await SB.auth.getSession();
+  let data;
+  try{({data}=await SB.auth.getSession())}catch(e){data={session:null}}
   cloudUser=data.session?.user||null;
   if(cloudUser)await findCloudLibrary();
+  if(!cloudReady&&!navigator.onLine&&tryLS.get('the-usual-owner')){offlineMode=true;refreshCloudUI()}
   SB.auth.onAuthStateChange((_event,session)=>{
     cloudUser=session?.user||null;
     if(!cloudUser){cloudReady=false;cloudLibrary=null;cloudMessage=_event==='SIGNED_OUT'?'Signed out.':'';clearAccount();refreshCloudUI();return}
@@ -2397,6 +2409,8 @@ applyTheme();
 route();
 cloudMessage='Connecting…';renderGate();
 initSupabase();
+addEventListener('online',()=>{if(offlineMode)location.reload()});
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
 </body>
 </html>

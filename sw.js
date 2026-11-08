@@ -1,5 +1,5 @@
 /* The Usual: offline shell. Bump VERSION to force clients to refetch. */
-const VERSION='v1';
+const VERSION='v2';
 const CACHE='the-usual-'+VERSION;
 const SHELL=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const EXTRA=['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js','https://use.typekit.net/rij0fmg.css'];

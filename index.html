@@ -343,6 +343,17 @@ dl{margin:32px 0 0}
 .lg-top time{font-weight:600;letter-spacing:-.01em}
 .lg-k{font-size:12px;color:var(--mute)}
 .lg-w{color:var(--ink2);font-size:13.5px;margin-top:4px}
+.dtop{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;margin:18px -2px 0;padding:2px 2px 6px;scrollbar-width:none}
+.dtop::-webkit-scrollbar{display:none}
+.dpick{flex:1 1 0;min-width:0;scroll-snap-align:start;display:flex;flex-direction:column;min-width:0}
+.dpick h3{font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.25;margin-top:12px}
+.dpick .dmeta{margin-top:4px}
+.dpick .dwhy{font-size:12px;margin:8px 0 12px;line-height:1.45}
+.dpick .dact{margin-top:auto}
+.dtophead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px}
+.dtophead .dhead{margin:0}
+.dtophead .chips{flex:none;flex-wrap:nowrap}
+.dchip[disabled]{opacity:.4;pointer-events:none}
 .dhead{font-size:20px;font-weight:600;letter-spacing:-.02em;margin:22px 0 4px}
 .rsum{margin:22px 0 8px;display:grid;gap:12px;justify-items:center}.rsum .rt{margin:0}.rs-avg{display:grid;justify-items:center;gap:2px}.rs-l{font-size:12px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}.rs-each{display:grid;gap:6px;width:min(280px,100%)}.rs-row{display:flex;align-items:center;gap:10px}.rs-row .stars{font-size:16px;letter-spacing:2px}.rs-row b{font-size:14px}.rs-n{min-width:56px;font-size:13.5px;color:var(--mute)}.rs-none{font-size:13px;color:var(--mute)}
 .rbox{display:inline-grid;gap:4px;margin-top:10px}
@@ -483,8 +494,8 @@ const tryLS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},se
 const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
 const TODAY=iso(new Date());
 const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)};
-const fmt=d=>!d?'Undated':new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-const fmtMonth=d=>!d?'undated':new Date(d+'T12:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+const fmt=d=>!d?'Undated':d.length===4?d:new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+const fmtMonth=d=>!d?'undated':d.length===4?d:new Date(d+'T12:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 const W20=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 const TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
 const words=n=>n<20?W20[n]:n<100?TENS[Math.floor(n/10)]+(n%10?'-'+W20[n%10]:''):String(n);
@@ -519,12 +530,38 @@ function tmdbToItem(r){
   return {id:`tmdb-${tv?'tv':'movie'}-${r.id}`,tmdb:`${tv?'tv':'movie'}-${r.id}`,t:(tv?r.name:r.title)||'Untitled',y:date?+date.slice(0,4):0,
     type:tv?'series':'film',s:tv?1:undefined,min:0,dir:'',gen:[],syn:r.overview||'',poster:TMDB.poster(r.poster_path),watches:[]};
 }
+const GENRE_IDS={movie:{action:28,adventure:12,animation:16,comedy:35,crime:80,documentary:99,drama:18,family:10751,fantasy:14,history:36,horror:27,music:10402,musical:10402,mystery:9648,romance:10749,'romantic comedy':[10749,35],'sci-fi':878,'science fiction':878,scifi:878,thriller:53,war:10752,western:37},
+  tv:{action:10759,adventure:10759,animation:16,comedy:35,crime:80,documentary:99,drama:18,family:10751,fantasy:10765,history:36,mystery:9648,romance:10749,'sci-fi':10765,'science fiction':10765,scifi:10765,war:10768,western:37,thriller:9648,horror:9648}};
 async function tmdbSearch(q){
   const d=await TMDB.get('/search/multi',{query:q,include_adult:'false',language:'en-GB'});
   const nq=sortKey(q).replace(/[^a-z0-9]/g,'');
   const rank=r=>{const t=sortKey((r.media_type==='tv'?r.name:r.title)||'').replace(/[^a-z0-9]/g,'');
     return (t===nq?100:t.startsWith(nq)?30:0)+Math.min(r.popularity||0,150)*.4+((r.vote_count||0)>300?25:0)};
-  return d.results.filter(r=>(r.media_type==='movie'||r.media_type==='tv')).sort((a,b)=>rank(b)-rank(a)).slice(0,10).map(tmdbToItem);
+  const titles=d.results.filter(r=>(r.media_type==='movie'||r.media_type==='tv')).sort((a,b)=>rank(b)-rank(a));
+  let out=titles.slice(0,10);
+  const extra=[];
+  /* actor: credits of the best-matching person */
+  const person=d.results.find(r=>r.media_type==='person'&&r.known_for_department==='Acting'&&(r.popularity||0)>2);
+  if(person&&q.trim().length>=3){
+    try{
+      const c=await TMDB.get(`/person/${person.id}/combined_credits`,{language:'en-GB'});
+      const cr=(c.cast||[]).filter(x=>(x.media_type==='movie'||x.media_type==='tv')&&x.poster_path&&!/self|himself|herself/i.test(x.character||'')
+        &&!(x.genre_ids||[]).some(g=>[10767,10763,10764,10766].includes(g))&&(x.vote_count||0)>50)
+        .sort((x,y)=>(y.vote_count||0)-(x.vote_count||0)).slice(0,12);
+      extra.push(...cr);
+    }catch(e){}
+  }
+  /* genre: the best-loved titles in it */
+  const gk=q.trim().toLowerCase().replace(/\s+(films?|movies?|shows?|series)$/,'');
+  if(GENRE_IDS.movie[gk]){
+    const one=async kind=>{const g=GENRE_IDS[kind][gk];if(!g)return [];
+      const r=await TMDB.get(`/discover/${kind}`,{with_genres:[].concat(g).join(','),sort_by:'vote_count.desc','vote_count.gte':kind==='tv'?500:2000,language:'en-GB',include_adult:'false'});
+      return r.results.slice(0,8).map(x=>({...x,media_type:kind}))};
+    try{const [m,t]=await Promise.all([one('movie'),one('tv')]);const mix=[];for(let i=0;i<8;i++){if(m[i])mix.push(m[i]);if(t[i])mix.push(t[i])}extra.push(...mix)}catch(e){}
+  }
+  const seen=new Set(out.map(r=>r.media_type+r.id));
+  extra.forEach(r=>{const k=r.media_type+r.id;if(!seen.has(k)){seen.add(k);out.push(r)}});
+  return out.map(tmdbToItem);
 }
 /* ---------- where to watch (TMDB / JustWatch) ---------- */
 const REGIONS=[['GB','United Kingdom'],['IE','Ireland'],['US','United States'],['CA','Canada'],['AU','Australia'],['NZ','New Zealand'],['DE','Germany'],['FR','France'],['ES','Spain'],['IT','Italy'],['NL','Netherlands'],['SE','Sweden']];
@@ -596,14 +633,16 @@ async function tmdbDetails(it){
   if(it.type==='film'){
     const d=await TMDB.get(`/movie/${tid}`,{append_to_response:'credits',language:'en-GB'});
     const dirs=((d.credits&&d.credits.crew)||[]).filter(c=>c.job==='Director').map(c=>c.name).slice(0,2);
-    return {...it,min:d.runtime||0,gen:(d.genres||[]).map(g=>g.name),dir:dirs.join(' & '),syn:d.overview||it.syn,poster:TMDB.poster(d.poster_path)||it.poster,
+    const cast=((d.credits&&d.credits.cast)||[]).slice(0,10).map(c=>c.name);
+    return {...it,cast,min:d.runtime||0,gen:(d.genres||[]).map(g=>g.name),dir:dirs.join(' & '),syn:d.overview||it.syn,poster:TMDB.poster(d.poster_path)||it.poster,
       y:d.release_date?+d.release_date.slice(0,4):it.y};
   }
-  const d=await TMDB.get(`/tv/${tid}`,{language:'en-GB'});
+  const d=await TMDB.get(`/tv/${tid}`,{append_to_response:'credits',language:'en-GB'});
+  const cast=((d.credits&&d.credits.cast)||[]).slice(0,10).map(c=>c.name);
   const seasons=(d.seasons||[]).filter(x=>x.season_number>0).map(x=>({n:x.season_number,eps:x.episode_count||0,poster:TMDB.poster(x.poster_path),y:x.air_date?+x.air_date.slice(0,4):0}));
   const first=seasons[0]||{n:1,eps:0,poster:'',y:it.y};
   const showPoster=TMDB.poster(d.poster_path)||it.poster;
-  return {...it,seasons:seasons.length?seasons:[first],s:first.n,eps:first.eps,showPoster,poster:first.poster||showPoster,y:first.y||it.y,
+  return {...it,cast,seasons:seasons.length?seasons:[first],s:first.n,eps:first.eps,showPoster,poster:first.poster||showPoster,y:first.y||it.y,
     min:(d.last_episode_to_air&&d.last_episode_to_air.runtime)||(d.episode_run_time&&d.episode_run_time[0])||0,
     gen:(d.genres||[]).map(g=>g.name),dir:(d.created_by||[]).map(c=>c.name).slice(0,2).join(' & '),syn:d.overview||it.syn};
 }
@@ -1015,7 +1054,7 @@ function myKey(){return (cloudProfile&&cloudProfile.username)||'me'}
 function partnerOf(){const me=myKey();const m=(cloudMembers||[]).find(x=>x.username&&!x.is_me&&x.username!==me);return m?{key:m.username,name:cap(m.username)}:null}
 function rname(k){return k===myKey()?'You':cap(k)}
 function coupleLabel(){const ms=(cloudMembers||[]).filter(m=>m.username);return ms.length<2?'':ms.slice(0,2).map(m=>cap(m.username)).join(' & ')}
-const fmtShort=d=>{if(!d)return 'Undated';const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+const fmtShort=d=>{if(!d)return 'Undated';if(d.length===4)return d;const x=new Date(d+'T12:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
 
 /* ============================================================
    v2 INTERFACE — everything below here is new.
@@ -1032,7 +1071,7 @@ const minsOf=it=>it.type==='series'?(it.eps||1)*(it.min||0):(it.min||0);
 const rtxt=r=>r?(r%1?r:r+'.0'):'';
 const matches=(it,q)=>{
   if(!q)return true; q=q.toLowerCase();
-  const hay=[it.t,it.short,it.dir,it.y,it.note,(it.gen||[]).join(' '),...it.watches.flatMap(w=>[w.note,w.ate,...w.who.map(nm),...(w.mood||[]).map(moodLabel)])].join(' ').toLowerCase();
+  const hay=[it.t,it.short,it.dir,(it.cast||[]).join(' '),it.y,it.note,(it.gen||[]).join(' '),...it.watches.flatMap(w=>[w.note,w.ate,...w.who.map(nm),...(w.mood||[]).map(moodLabel)])].join(' ').toLowerCase();
   return q.split(/\s+/).every(p=>hay.includes(p));
 };
 const SORTS={recent:'Recently added',title:'Title',year:'Year',watched:'Last watched',rating:'Rating'};
@@ -1143,6 +1182,19 @@ function renderBase(){
   scrollTo(0,y);
   if(S.open&&byId(S.open))renderDetail(S.open,true);
 }
+let castBusy=false;
+async function backfillCast(){
+  if(castBusy||!TMDB.on())return; castBusy=true;
+  try{
+    const todo=S.items.filter(i=>i.tmdb&&!i.cast);
+    for(const it of todo){
+      try{const m=await tmdbDetails(it);it.cast=m.cast||[];if(!it.gen||!it.gen.length)it.gen=m.gen||[];if(!it.dir)it.dir=m.dir||''}
+      catch(e){if(e.message==='key')break;it.cast=[]}
+      if(S.view==='shelf'&&S.q)fillGrid();
+    }
+    if(todo.length){save();fillChips()}
+  }finally{castBusy=false}
+}
 function refreshView(){
   if(S.view==='discover'){if(!S.disc||S.disc.sig!==discSig())loadDiscover();else fillDiscover()}
   else if(S.view==='me')viewProfile();
@@ -1165,7 +1217,7 @@ function chipsHTML(){
 }
 function fillChips(){const el=$('#chips');if(el)el.innerHTML=chipsHTML()}
 function toolsHTML(sortHTML){
-  return `<div class="toolrow"><label class="find">${ICON.search}<span class="sr">Search</span><input id="find" type="search" autocomplete="off" placeholder="Search" value="${esc(S.q)}"></label>${sortHTML}</div>
+  return `<div class="toolrow"><label class="find">${ICON.search}<span class="sr">Search</span><input id="find" type="search" autocomplete="off" placeholder="Title, actor or genre" value="${esc(S.q)}"></label>${sortHTML}</div>
   <div class="chiprow"><div class="chips scroll" id="chips" role="group" aria-label="Show">${chipsHTML()}</div></div>`;
 }
 function sinceText(){
@@ -1186,7 +1238,7 @@ function viewShelf(){
     <div id="ago"></div>
     ${toolsHTML(shelfSortHTML())}
     <div id="grid"></div><div id="below"></div>`;
-  fillStats();fillGrid();fillBelow();
+  fillStats();fillGrid();fillBelow();backfillCast();
 }
 function fillStats(){
   const el=$('#stats');if(!el)return;
@@ -1199,7 +1251,7 @@ function fillStats(){
 function agoHTML(){
   const [Y,M,D]=TODAY.split('-').map(Number),now=new Date(Y,M-1,D,12),hits=[];
   S.items.forEach(it=>it.watches.forEach(w=>(w.sit&&w.sit.length?w.sit:[w.d]).forEach(d=>{
-    const [y,m,dd]=(d||'').split('-').map(Number);if(!y)return;
+    const [y,m,dd]=(d||'').split('-').map(Number);if(!y||!m)return;
     const yrs=Y-y;if(yrs<1)return;
     const diff=Math.round((new Date(Y,m-1,dd,12)-now)/864e5);if(Math.abs(diff)>3)return;
     hits.push({it,w,yrs,diff});
@@ -1367,6 +1419,48 @@ function dcardHTML(e){
     <p class="dwhy">${why}</p>
     <div class="dact"><button type="button" class="chip" data-act="d-add" data-k="${esc(e.k)}">+ To watch</button></div></div></article>`;
 }
+/* Top three: highest scoring, each for a different reason (a different title or combination of titles). Shuffles are kept so you can step back. */
+const whyKey=e=>dseeds(e).map(x=>x.it.id).sort().join('+');
+function pickFive(list,avoid){
+  const pool=list.slice().sort((a,b)=>b.score-a.score).slice(0,30);
+  const fresh=pool.filter(e=>!avoid.has(e.k)),src=fresh.length>=3?fresh:pool;
+  const ord=src.map(e=>({e,k:Math.random()*Math.max(e.score,.1)})).sort((a,b)=>b.k-a.k).map(x=>x.e);
+  const out=[],used=new Set();
+  ord.forEach(e=>{const w=whyKey(e);if(out.length<3&&!used.has(w)){used.add(w);out.push(e)}});
+  ord.forEach(e=>{if(out.length<3&&!out.includes(e))out.push(e)});
+  return out.map(e=>e.k);
+}
+function ensurePicks(D,list){
+  const sig=S.dtaste+'|'+S.dmood,keys=new Set(list.map(e=>e.k));
+  if(D.psig!==sig){D.psig=sig;D.hist=[];D.hi=-1}
+  let cur=D.hist[D.hi];
+  if(!cur||cur.some(k=>!keys.has(k))){
+    const keep=(cur||[]).filter(k=>keys.has(k));
+    const more=pickFive(list.filter(e=>!keep.includes(e.k)),new Set(keep)).slice(0,3-keep.length);
+    cur=keep.concat(more);
+    if(D.hi<0){D.hist=[cur];D.hi=0}else D.hist[D.hi]=cur;
+  }
+  return cur;
+}
+function dshuffle(dir){
+  const D=S.disc;if(!D)return;
+  const list=(D.recs||[]).filter(e=>dseeds(e).length);
+  ensurePicks(D,list);
+  if(dir<0){if(D.hi>0)D.hi--}
+  else{
+    const seen=new Set(D.hist.flat());
+    D.hist=D.hist.slice(0,D.hi+1);D.hist.push(pickFive(list,seen));D.hi=D.hist.length-1;
+    if(D.hist.length>20){D.hist.shift();D.hi--}
+  }
+  fillDiscover();
+}
+function pickHTML(e){
+  const r=e.r,tv=r.kind==='tv',it={poster:TMDB.poster(r.p,'w342'),t:r.t,y:r.y};
+  const by=dseeds(e).map(x=>x.it.t);
+  const why=by.length>1?`Because you rated ${esc(by[0])} and ${by.length>2?(by.length-1)+' more':esc(by[1])} highly`:`Because you rated ${esc(by[0])} highly`;
+  return `<article class="dpick" data-k="${esc(e.k)}">${coverHTML(it)}<h3>${esc(r.t)}</h3><p class="dmeta">${r.y||''} · ${tv?'Series':'Film'}</p><p class="dwhy">${why}</p>
+    <div class="dact"><button type="button" class="chip" data-act="d-add" data-k="${esc(e.k)}">+ To watch</button></div></article>`;
+}
 function fillDiscover(){
   const el=$('#disc');if(!el)return;const D=S.disc;if(!D)return;
   const pr=partnerOf();
@@ -1380,7 +1474,9 @@ function fillDiscover(){
   if(D.busy){el.innerHTML='<p class="fine" style="margin-top:28px">Looking through your favourites…</p>';return}
   if(D.err){el.innerHTML=`<div class="hollow"><h2>${esc(D.err)}</h2></div>`;return}
   if(!D.seeds.length){el.innerHTML=`<div class="hollow"><h2>Nothing to go on yet</h2><p>Rate something 3.5 stars or higher and recommendations will appear here.</p></div>`;return}
-  el.innerHTML=`<h2 class="dhead">${esc(head)}</h2>`+(list.length?`<div class="dlist">${list.map(dcardHTML).join('')}</div>`:`<div class="hollow"><h2>Nothing here yet</h2><p>${S.dtaste==='all'?'Rate more titles on the Us shelf at 3.5 or higher.':S.dtaste==='them'?'Needs more titles '+esc(pr?pr.name:'')+' has rated 3.5 or higher.':'Rate more titles at 3.5 or higher.'} Or try another mood.</p></div>`)
+  const pk=list.length?ensurePicks(D,list):[],pe=pk.map(k=>list.find(e=>e.k===k)).filter(Boolean),rest=list.filter(e=>!pk.includes(e.k));
+  const top=pe.length?`<div class="dtophead"><h2 class="dhead">Top picks</h2><div class="chips"><button type="button" class="chip dchip" data-act="d-back" aria-label="Back to the previous shuffle" ${D.hi>0?'':'disabled'}>↶ Undo</button><button type="button" class="chip dchip" data-act="d-shuffle" aria-label="Shuffle the top picks">⤮ Shuffle</button></div></div><div class="dtop">${pe.map(pickHTML).join('')}</div>`:'';
+  el.innerHTML=top+(rest.length?`<h2 class="dhead" style="margin-top:36px">${esc(pe.length?'More to explore':head)}</h2>`:'')+(list.length?(rest.length?`<div class="dlist">${rest.map(dcardHTML).join('')}</div>`:''):`<div class="hollow"><h2>Nothing here yet</h2><p>${S.dtaste==='all'?'Rate more titles on the Us shelf at 3.5 or higher.':S.dtaste==='them'?'Needs more titles '+esc(pr?pr.name:'')+' has rated 3.5 or higher.':'Rate more titles at 3.5 or higher.'} Or try another mood.</p></div>`)
     +'<p class="credit">Recommendations from TMDB.</p>';
 }
 async function discoverAdd(k){
@@ -1602,7 +1698,7 @@ function paintAdd(){
   const tabs=`<div class="seg wide" role="group" aria-label="How to add"><button type="button" data-act="addtab" data-v="search" aria-pressed="${a.tab==='search'}">Search</button><button type="button" data-act="addtab" data-v="import" aria-pressed="${a.tab==='import'}">Paste a list</button></div>`;
   let pane='';
   if(a.tab==='search'){
-    pane=`<div class="field"><label class="sr" for="sh-q">Title</label><input id="sh-q" class="bigfield" type="search" autocomplete="off" placeholder="Search a film or series" aria-controls="sh-res" value="${esc(a.q)}"></div>
+    pane=`<div class="field"><label class="sr" for="sh-q">Title</label><input id="sh-q" class="bigfield" type="search" autocomplete="off" placeholder="Title, actor or genre" aria-controls="sh-res" value="${esc(a.q)}"></div>
       <div class="addrow">${statusSegHTML(a)}<span class="fine" style="margin:0">Adding to <b>${S.shelf==='together'?'our shelf':'my shelf'}</b> · <button type="button" class="tlink" data-act="addshelf" style="display:inline">Switch</button></span></div>
       <ul id="sh-res" class="results" role="listbox" aria-label="Results"></ul>
       <div class="formfoot"><button type="button" class="btn line block" data-act="sheet-close">Done</button></div>`;
@@ -1690,7 +1786,7 @@ function quickAdd(m,status,date){
   const dup=findDup(m); if(dup)return {dup};
   const tv=m.type==='series';
   const id=m.tmdb?'tmdb-'+m.tmdb+(tv?'-s'+(m.s||1):''):'m-'+title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+(tv?'-s'+(m.s||1):'')+'-'+Math.random().toString(36).slice(2,6);
-  const it=norm({id,t:title,y:m.y||0,type:m.type||'film',s:m.s,eps:m.eps,min:m.min||0,dir:m.dir||'',gen:m.gen||[],syn:m.syn||'',short:m.short,
+  const it=norm({id,t:title,y:m.y||0,type:m.type||'film',s:m.s,eps:m.eps,min:m.min||0,dir:m.dir||'',cast:m.cast||[],gen:m.gen||[],syn:m.syn||'',short:m.short,
     status:status==='archive'?'seen':status,watches:status==='seen'?[Wt(date||TODAY,[],null,'','')]:status==='archive'?[Wt('',[],null)]:[],added:TODAY,poster:m.poster||'',tmdb:m.tmdb||'',note:''});
   S.items.push(it);
   return {item:it};
@@ -1837,10 +1933,13 @@ async function impConfirm(){
 function sittingsHTML(d){
   const multi=d.sit.length>1;
   if(d.undated)return `<span class="lab">When</span>
-    <div class="chips"><button type="button" class="chip" data-act="undated" aria-pressed="true">Undated</button><button type="button" class="chip" data-act="date" data-v="0">Pick a date</button></div>`;
+    <div class="chips"><button type="button" class="chip" data-act="undated" aria-pressed="true">Undated</button><button type="button" class="chip" data-act="yearonly">Year only</button><button type="button" class="chip" data-act="date" data-v="0">Pick a date</button></div>`;
+  if(d.yearOnly)return `<span class="lab">When</span>
+    <div class="field" style="margin:0"><input type="number" id="f-yr" inputmode="numeric" min="1900" max="${TODAY.slice(0,4)}" value="${esc(d.year)}" aria-label="Year watched"></div>
+    <div class="chips"><button type="button" class="chip" data-act="date" data-v="0">Pick a date</button><button type="button" class="chip" data-act="undated" aria-pressed="false">Undated</button></div>`;
   return `<span class="lab">${multi?'Sittings':'When'}</span>
     <div class="field" style="margin:0">${d.sit.map((x,i)=>`<div class="setrow" style="flex-wrap:nowrap">${multi?`<span class="lab" style="width:16px">${i+1}</span>`:''}<input type="date" class="f-sit" data-i="${i}" value="${esc(x)}" max="${TODAY}" aria-label="${multi?'Sitting '+(i+1):'Date watched'}">${multi?`<button type="button" class="tlink" data-act="rmsit" data-i="${i}" aria-label="Remove sitting ${i+1}">Remove</button>`:''}</div>`).join('')}</div>
-    <div class="chips">${multi?'':`<button type="button" class="chip" data-act="date" data-v="0">Tonight</button><button type="button" class="chip" data-act="date" data-v="-1">Last night</button>`}<button type="button" class="chip" data-act="addsit">+ Another sitting</button>${multi?'':`<button type="button" class="chip" data-act="undated" aria-pressed="false">Undated</button>`}</div>`;
+    <div class="chips">${multi?'':`<button type="button" class="chip" data-act="date" data-v="0">Tonight</button><button type="button" class="chip" data-act="date" data-v="-1">Last night</button>`}<button type="button" class="chip" data-act="addsit">+ Another sitting</button>${multi?'':`<button type="button" class="chip" data-act="yearonly">Year only</button><button type="button" class="chip" data-act="undated" aria-pressed="false">Undated</button>`}</div>`;
 }
 function paintSits(){const el=$('#f-when');if(el&&S.add&&S.add.step==='rate')el.innerHTML=sittingsHTML(S.add.d)}
 function openRate(id,opt){
@@ -1848,7 +1947,7 @@ function openRate(id,opt){
   const w=opt.wi!=null?it.watches[opt.wi]:null;
   const rs=w?(w.rs&&Object.keys(w.rs).length?{...w.rs}:(w.r?{[myKey()]:w.r}:{})):{};
   S.add={step:'rate',id,wi:w?opt.wi:null,back:opt.back||null,
-    d:{undated:!!(w&&!w.d),sit:w?(w.sit&&w.sit.length?w.sit.slice():[w.d||TODAY]):[TODAY],who:w?(w.who||[]).slice():[],rs,mood:w?(w.mood||[]).slice():[],note:w?(w.note||''):'',ate:w?(w.ate||''):''}};
+    d:{undated:!!(w&&!w.d),yearOnly:!!(w&&w.d&&w.d.length===4),year:w&&w.d&&w.d.length===4?w.d:TODAY.slice(0,4),sit:w?(w.sit&&w.sit.length?w.sit.slice():[w.d&&w.d.length>4?w.d:TODAY]):[TODAY],who:w?(w.who||[]).slice():[],rs,mood:w?(w.mood||[]).slice():[],note:w?(w.note||''):'',ate:w?(w.ate||''):''}};
   renderRate();
 }
 function renderRate(){
@@ -1881,11 +1980,13 @@ function syncRate(){
   const g=id=>{const e=$(id);return e?e.value:undefined};
   a.d.note=g('#f-note')??a.d.note; a.d.ate=g('#f-ate')??a.d.ate;
   $$('.f-sit').forEach(el=>{a.d.sit[+el.dataset.i]=el.value||TODAY});
+  const yr=$('#f-yr');if(yr&&yr.value)a.d.year=yr.value;
 }
 function submitRate(){
   syncRate();
   const a=S.add, it=byId(a.id), d=a.d; if(!it)return;
-  const sit=d.undated?[]:[...new Set(d.sit.filter(Boolean))].sort(); const last=d.undated?'':(sit[sit.length-1]||TODAY);
+  const yo=!d.undated&&d.yearOnly, yv=Math.min(+TODAY.slice(0,4),Math.max(1900,Math.round(+d.year)||+TODAY.slice(0,4)));
+  const sit=d.undated||yo?[]:[...new Set(d.sit.filter(Boolean))].sort(); const last=d.undated?'':yo?String(yv):(sit[sit.length-1]||TODAY);
   const rs={};Object.entries(d.rs).forEach(([k,v])=>{if(v>0)rs[k]=v});
   const vals=Object.values(rs), avg=vals.length?Math.round(vals.reduce((x,y)=>x+y,0)/vals.length*2)/2:null;
   const w=Wt(last,d.who.slice(),avg,(d.note||'').trim(),(d.ate||'').trim());
@@ -2103,6 +2204,8 @@ document.addEventListener('click',e=>{
     case 'log': {const it=byId(b.dataset.id);if(it){S.add=null;openRate(it.id,{wi:null})}break}
     case 'layout': if(b.dataset.v!==S.layout){S.layout=b.dataset.v;save();renderBase()}break;
     case 'pperson': S.pperson=b.dataset.v;viewProfile();break;
+    case 'd-shuffle': dshuffle(1);break;
+    case 'd-back': dshuffle(-1);break;
     case 'd-taste': S.dtaste=b.dataset.v;fillDiscover();break;
     case 'd-mood': S.dmood=S.dmood===b.dataset.v?'':b.dataset.v;fillDiscover();break;
     case 'd-add': discoverAdd(b.dataset.k);break;
@@ -2140,8 +2243,9 @@ document.addEventListener('click',e=>{
     case 'mood': if(S.add&&S.add.step==='rate'){const m=S.add.d.mood,v=b.dataset.v,i=m.indexOf(v);if(i>=0)m.splice(i,1);else m.push(v);b.setAttribute('aria-pressed',String(i<0))}break;
     case 'addsit': if(S.add&&S.add.step==='rate'){syncRate();const l=S.add.d.sit[S.add.d.sit.length-1]||TODAY;const n=addDays(l,1);S.add.d.sit.push(n>TODAY?TODAY:n);paintSits()}break;
     case 'rmsit': if(S.add&&S.add.step==='rate'){syncRate();S.add.d.sit.splice(+b.dataset.i,1);if(!S.add.d.sit.length)S.add.d.sit=[TODAY];paintSits()}break;
-    case 'date': {const v=addDays(TODAY,+b.dataset.v);if(S.add&&S.add.step==='rate'){S.add.d.undated=false;S.add.d.sit=[v];paintSits()}break}
-    case 'undated': if(S.add&&S.add.step==='rate'){syncRate();S.add.d.undated=true;paintSits()}break;
+    case 'date': {const v=addDays(TODAY,+b.dataset.v);if(S.add&&S.add.step==='rate'){syncRate();S.add.d.undated=false;S.add.d.yearOnly=false;S.add.d.sit=[v];paintSits()}break}
+    case 'undated': if(S.add&&S.add.step==='rate'){syncRate();S.add.d.undated=true;S.add.d.yearOnly=false;paintSits()}break;
+    case 'yearonly': if(S.add&&S.add.step==='rate'){syncRate();S.add.d.undated=false;S.add.d.yearOnly=true;paintSits()}break;
     case 'who': {const v=b.dataset.v,w=S.add.d.who;
       if(!v){w.length=0}else{const i=w.indexOf(v);i>=0?w.splice(i,1):w.push(v)}
       $$('#f-who [data-act=who]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v?w.includes(x.dataset.v):!w.length)));break}
